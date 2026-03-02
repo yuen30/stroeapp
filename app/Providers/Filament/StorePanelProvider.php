@@ -10,6 +10,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color as FilamentColor;
+use Filament\Support\Enums\Width;
 use Openplain\FilamentShadcnTheme\Color as ShadcnColor;
 use Filament\Widgets\AccountWidget;
 use Leek\FilamentDiceBear\DiceBearPlugin;
@@ -22,6 +23,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use App\Filament\Pages\Auth\Login;
 
 class StorePanelProvider extends PanelProvider
 {
@@ -31,14 +33,14 @@ class StorePanelProvider extends PanelProvider
             ->default()
             ->id('store')
             ->path('store')
-            ->login(\App\Filament\Pages\Auth\Login::class)
+            ->login(Login::class)
             ->colors([
                 'primary' => ShadcnColor::adaptive(
                     lightColor: FilamentColor::Blue,
                     darkColor: FilamentColor::Teal
                 )
             ])
-            ->defaultAvatarProvider(DiceBearProvider::class)
+            // ->defaultAvatarProvider(DiceBearProvider::class)
             ->plugins([
                 DiceBearPlugin::make()
                     ->style(DiceBearStyle::Adventurer),
@@ -66,6 +68,11 @@ class StorePanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->sidebarWidth('15rem')
+            ->databaseNotifications()
+            ->sidebarFullyCollapsibleOnDesktop()
+            ->font('Roboto')
+            ->maxContentWidth(Width::Full);
     }
 }

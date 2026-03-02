@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Filament\Resources\Branches\Schemas;
+
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Schema;
+
+class BranchForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Select::make('company_id')
+                    ->relationship('company', 'name')
+                    ->required(),
+                Toggle::make('is_headquarter')
+                    ->required(),
+                TextInput::make('name')
+                    ->required(),
+                TextInput::make('code')
+                    ->required(),
+                TextInput::make('address_0'),
+                TextInput::make('address_1'),
+                TextInput::make('amphoe'),
+                TextInput::make('province'),
+                TextInput::make('postal_code'),
+                TextInput::make('tel')
+                    ->tel(),
+                TextInput::make('fax'),
+                TextInput::make('tax_id'),
+                TextInput::make('photo_path'),
+                Toggle::make('is_active')
+                    ->required(),
+            ]);
+    }
+}

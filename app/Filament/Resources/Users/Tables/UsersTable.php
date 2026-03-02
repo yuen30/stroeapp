@@ -18,39 +18,39 @@ class UsersTable
     {
         return $table
             ->columns([
-                TextColumn::make('id')
+                TextColumn::make('row_id')->label('รหัสอ้างอิง')
                     ->label('ID')
+                    ->rowIndex(),
+                TextColumn::make('company_id')->label('รหัสบริษัท')
                     ->searchable(),
-                TextColumn::make('company_id')
+                TextColumn::make('branch_id')->label('รหัสสาขา')
                     ->searchable(),
-                TextColumn::make('branch_id')
+                TextColumn::make('name')->label('ชื่อ')
                     ->searchable(),
-                TextColumn::make('name')
+                TextColumn::make('username')->label('ชื่อผู้ใช้')
                     ->searchable(),
-                TextColumn::make('username')
-                    ->searchable(),
-                TextColumn::make('email')
+                TextColumn::make('email')->label('อีเมล')
                     ->label('Email address')
                     ->searchable(),
-                TextColumn::make('email_verified_at')
+                TextColumn::make('email_verified_at')->label('ยืนยันอีเมลเมื่อ')
                     ->dateTime()
                     ->sortable(),
-                TextColumn::make('profile_photo_path')
+                TextColumn::make('profile_photo_path')->label('รูปภาพโปรไฟล์')
                     ->searchable(),
-                TextColumn::make('role')
+                TextColumn::make('role')->label('สิทธิ์การใช้งาน')
                     ->badge()
                     ->searchable(),
-                IconColumn::make('is_active')
+                IconColumn::make('is_active')->label('สถานะใช้งาน')
                     ->boolean(),
-                TextColumn::make('deleted_at')
+                TextColumn::make('deleted_at')->label('วันที่ลบ')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('created_at')
+                TextColumn::make('created_at')->label('วันที่สร้าง')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
+                TextColumn::make('updated_at')->label('วันที่แก้ไข')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

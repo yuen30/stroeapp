@@ -1,0 +1,90 @@
+<?php
+
+namespace App\Filament\Resources\Customers\Tables;
+
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
+
+class CustomersTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('row_id')->label('รหัสอ้างอิง')
+                    ->label('ID')
+                    ->rowIndex(),
+                TextColumn::make('company.name')->label('บริษัท')
+                    ->searchable(),
+                TextColumn::make('name')->label('ชื่อ')
+                    ->searchable(),
+                TextColumn::make('code')->label('รหัส')
+                    ->searchable(),
+                TextColumn::make('address_0')->label('ที่อยู่ 1')
+                    ->searchable(),
+                TextColumn::make('address_1')->label('ที่อยู่ 2')
+                    ->searchable(),
+                TextColumn::make('amphoe')->label('เขต/อำเภอ')
+                    ->searchable(),
+                TextColumn::make('province')->label('จังหวัด')
+                    ->searchable(),
+                TextColumn::make('postal_code')->label('รหัสไปรษณีย์')
+                    ->searchable(),
+                TextColumn::make('tel')->label('เบอร์โทรศัพท์')
+                    ->searchable(),
+                TextColumn::make('fax')->label('แฟกซ์')
+                    ->searchable(),
+                TextColumn::make('tax_id')->label('เลขประจำตัวผู้เสียภาษี')
+                    ->searchable(),
+                TextColumn::make('credit_limit')->label('วงเงินเครดิต')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('credit_days')->label('เครดิต (วัน)')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('vat_rate')->label('อัตราภาษี')
+                    ->numeric()
+                    ->sortable(),
+                IconColumn::make('is_head_office')->label('เป็นสำนักงานใหญ่')
+                    ->boolean(),
+                TextColumn::make('branch_no')->label('รหัสสาขา')
+                    ->searchable(),
+                TextColumn::make('photo_path')->label('รูปภาพ')
+                    ->searchable(),
+                IconColumn::make('is_active')->label('สถานะใช้งาน')
+                    ->boolean(),
+                TextColumn::make('deleted_at')->label('วันที่ลบ')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('created_at')->label('วันที่สร้าง')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')->label('วันที่แก้ไข')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                TrashedFilter::make(),
+            ])
+            ->recordActions([
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
+                ]),
+            ]);
+    }
+}

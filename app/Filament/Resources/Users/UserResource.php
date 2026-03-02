@@ -20,7 +20,17 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
+
+    protected static string|\UnitEnum|null $navigationGroup = '6. ตั้งค่าระบบ (Settings)';
+
+    protected static ?int $navigationSort = 14;
+
+    protected static ?string $modelLabel = 'ผู้ใช้งาน';
+
+    protected static ?string $pluralModelLabel = 'ผู้ใช้งาน';
+
+    protected static ?string $recordTitleAttribute = 'name';
 
     public static function form(Schema $schema): Schema
     {
