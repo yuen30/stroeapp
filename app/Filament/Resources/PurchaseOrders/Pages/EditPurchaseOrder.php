@@ -15,9 +15,17 @@ class EditPurchaseOrder extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
-            ForceDeleteAction::make(),
-            RestoreAction::make(),
+            $this->getSaveFormAction()->formId('form'),
+            $this->getCancelFormAction(),
+            DeleteAction::make()->label('ลบ')->icon('heroicon-o-trash'),
+            ForceDeleteAction::make()->label('ลบถาวร')->icon('heroicon-o-trash'),
+            RestoreAction::make()->label('กู้คืน')->icon('heroicon-o-arrow-uturn-left'),
         ];
     }
+
+    protected function getFormActions(): array
+    {
+        return [];
+    }
+
 }

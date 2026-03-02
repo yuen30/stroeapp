@@ -44,11 +44,11 @@ class StocksTable
                 // No soft deletes on Stocks
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->label('แก้ไข')->icon('heroicon-o-pencil-square'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->label('ลบ')->icon('heroicon-o-trash'),
                 ]),
             ]);
     }

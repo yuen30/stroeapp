@@ -34,6 +34,7 @@ class StorePanelProvider extends PanelProvider
             ->id('store')
             ->path('store')
             ->login(Login::class)
+            ->resourceCreatePageRedirect('index')
             ->colors([
                 'primary' => ShadcnColor::adaptive(
                     lightColor: FilamentColor::Blue,

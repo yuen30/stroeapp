@@ -23,8 +23,7 @@ class PurchaseOrderForm
                 Select::make('supplier_id')
                     ->relationship('supplier', 'name')
                     ->required(),
-                TextInput::make('created_by')
-                    ->required(),
+
                 TextInput::make('order_number')
                     ->required(),
                 DatePicker::make('order_date')

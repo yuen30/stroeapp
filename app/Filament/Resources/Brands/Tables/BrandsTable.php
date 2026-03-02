@@ -43,16 +43,16 @@ class BrandsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                TrashedFilter::make(),
+                TrashedFilter::make()->label('ที่ถูกลบไปแล้ว'),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()->label('แก้ไข')->icon('heroicon-o-pencil-square'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
+                    DeleteBulkAction::make()->label('ลบ')->icon('heroicon-o-trash'),
+                    ForceDeleteBulkAction::make()->label('ลบถาวร')->icon('heroicon-o-trash'),
+                    RestoreBulkAction::make()->label('กู้คืน')->icon('heroicon-o-arrow-uturn-left'),
                 ]),
             ]);
     }

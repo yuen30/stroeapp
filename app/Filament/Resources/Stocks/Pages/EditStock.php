@@ -13,7 +13,15 @@ class EditStock extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            $this->getSaveFormAction()->formId('form'),
+            $this->getCancelFormAction(),
+            DeleteAction::make()->label('ลบ')->icon('heroicon-o-trash'),
         ];
     }
+
+    protected function getFormActions(): array
+    {
+        return [];
+    }
+
 }

@@ -26,8 +26,7 @@ class TaxInvoiceForm
                     ->required(),
                 Select::make('sale_order_id')
                     ->relationship('saleOrder', 'id'),
-                TextInput::make('created_by')
-                    ->required(),
+
                 TextInput::make('tax_invoice_number')
                     ->required(),
                 DatePicker::make('document_date')

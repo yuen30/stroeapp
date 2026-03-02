@@ -8,4 +8,19 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateCustomer extends CreateRecord
 {
     protected static string $resource = CustomerResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            $this->getCreateFormAction()->formId('form'),
+            $this->getCancelFormAction(),
+        ];
+    }
+
+
+    protected function getFormActions(): array
+    {
+        return [];
+    }
+
 }

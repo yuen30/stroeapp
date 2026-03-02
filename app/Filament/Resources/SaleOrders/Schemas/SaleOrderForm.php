@@ -25,8 +25,7 @@ class SaleOrderForm
                     ->relationship('branch', 'name'),
                 Select::make('customer_id')
                     ->relationship('customer', 'name'),
-                TextInput::make('created_by')
-                    ->required(),
+
                 Select::make('salesman_id')
                     ->relationship('salesman', 'name'),
                 Select::make('document_type')

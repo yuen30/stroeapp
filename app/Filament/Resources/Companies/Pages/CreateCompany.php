@@ -8,4 +8,19 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateCompany extends CreateRecord
 {
     protected static string $resource = CompanyResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            $this->getCreateFormAction()->formId('form'),
+            $this->getCancelFormAction(),
+        ];
+    }
+
+
+    protected function getFormActions(): array
+    {
+        return [];
+    }
+
 }

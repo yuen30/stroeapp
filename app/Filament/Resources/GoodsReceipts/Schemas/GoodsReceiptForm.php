@@ -25,8 +25,7 @@ class GoodsReceiptForm
                     ->required(),
                 Select::make('purchase_order_id')
                     ->relationship('purchaseOrder', 'id'),
-                TextInput::make('created_by')
-                    ->required(),
+
                 TextInput::make('receipt_number')
                     ->required(),
                 TextInput::make('supplier_delivery_no'),
