@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -14,10 +13,14 @@ return new class extends Migration
         Schema::create('stocks', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->foreignUlid('product_id')->references('id')->on('products');
+            $table->foreignUlid('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->integer('quantity')->default(0);
             $table->decimal('cost_price', 15, 2)->nullable();
             $table->decimal('selling_price', 15, 2)->nullable();
             $table->timestamps();
+
+            // Unique constraint: one stock record per product per branch
+            $table->unique(['product_id', 'branch_id']);
         });
     }
 

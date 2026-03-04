@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Create Company and Branch
-        $company = Company::create([
+        $company = Company::updateOrCreate([
             'name' => 'บริษัท อะไหล่ไทย จำกัด (มหาชน)',
             'code' => 'COMP-001',
             'tax_id' => '0105555555555',
@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
             'address_0' => '123 ถ.สุขุมวิท กรุงเทพมหานคร 10110'
         ]);
 
-        $branch = Branch::create([
+        $branch = Branch::updateOrCreate([
             'company_id' => $company->id,
             'name' => 'สำนักงานใหญ่',
             'code' => 'HQ001',
@@ -36,44 +36,46 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 2. Create Admin User
-        User::create([
+        User::updateOrCreate([
+            'username' => 'admin',
+            'email' => 'admin@store.com',
+        ], [
             'company_id' => $company->id,
             'branch_id' => $branch->id,
             'name' => 'ผู้ดูแลระบบ (Admin)',
-            'username' => 'admin',
-            'email' => 'admin@store.com',
             'password' => Hash::make('password'),
-            'role' => env('ADMIN_ROLE', 'admin'), // Fallback to 'admin'
+            'role' => env('ADMIN_ROLE', 'admin'),  // Fallback to 'admin'
             'is_active' => true,
         ]);
 
         // Create Staff User
-        User::create([
+        User::updateOrCreate([
+            'username' => 'staff01',
+            'email' => 'staff@store.com',
+        ], [
             'company_id' => $company->id,
             'branch_id' => $branch->id,
             'name' => 'พนักงานขาย (Staff)',
-            'username' => 'staff01',
-            'email' => 'staff@store.com',
             'password' => Hash::make('password'),
             'role' => 'staff',
             'is_active' => true,
         ]);
 
         // 3. Create Master Data (Units, Brands, Categories)
-        $unitPiece = Unit::create(['name' => 'ชิ้น', 'code' => 'PCS']);
-        $unitSet = Unit::create(['name' => 'ชุด', 'code' => 'SET']);
-        $unitLiter = Unit::create(['name' => 'ลิตร', 'code' => 'LTR']);
+        $unitPiece = Unit::updateOrCreate(['name' => 'ชิ้น', 'code' => 'PCS']);
+        $unitSet = Unit::updateOrCreate(['name' => 'ชุด', 'code' => 'SET']);
+        $unitLiter = Unit::updateOrCreate(['name' => 'ลิตร', 'code' => 'LTR']);
 
-        $brandToyota = Brand::create(['name' => 'Toyota Genuine Parts', 'code' => 'TOYOTA']);
-        $brandBrembo = Brand::create(['name' => 'Brembo', 'code' => 'BREMBO']);
-        $brandMotul = Brand::create(['name' => 'Motul', 'code' => 'MOTUL']);
+        $brandToyota = Brand::updateOrCreate(['name' => 'Toyota Genuine Parts', 'code' => 'TOYOTA']);
+        $brandBrembo = Brand::updateOrCreate(['name' => 'Brembo', 'code' => 'BREMBO']);
+        $brandMotul = Brand::updateOrCreate(['name' => 'Motul', 'code' => 'MOTUL']);
 
-        $catEngine = Category::create(['name' => 'ระบบเครื่องยนต์', 'code' => 'ENG']);
-        $catBrake = Category::create(['name' => 'ระบบเบรก', 'code' => 'BRK']);
-        $catFluid = Category::create(['name' => 'น้ำมันและสารหล่อลื่น', 'code' => 'FLD']);
+        $catEngine = Category::updateOrCreate(['name' => 'ระบบเครื่องยนต์', 'code' => 'ENG']);
+        $catBrake = Category::updateOrCreate(['name' => 'ระบบเบรก', 'code' => 'BRK']);
+        $catFluid = Category::updateOrCreate(['name' => 'น้ำมันและสารหล่อลื่น', 'code' => 'FLD']);
 
         // 4. Create Trading Partners (Suppliers & Customers)
-        $supplier1 = Supplier::create([
+        $supplier1 = Supplier::updateOrCreate([
             'company_id' => $company->id,
             'name' => 'บริษัท โตโยต้า มอเตอร์ (ประเทศไทย)',
             'code' => 'SUP-001',
@@ -81,7 +83,7 @@ class DatabaseSeeder extends Seeder
             'tel' => '02-386-2000'
         ]);
 
-        $customer1 = Customer::create([
+        $customer1 = Customer::updateOrCreate([
             'company_id' => $company->id,
             'name' => 'อู่ขจรเจริญยนต์',
             'code' => 'CUS-001',
@@ -89,50 +91,96 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 5. Create Products
-        Product::create([
-            'company_id' => $company->id,
-            'branch_id' => $branch->id,
-            'category_id' => $catBrake->id,
-            'brand_id' => $brandBrembo->id,
-            'unit_id' => $unitSet->id,
-            'name' => 'ผ้าเบรกคู่หน้า Brembo - Revo',
-            'code' => 'BR-001-REV',
-            'barcode' => '885000000001',
-            'description' => 'ผ้าเบรกคู่หน้าสำหรับ Toyota Revo',
-            'cost_price' => 1200,
-            'selling_price' => 1800,
-            'stock_quantity' => 10,
-        ]);
+        $products = [
+            // ระบบเบรก
+            ['code' => 'BR-001-REV', 'category' => $catBrake, 'brand' => $brandBrembo, 'unit' => $unitSet, 'name' => 'ผ้าเบรกคู่หน้า Brembo - Revo', 'barcode' => '885000000001', 'cost' => 1200, 'price' => 1800, 'stock' => 10],
+            ['code' => 'BR-002-REV', 'category' => $catBrake, 'brand' => $brandBrembo, 'unit' => $unitSet, 'name' => 'ผ้าเบรกคู่หลัง Brembo - Revo', 'barcode' => '885000000002', 'cost' => 1000, 'price' => 1500, 'stock' => 15],
+            ['code' => 'BR-003-FOR', 'category' => $catBrake, 'brand' => $brandBrembo, 'unit' => $unitSet, 'name' => 'ผ้าเบรกคู่หน้า Brembo - Fortuner', 'barcode' => '885000000003', 'cost' => 1500, 'price' => 2200, 'stock' => 8],
+            ['code' => 'BR-004-FOR', 'category' => $catBrake, 'brand' => $brandBrembo, 'unit' => $unitSet, 'name' => 'ผ้าเบรกคู่หลัง Brembo - Fortuner', 'barcode' => '885000000004', 'cost' => 1300, 'price' => 1900, 'stock' => 12],
+            ['code' => 'BR-005-CAM', 'category' => $catBrake, 'brand' => $brandToyota, 'unit' => $unitSet, 'name' => 'ผ้าเบรกคู่หน้า แท้ - Camry', 'barcode' => '885000000005', 'cost' => 1800, 'price' => 2500, 'stock' => 6],
+            ['code' => 'BR-006-CAM', 'category' => $catBrake, 'brand' => $brandToyota, 'unit' => $unitSet, 'name' => 'ผ้าเบรกคู่หลัง แท้ - Camry', 'barcode' => '885000000006', 'cost' => 1600, 'price' => 2200, 'stock' => 8],
+            ['code' => 'BR-007-COR', 'category' => $catBrake, 'brand' => $brandToyota, 'unit' => $unitSet, 'name' => 'ผ้าเบรกคู่หน้า แท้ - Corolla', 'barcode' => '885000000007', 'cost' => 1000, 'price' => 1500, 'stock' => 20],
+            ['code' => 'BR-008-COR', 'category' => $catBrake, 'brand' => $brandToyota, 'unit' => $unitSet, 'name' => 'ผ้าเบรกคู่หลัง แท้ - Corolla', 'barcode' => '885000000008', 'cost' => 900, 'price' => 1300, 'stock' => 18],
+            ['code' => 'BR-009-YAR', 'category' => $catBrake, 'brand' => $brandToyota, 'unit' => $unitSet, 'name' => 'ผ้าเบรกคู่หน้า แท้ - Yaris', 'barcode' => '885000000009', 'cost' => 800, 'price' => 1200, 'stock' => 25],
+            ['code' => 'BR-010-YAR', 'category' => $catBrake, 'brand' => $brandToyota, 'unit' => $unitSet, 'name' => 'ผ้าเบรกคู่หลัง แท้ - Yaris', 'barcode' => '885000000010', 'cost' => 700, 'price' => 1000, 'stock' => 22],
+            // น้ำมันเครื่อง
+            ['code' => 'MT-HT-10W40', 'category' => $catFluid, 'brand' => $brandMotul, 'unit' => $unitLiter, 'name' => 'น้ำมันเครื่อง Motul H-Tech 10W-40', 'barcode' => '885000000011', 'cost' => 250, 'price' => 350, 'stock' => 50],
+            ['code' => 'MT-HT-5W30', 'category' => $catFluid, 'brand' => $brandMotul, 'unit' => $unitLiter, 'name' => 'น้ำมันเครื่อง Motul H-Tech 5W-30', 'barcode' => '885000000012', 'cost' => 280, 'price' => 400, 'stock' => 45],
+            ['code' => 'MT-8100-5W40', 'category' => $catFluid, 'brand' => $brandMotul, 'unit' => $unitLiter, 'name' => 'น้ำมันเครื่อง Motul 8100 5W-40', 'barcode' => '885000000013', 'cost' => 350, 'price' => 500, 'stock' => 40],
+            ['code' => 'TY-0W20-1L', 'category' => $catFluid, 'brand' => $brandToyota, 'unit' => $unitLiter, 'name' => 'น้ำมันเครื่อง Toyota 0W-20 แท้', 'barcode' => '885000000014', 'cost' => 300, 'price' => 450, 'stock' => 60],
+            ['code' => 'TY-5W30-1L', 'category' => $catFluid, 'brand' => $brandToyota, 'unit' => $unitLiter, 'name' => 'น้ำมันเครื่อง Toyota 5W-30 แท้', 'barcode' => '885000000015', 'cost' => 280, 'price' => 420, 'stock' => 55],
+            // ไส้กรอง
+            ['code' => 'TY-90915-YZZD2', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'ไส้กรองน้ำมันเครื่อง VIGO/REVO แท้', 'barcode' => '885000000016', 'cost' => 150, 'price' => 220, 'stock' => 100],
+            ['code' => 'TY-90915-10003', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'ไส้กรองน้ำมันเครื่อง Fortuner แท้', 'barcode' => '885000000017', 'cost' => 180, 'price' => 260, 'stock' => 80],
+            ['code' => 'TY-90915-YZZJ1', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'ไส้กรองน้ำมันเครื่อง Camry แท้', 'barcode' => '885000000018', 'cost' => 200, 'price' => 300, 'stock' => 70],
+            ['code' => 'TY-90915-YZZJ2', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'ไส้กรองน้ำมันเครื่อง Corolla แท้', 'barcode' => '885000000019', 'cost' => 120, 'price' => 180, 'stock' => 120],
+            ['code' => 'TY-90915-YZZJ3', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'ไส้กรองน้ำมันเครื่อง Yaris แท้', 'barcode' => '885000000020', 'cost' => 100, 'price' => 150, 'stock' => 150],
+            ['code' => 'TY-17801-21050', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'ไส้กรองอากาศ VIGO/REVO แท้', 'barcode' => '885000000021', 'cost' => 250, 'price' => 380, 'stock' => 60],
+            ['code' => 'TY-17801-0C010', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'ไส้กรองอากาศ Fortuner แท้', 'barcode' => '885000000022', 'cost' => 300, 'price' => 450, 'stock' => 50],
+            ['code' => 'TY-17801-22020', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'ไส้กรองอากาศ Camry แท้', 'barcode' => '885000000023', 'cost' => 350, 'price' => 520, 'stock' => 40],
+            ['code' => 'TY-17801-21030', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'ไส้กรองอากาศ Corolla แท้', 'barcode' => '885000000024', 'cost' => 200, 'price' => 300, 'stock' => 80],
+            ['code' => 'TY-17801-0D060', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'ไส้กรองอากาศ Yaris แท้', 'barcode' => '885000000025', 'cost' => 180, 'price' => 270, 'stock' => 90],
+            // หลอดไฟ
+            ['code' => 'TY-90981-13033', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'หลอดไฟหน้า H4 แท้', 'barcode' => '885000000026', 'cost' => 150, 'price' => 250, 'stock' => 100],
+            ['code' => 'TY-90981-13034', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'หลอดไฟหน้า H7 แท้', 'barcode' => '885000000027', 'cost' => 180, 'price' => 280, 'stock' => 90],
+            ['code' => 'TY-90981-13035', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'หลอดไฟหน้า H11 แท้', 'barcode' => '885000000028', 'cost' => 200, 'price' => 300, 'stock' => 80],
+            ['code' => 'TY-90981-13036', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'หลอดไฟหน้า HB3 แท้', 'barcode' => '885000000029', 'cost' => 220, 'price' => 330, 'stock' => 70],
+            ['code' => 'TY-90981-13037', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'หลอดไฟหน้า HB4 แท้', 'barcode' => '885000000030', 'cost' => 220, 'price' => 330, 'stock' => 70],
+            // แบตเตอรี่
+            ['code' => 'BAT-55D23L', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'แบตเตอรี่ 55D23L', 'barcode' => '885000000031', 'cost' => 2000, 'price' => 2800, 'stock' => 15],
+            ['code' => 'BAT-75D23L', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'แบตเตอรี่ 75D23L', 'barcode' => '885000000032', 'cost' => 2500, 'price' => 3500, 'stock' => 12],
+            ['code' => 'BAT-80D26L', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'แบตเตอรี่ 80D26L', 'barcode' => '885000000033', 'cost' => 2800, 'price' => 3900, 'stock' => 10],
+            ['code' => 'BAT-95D31L', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'แบตเตอรี่ 95D31L', 'barcode' => '885000000034', 'cost' => 3200, 'price' => 4500, 'stock' => 8],
+            // สายพาน
+            ['code' => 'TY-90916-02582', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'สายพานไดนาโม VIGO/REVO แท้', 'barcode' => '885000000035', 'cost' => 350, 'price' => 520, 'stock' => 30],
+            ['code' => 'TY-90916-02583', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'สายพานไดนาโม Fortuner แท้', 'barcode' => '885000000036', 'cost' => 400, 'price' => 600, 'stock' => 25],
+            ['code' => 'TY-90916-02584', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'สายพานไดนาโม Camry แท้', 'barcode' => '885000000037', 'cost' => 450, 'price' => 680, 'stock' => 20],
+            ['code' => 'TY-90916-02585', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'สายพานไดนาโม Corolla แท้', 'barcode' => '885000000038', 'cost' => 300, 'price' => 450, 'stock' => 35],
+            ['code' => 'TY-90916-02586', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'สายพานไดนาโม Yaris แท้', 'barcode' => '885000000039', 'cost' => 280, 'price' => 420, 'stock' => 40],
+            // ปั๊มน้ำ
+            ['code' => 'TY-16100-09450', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'ปั๊มน้ำ VIGO/REVO แท้', 'barcode' => '885000000040', 'cost' => 2500, 'price' => 3500, 'stock' => 10],
+            ['code' => 'TY-16100-09451', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'ปั๊มน้ำ Fortuner แท้', 'barcode' => '885000000041', 'cost' => 2800, 'price' => 3900, 'stock' => 8],
+            ['code' => 'TY-16100-09452', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'ปั๊มน้ำ Camry แท้', 'barcode' => '885000000042', 'cost' => 3000, 'price' => 4200, 'stock' => 6],
+            ['code' => 'TY-16100-09453', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'ปั๊มน้ำ Corolla แท้', 'barcode' => '885000000043', 'cost' => 2200, 'price' => 3100, 'stock' => 12],
+            ['code' => 'TY-16100-09454', 'category' => $catEngine, 'brand' => $brandToyota, 'unit' => $unitPiece, 'name' => 'ปั๊มน้ำ Yaris แท้', 'barcode' => '885000000044', 'cost' => 2000, 'price' => 2800, 'stock' => 15],
+            // น้ำมันเกียร์
+            ['code' => 'MT-GEAR-75W90', 'category' => $catFluid, 'brand' => $brandMotul, 'unit' => $unitLiter, 'name' => 'น้ำมันเกียร์ Motul 75W-90', 'barcode' => '885000000045', 'cost' => 400, 'price' => 600, 'stock' => 30],
+            ['code' => 'MT-GEAR-80W90', 'category' => $catFluid, 'brand' => $brandMotul, 'unit' => $unitLiter, 'name' => 'น้ำมันเกียร์ Motul 80W-90', 'barcode' => '885000000046', 'cost' => 350, 'price' => 520, 'stock' => 35],
+            ['code' => 'TY-GEAR-75W85', 'category' => $catFluid, 'brand' => $brandToyota, 'unit' => $unitLiter, 'name' => 'น้ำมันเกียร์ Toyota 75W-85 แท้', 'barcode' => '885000000047', 'cost' => 450, 'price' => 680, 'stock' => 25],
+            ['code' => 'TY-ATF-WS', 'category' => $catFluid, 'brand' => $brandToyota, 'unit' => $unitLiter, 'name' => 'น้ำมันเกียร์ออโต้ Toyota ATF-WS แท้', 'barcode' => '885000000048', 'cost' => 500, 'price' => 750, 'stock' => 40],
+            // น้ำมันเบรก
+            ['code' => 'MT-DOT4', 'category' => $catFluid, 'brand' => $brandMotul, 'unit' => $unitLiter, 'name' => 'น้ำมันเบรก Motul DOT4', 'barcode' => '885000000049', 'cost' => 200, 'price' => 300, 'stock' => 50],
+            ['code' => 'TY-DOT3', 'category' => $catFluid, 'brand' => $brandToyota, 'unit' => $unitLiter, 'name' => 'น้ำมันเบรก Toyota DOT3 แท้', 'barcode' => '885000000050', 'cost' => 180, 'price' => 270, 'stock' => 60],
+        ];
 
-        Product::create([
-            'company_id' => $company->id,
-            'branch_id' => $branch->id,
-            'category_id' => $catFluid->id,
-            'brand_id' => $brandMotul->id,
-            'unit_id' => $unitLiter->id,
-            'name' => 'น้ำมันเครื่อง Motul H-Tech 10W-40',
-            'code' => 'MT-HT-10W40',
-            'barcode' => '885000000002',
-            'description' => 'น้ำมันเครื่องสังเคราะห์ 100% ขนาด 1 ลิตร',
-            'cost_price' => 250,
-            'selling_price' => 350,
-            'stock_quantity' => 50,
-        ]);
+        foreach ($products as $productData) {
+            $product = Product::updateOrCreate(
+                ['code' => $productData['code']],
+                [
+                    'company_id' => $company->id,
+                    'branch_id' => $branch->id,
+                    'category_id' => $productData['category']->id,
+                    'brand_id' => $productData['brand']->id,
+                    'unit_id' => $productData['unit']->id,
+                    'name' => $productData['name'],
+                    'barcode' => $productData['barcode'],
+                    'description' => $productData['name'],
+                    'cost_price' => $productData['cost'],
+                    'selling_price' => $productData['price'],
+                    'stock_quantity' => $productData['stock'],
+                ]
+            );
 
-        Product::create([
-            'company_id' => $company->id,
-            'branch_id' => $branch->id,
-            'category_id' => $catEngine->id,
-            'brand_id' => $brandToyota->id,
-            'unit_id' => $unitPiece->id,
-            'name' => 'ไส้กรองน้ำมันเครื่อง VIGO/REVO แท้',
-            'code' => 'TY-90915-YZZD2',
-            'barcode' => '885000000003',
-            'description' => 'ไส้กรองแท้เบิกศูนย์',
-            'cost_price' => 150,
-            'selling_price' => 220,
-            'stock_quantity' => 100,
-        ]);
+            // Create stock record
+            if (!$product->stocks()->exists()) {
+                \App\Models\Stock::create([
+                    'product_id' => $product->id,
+                    'branch_id' => $branch->id,
+                    'quantity' => $productData['stock'],
+                ]);
+            }
+        }
 
+        $this->command->info('Created ' . count($products) . ' products with stock records!');
     }
 }

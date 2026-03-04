@@ -7,8 +7,12 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
+use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -18,73 +22,198 @@ class CustomersTable
     {
         return $table
             ->columns([
-                TextColumn::make('row_id')->label('รหัสอ้างอิง')
-                    ->label('ID')
-                    ->rowIndex(),
-                TextColumn::make('company.name')->label('บริษัท')
-                    ->searchable(),
-                TextColumn::make('name')->label('ชื่อ')
-                    ->searchable(),
-                TextColumn::make('code')->label('รหัส')
-                    ->searchable(),
-                TextColumn::make('address_0')->label('ที่อยู่ 1')
-                    ->searchable(),
-                TextColumn::make('address_1')->label('ที่อยู่ 2')
-                    ->searchable(),
-                TextColumn::make('amphoe')->label('เขต/อำเภอ')
-                    ->searchable(),
-                TextColumn::make('province')->label('จังหวัด')
-                    ->searchable(),
-                TextColumn::make('postal_code')->label('รหัสไปรษณีย์')
-                    ->searchable(),
-                TextColumn::make('tel')->label('เบอร์โทรศัพท์')
-                    ->searchable(),
-                TextColumn::make('fax')->label('แฟกซ์')
-                    ->searchable(),
-                TextColumn::make('tax_id')->label('เลขประจำตัวผู้เสียภาษี')
-                    ->searchable(),
-                TextColumn::make('credit_limit')->label('วงเงินเครดิต')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('credit_days')->label('เครดิต (วัน)')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('vat_rate')->label('อัตราภาษี')
-                    ->numeric()
-                    ->sortable(),
-                IconColumn::make('is_head_office')->label('เป็นสำนักงานใหญ่')
-                    ->boolean(),
-                TextColumn::make('branch_no')->label('รหัสสาขา')
-                    ->searchable(),
-                TextColumn::make('photo_path')->label('รูปภาพ')
-                    ->searchable(),
-                IconColumn::make('is_active')->label('สถานะใช้งาน')
-                    ->boolean(),
-                TextColumn::make('deleted_at')->label('วันที่ลบ')
-                    ->dateTime()
+                TextColumn::make('row_id')
+                    ->label('#')
+                    ->rowIndex()
+                    ->alignCenter(),
+                ImageColumn::make('photo_path')
+                    ->label('รูปภาพ')
+                    ->circular()
+                    ->defaultImageUrl('/images/placeholder-customer.png')
+                    ->size(40),
+                TextColumn::make('name')
+                    ->label('ชื่อลูกค้า')
+                    ->searchable()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('created_at')->label('วันที่สร้าง')
-                    ->dateTime()
+                    ->weight('medium')
+                    ->icon('heroicon-o-user-group')
+                    ->iconColor('primary')
+                    ->description(fn($record) => "รหัส: {$record->code}"),
+                TextColumn::make('code')
+                    ->label('รหัสลูกค้า')
+                    ->searchable()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')->label('วันที่แก้ไข')
-                    ->dateTime()
+                    ->copyable()
+                    ->copyMessage('คัดลอกรหัสแล้ว')
+                    ->badge()
+                    ->color('info')
+                    ->icon('heroicon-o-hashtag')
+                    ->alignCenter(),
+                TextColumn::make('company.name')
+                    ->label('บริษัท')
+                    ->searchable()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->icon('heroicon-o-building-office-2')
+                    ->iconColor('primary')
+                    ->placeholder('ไม่ระบุ')
+                    ->toggleable(),
+                TextColumn::make('tel')
+                    ->label('เบอร์โทรศัพท์')
+                    ->searchable()
+                    ->icon('heroicon-o-phone')
+                    ->iconColor('success')
+                    ->placeholder('ไม่ระบุ')
+                    ->toggleable(),
+                TextColumn::make('province')
+                    ->label('จังหวัด')
+                    ->searchable()
+                    ->icon('heroicon-o-map-pin')
+                    ->iconColor('gray')
+                    ->placeholder('ไม่ระบุ')
+                    ->toggleable(true),
+                TextColumn::make('credit_limit')
+                    ->label('วงเงินเครดิต')
+                    ->numeric()
+                    ->money('THB')
+                    ->sortable()
+                    ->icon('heroicon-o-credit-card')
+                    ->iconColor('warning')
+                    ->alignEnd()
+                    ->toggleable(),
+                TextColumn::make('credit_days')
+                    ->label('เครดิต (วัน)')
+                    ->numeric()
+                    ->sortable()
+                    ->suffix(' วัน')
+                    ->badge()
+                    ->color('info')
+                    ->alignCenter()
+                    ->toggleable(),
+                TextColumn::make('saleOrders_count')
+                    ->label('ใบสั่งขาย')
+                    ->counts('saleOrders')
+                    ->badge()
+                    ->color('success')
+                    ->icon('heroicon-o-document-text')
+                    ->alignCenter()
+                    ->sortable()
+                    ->tooltip('จำนวนใบสั่งขาย')
+                    ->toggleable(isToggledHiddenByDefault: false),
+                IconColumn::make('is_active')
+                    ->label('สถานะ')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger')
+                    ->size(IconSize::Large)
+                    ->alignCenter()
+                    ->sortable()
+                    ->tooltip(fn($state) => $state ? 'ใช้งาน' : 'ไม่ใช้งาน'),
+                TextColumn::make('created_at')
+                    ->label('วันที่สร้าง')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->icon('heroicon-o-calendar')
+                    ->iconColor('gray')
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
+                TextColumn::make('updated_at')
+                    ->label('แก้ไขล่าสุด')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->since()
+                    ->icon('heroicon-o-clock')
+                    ->iconColor('gray')
+                    ->toggleable()
+                    ->tooltip(fn($record) => $record->updated_at?->format('d/m/Y H:i:s')),
+                TextColumn::make('deleted_at')
+                    ->label('วันที่ลบ')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->icon('heroicon-o-trash')
+                    ->iconColor('danger')
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
             ])
             ->filters([
-                TrashedFilter::make()->label('ที่ถูกลบไปแล้ว'),
+                SelectFilter::make('company_id')
+                    ->label('บริษัท')
+                    ->relationship('company', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->placeholder('ทุกบริษัท')
+                    ->native(false),
+                SelectFilter::make('province')
+                    ->label('จังหวัด')
+                    ->options(fn() => \App\Models\Customer::query()
+                        ->whereNotNull('province')
+                        ->distinct()
+                        ->pluck('province', 'province')
+                        ->toArray())
+                    ->searchable()
+                    ->placeholder('ทุกจังหวัด')
+                    ->native(false),
+                SelectFilter::make('is_active')
+                    ->label('สถานะ')
+                    ->options([
+                        true => 'ใช้งาน',
+                        false => 'ไม่ใช้งาน',
+                    ])
+                    ->placeholder('ทั้งหมด')
+                    ->native(false),
+                TrashedFilter::make()
+                    ->label('รายการที่ถูกลบ')
+                    ->placeholder('ไม่รวมรายการที่ลบ')
+                    ->trueLabel('เฉพาะรายการที่ลบ')
+                    ->falseLabel('ไม่รวมรายการที่ลบ')
+                    ->native(false),
             ])
             ->recordActions([
-                EditAction::make()->label('แก้ไข')->icon('heroicon-o-pencil-square'),
+                ViewAction::make()
+                    ->label('ดู')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->tooltip('ดูรายละเอียด'),
+                EditAction::make()
+                    ->label('แก้ไข')
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('warning')
+                    ->tooltip('แก้ไขข้อมูล'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()->label('ลบ')->icon('heroicon-o-trash'),
-                    ForceDeleteBulkAction::make()->label('ลบถาวร')->icon('heroicon-o-trash'),
-                    RestoreBulkAction::make()->label('กู้คืน')->icon('heroicon-o-arrow-uturn-left'),
+                    DeleteBulkAction::make()
+                        ->label('ลบรายการที่เลือก')
+                        ->icon('heroicon-o-trash')
+                        ->requiresConfirmation()
+                        ->modalHeading('ลบลูกค้า')
+                        ->modalDescription('คุณแน่ใจหรือไม่ว่าต้องการลบลูกค้าที่เลือก? รายการจะถูกย้ายไปยังถังขยะ')
+                        ->modalSubmitActionLabel('ลบ')
+                        ->successNotificationTitle('ลบลูกค้าสำเร็จ')
+                        ->color('danger'),
+                    ForceDeleteBulkAction::make()
+                        ->label('ลบถาวร')
+                        ->icon('heroicon-o-trash')
+                        ->requiresConfirmation()
+                        ->modalHeading('ลบลูกค้าถาวร')
+                        ->modalDescription('คุณแน่ใจหรือไม่? การลบถาวรไม่สามารถกู้คืนได้! ข้อมูลทั้งหมดจะถูกลบอย่างถาวร')
+                        ->modalSubmitActionLabel('ลบถาวร')
+                        ->successNotificationTitle('ลบลูกค้าถาวรสำเร็จ')
+                        ->color('danger'),
+                    RestoreBulkAction::make()
+                        ->label('กู้คืนรายการที่เลือก')
+                        ->icon('heroicon-o-arrow-uturn-left')
+                        ->successNotificationTitle('กู้คืนลูกค้าสำเร็จ')
+                        ->color('success'),
                 ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->striped()
+            ->paginated([10, 25, 50, 100])
+            ->poll('30s')
+            ->emptyStateHeading('ยังไม่มีลูกค้าในระบบ')
+            ->emptyStateDescription('เริ่มต้นโดยการสร้างลูกค้าใหม่')
+            ->emptyStateIcon('heroicon-o-user-group');
     }
 }

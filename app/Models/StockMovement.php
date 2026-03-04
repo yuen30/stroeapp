@@ -4,8 +4,8 @@ namespace App\Models;
 
 use App\Enums\StockMovementType;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Model;
 
 class StockMovement extends Model
 {
@@ -14,6 +14,7 @@ class StockMovement extends Model
     protected $fillable = [
         'product_id',
         'purchase_order_id',
+        'goods_receipt_id',
         'sale_order_id',
         'created_by',
         'type',
@@ -41,6 +42,11 @@ class StockMovement extends Model
     public function purchaseOrder(): BelongsTo
     {
         return $this->belongsTo(PurchaseOrder::class);
+    }
+
+    public function goodsReceipt(): BelongsTo
+    {
+        return $this->belongsTo(GoodsReceipt::class);
     }
 
     public function saleOrder(): BelongsTo

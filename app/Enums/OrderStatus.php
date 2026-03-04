@@ -11,6 +11,7 @@ enum OrderStatus: string implements HasLabel, HasColor, HasIcon
 {
     case Draft = 'draft';
     case Confirmed = 'confirmed';
+    case PartiallyReceived = 'partially_received';
     case Completed = 'completed';
     case Cancelled = 'cancelled';
 
@@ -19,6 +20,7 @@ enum OrderStatus: string implements HasLabel, HasColor, HasIcon
         return match ($this) {
             self::Draft => 'แบบร่าง',
             self::Confirmed => 'ยืนยันแล้ว',
+            self::PartiallyReceived => 'รับบางส่วน',
             self::Completed => 'เสร็จสิ้น',
             self::Cancelled => 'ยกเลิก',
         };
@@ -29,6 +31,7 @@ enum OrderStatus: string implements HasLabel, HasColor, HasIcon
         return match ($this) {
             self::Draft => 'gray',
             self::Confirmed => 'info',
+            self::PartiallyReceived => 'warning',
             self::Completed => 'success',
             self::Cancelled => 'danger',
         };
@@ -39,6 +42,7 @@ enum OrderStatus: string implements HasLabel, HasColor, HasIcon
         return match ($this) {
             self::Draft => 'heroicon-o-pencil-square',
             self::Confirmed => 'heroicon-o-check-circle',
+            self::PartiallyReceived => 'heroicon-o-clock',
             self::Completed => 'heroicon-o-check-badge',
             self::Cancelled => 'heroicon-o-x-circle',
         };

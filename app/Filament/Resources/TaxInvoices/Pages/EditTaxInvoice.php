@@ -7,6 +7,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Callout;
 
 class EditTaxInvoice extends EditRecord
 {
@@ -15,11 +16,40 @@ class EditTaxInvoice extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            $this->getSaveFormAction()->formId('form'),
-            $this->getCancelFormAction(),
-            DeleteAction::make()->label('ลบ')->icon('heroicon-o-trash'),
-            ForceDeleteAction::make()->label('ลบถาวร')->icon('heroicon-o-trash'),
-            RestoreAction::make()->label('กู้คืน')->icon('heroicon-o-arrow-uturn-left'),
+            $this
+                ->getSaveFormAction()
+                ->formId('form')
+                ->label('บันทึก')
+                ->icon('heroicon-o-check')
+                ->requiresConfirmation()
+                ->modalHeading('ยืนยันการบันทึก')
+                ->modalDescription('คุณแน่ใจหรือไม่ว่าต้องการบันทึกการเปลี่ยนแปลง?')
+                ->modalSubmitActionLabel('ยืนยัน'),
+            $this
+                ->getCancelFormAction()
+                ->label('ยกเลิก')
+                ->icon('heroicon-o-x-mark'),
+            DeleteAction::make()
+                ->label('ลบ')
+                ->icon('heroicon-o-trash')
+                ->requiresConfirmation()
+                ->modalHeading('ลบใบกำกับภาษี')
+                ->modalDescription('คุณแน่ใจหรือไม่ว่าต้องการลบใบกำกับภาษีนี้?')
+                ->modalSubmitActionLabel('ยืนยันการลบ'),
+            ForceDeleteAction::make()
+                ->label('ลบถาวร')
+                ->icon('heroicon-o-trash')
+                ->requiresConfirmation()
+                ->modalHeading('ลบใบกำกับภาษีถาวร')
+                ->modalDescription('คุณแน่ใจหรือไม่ว่าต้องการลบใบกำกับภาษีถาวร? การกระทำนี้ไม่สามารถย้อนกลับได้')
+                ->modalSubmitActionLabel('ยืนยันการลบถาวร'),
+            RestoreAction::make()
+                ->label('กู้คืน')
+                ->icon('heroicon-o-arrow-uturn-left')
+                ->requiresConfirmation()
+                ->modalHeading('กู้คืนใบกำกับภาษี')
+                ->modalDescription('คุณแน่ใจหรือไม่ว่าต้องการกู้คืนใบกำกับภาษีนี้?')
+                ->modalSubmitActionLabel('ยืนยันการกู้คืน'),
         ];
     }
 
@@ -28,4 +58,18 @@ class EditTaxInvoice extends EditRecord
         return [];
     }
 
+    public function getHeaderWidgets(): array
+    {
+        return [
+            Callout::make('⚠️ คำเตือน')
+                ->description('การแก้ไขใบกำกับภาษีอาจส่งผลต่อการรายงานภาษี กรุณาตรวจสอบข้อมูลให้ถูกต้องตามกฎหมายก่อนบันทึก')
+                ->warning()
+                ->columnSpanFull(),
+        ];
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->previousUrl ?? $this->getResource()::getUrl('index');
+    }
 }

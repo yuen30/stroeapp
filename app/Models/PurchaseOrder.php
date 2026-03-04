@@ -4,14 +4,16 @@ namespace App\Models;
 
 use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class PurchaseOrder extends Model
 {
-    use HasUlids, SoftDeletes;
+    use HasUlids, SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'company_id',
@@ -26,6 +28,12 @@ class PurchaseOrder extends Model
         'discount_amount',
         'vat_amount',
         'total_amount',
+        'payment_terms',
+        'delivery_address',
+        'contact_person',
+        'contact_phone',
+        'reference_number',
+        'attachments',
         'notes',
     ];
 
@@ -39,6 +47,7 @@ class PurchaseOrder extends Model
             'discount_amount' => 'decimal:2',
             'vat_amount' => 'decimal:2',
             'total_amount' => 'decimal:2',
+            'attachments' => 'array',
         ];
     }
 
@@ -75,5 +84,35 @@ class PurchaseOrder extends Model
     public function goodsReceipts(): HasMany
     {
         return $this->hasMany(GoodsReceipt::class);
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'order_number',
+                'order_date',
+                'expected_date',
+                'status',
+                'supplier.name',
+                'subtotal',
+                'discount_amount',
+                'vat_amount',
+                'total_amount',
+                'payment_terms',
+                'delivery_address',
+                'contact_person',
+                'contact_phone',
+                'reference_number',
+                'notes',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => match ($eventName) {
+                'created' => 'สร้างใบสั่งซื้อ',
+                'updated' => 'แก้ไขใบสั่งซื้อ',
+                'deleted' => 'ลบใบสั่งซื้อ',
+                default => $eventName,
+            });
     }
 }

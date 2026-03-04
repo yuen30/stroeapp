@@ -7,7 +7,9 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -17,78 +19,36 @@ class SaleOrdersTable
     {
         return $table
             ->columns([
-                TextColumn::make('row_id')->label('รหัสอ้างอิง')
-                    ->label('ID')
-                    ->rowIndex(),
-                TextColumn::make('company.name')->label('บริษัท')
-                    ->searchable(),
-                TextColumn::make('branch.name')->label('สาขา')
-                    ->searchable(),
-                TextColumn::make('customer.name')->label('ลูกค้า')
-                    ->searchable(),
-                TextColumn::make('created_by')->label('ผู้สร้าง')
-                    ->searchable(),
-                TextColumn::make('salesman.name')->label('พนักงานขาย')
-                    ->searchable(),
-                TextColumn::make('document_type')->label('ประเภทเอกสาร')
-                    ->badge()
-                    ->searchable(),
-                TextColumn::make('invoice_number')->label('เลขที่ใบกำกับภาษี')
-                    ->searchable(),
-                TextColumn::make('order_date')->label('วันที่สั่งซื้อ')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('due_date')->label('วันครบกำหนด')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('term_of_payment')->label('เงื่อนไขชำระเงิน')
-                    ->searchable(),
-                TextColumn::make('status')->label('สถานะ')
-                    ->badge()
-                    ->searchable(),
-                TextColumn::make('payment_status')->label('สถานะการชำระเงิน')
-                    ->badge()
-                    ->searchable(),
-                TextColumn::make('payment_method')->label('วิธีชำระเงิน')
-                    ->badge()
-                    ->searchable(),
-                TextColumn::make('subtotal')->label('ยอดรวม')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('discount_amount')->label('ส่วนลด')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('vat_amount')->label('ภาษีมูลค่าเพิ่ม')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('total_amount')->label('จำนวนเงินรวม')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('deleted_at')->label('วันที่ลบ')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('created_at')->label('วันที่สร้าง')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')->label('วันที่แก้ไข')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('row_id')->label('#')->rowIndex()->alignCenter(),
+                TextColumn::make('invoice_number')->label('เลขที่ใบกำกับภาษี')->searchable()->sortable()->weight('medium')->icon('heroicon-o-document-text')->iconColor('primary')->copyable(),
+                TextColumn::make('customer.name')->label('ลูกค้า')->searchable()->sortable()->icon('heroicon-o-user-group')->iconColor('info'),
+                TextColumn::make('order_date')->label('วันที่สั่งซื้อ')->date('d/m/Y')->sortable()->icon('heroicon-o-calendar'),
+                TextColumn::make('status')->label('สถานะ')->badge()->sortable()->alignCenter(),
+                TextColumn::make('payment_status')->label('สถานะชำระเงิน')->badge()->sortable()->alignCenter(),
+                TextColumn::make('total_amount')->label('ยอดรวมทั้งสิ้น')->money('THB')->sortable()->alignEnd()->weight('bold'),
+                TextColumn::make('creator.name')->label('ผู้สร้าง')->searchable()->toggleable(),
+                TextColumn::make('created_at')->label('วันที่สร้าง')->dateTime('d/m/Y H:i')->sortable()->toggleable()->toggledHiddenByDefault(),
             ])
             ->filters([
-                TrashedFilter::make()->label('ที่ถูกลบไปแล้ว'),
+                SelectFilter::make('customer_id')->label('ลูกค้า')->relationship('customer', 'name')->searchable()->preload()->native(false),
+                SelectFilter::make('status')->label('สถานะ')->options(\App\Enums\OrderStatus::class)->native(false),
+                SelectFilter::make('payment_status')->label('สถานะชำระเงิน')->options(\App\Enums\PaymentStatus::class)->native(false),
+                TrashedFilter::make()->label('รายการที่ถูกลบ')->native(false),
             ])
             ->recordActions([
-                EditAction::make()->label('แก้ไข')->icon('heroicon-o-pencil-square'),
+                ViewAction::make()->label('ดู')->icon('heroicon-o-eye')->color('info'),
+                EditAction::make()->label('แก้ไข')->icon('heroicon-o-pencil-square')->color('warning'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()->label('ลบ')->icon('heroicon-o-trash'),
-                    ForceDeleteBulkAction::make()->label('ลบถาวร')->icon('heroicon-o-trash'),
-                    RestoreBulkAction::make()->label('กู้คืน')->icon('heroicon-o-arrow-uturn-left'),
+                    DeleteBulkAction::make()->label('ลบรายการที่เลือก')->icon('heroicon-o-trash')->color('danger'),
+                    RestoreBulkAction::make()->label('กู้คืนรายการที่เลือก')->icon('heroicon-o-arrow-uturn-left')->color('success'),
                 ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->striped()
+            ->paginated([10, 25, 50, 100])
+            ->emptyStateHeading('ยังไม่มีใบสั่งขายในระบบ')
+            ->emptyStateIcon('heroicon-o-document-text');
     }
 }

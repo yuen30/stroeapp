@@ -5,6 +5,7 @@ namespace App\Filament\Resources\GoodsReceipts\Pages;
 use App\Filament\Resources\GoodsReceipts\GoodsReceiptResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Icons\Heroicon;
 
 class ListGoodsReceipts extends ListRecords
 {
@@ -13,7 +14,9 @@ class ListGoodsReceipts extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('เพิ่มข้อมูล')
+                ->icon(Heroicon::PlusCircle),
         ];
     }
 }

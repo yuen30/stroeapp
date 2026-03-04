@@ -7,7 +7,10 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
+use Filament\Support\Enums\IconSize;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -17,65 +20,105 @@ class PurchaseOrdersTable
     {
         return $table
             ->columns([
-                TextColumn::make('row_id')->label('รหัสอ้างอิง')
-                    ->label('ID')
-                    ->rowIndex(),
-                TextColumn::make('company.name')->label('บริษัท')
-                    ->searchable(),
-                TextColumn::make('branch.name')->label('สาขา')
-                    ->searchable(),
-                TextColumn::make('supplier.name')->label('ผู้จัดจำหน่าย')
-                    ->searchable(),
-                TextColumn::make('created_by')->label('ผู้สร้าง')
-                    ->searchable(),
-                TextColumn::make('order_number')->label('เลขที่ใบสั่งซื้อ')
-                    ->searchable(),
-                TextColumn::make('order_date')->label('วันที่สั่งซื้อ')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('expected_date')->label('วันที่กำหนดส่ง')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('status')->label('สถานะ')
+                TextColumn::make('row_id')
+                    ->label('#')
+                    ->rowIndex()
+                    ->alignCenter(),
+                TextColumn::make('order_number')
+                    ->label('เลขที่ใบสั่งซื้อ')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium')
+                    ->iconColor('primary'),
+                TextColumn::make('supplier.name')
+                    ->label('ผู้จัดจำหน่าย')
+                    ->searchable()
+                    ->sortable()
+                    ->icon('heroicon-o-truck')
+                    ->iconColor('info'),
+                TextColumn::make('order_date')
+                    ->label('วันที่สั่งซื้อ')
+                    ->date('d/m/Y')
+                    ->sortable()
+                    ->icon('heroicon-o-calendar'),
+                TextColumn::make('expected_date')
+                    ->label('วันที่กำหนดส่ง')
+                    ->date('d/m/Y')
+                    ->sortable()
+                    ->icon('heroicon-o-clock')
+                    ->toggleable(),
+                TextColumn::make('status')
+                    ->label('สถานะ')
                     ->badge()
-                    ->searchable(),
-                TextColumn::make('subtotal')->label('ยอดรวม')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('discount_amount')->label('ส่วนลด')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('vat_amount')->label('ภาษีมูลค่าเพิ่ม')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('total_amount')->label('จำนวนเงินรวม')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('deleted_at')->label('วันที่ลบ')
-                    ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('created_at')->label('วันที่สร้าง')
-                    ->dateTime()
+                    ->alignCenter(),
+                TextColumn::make('total_amount')
+                    ->label('ยอดรวมทั้งสิ้น')
+                    ->money('THB')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')->label('วันที่แก้ไข')
-                    ->dateTime()
+                    ->alignEnd()
+                    ->weight('bold'),
+                TextColumn::make('company.name')
+                    ->label('บริษัท')
+                    ->searchable()
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
+                TextColumn::make('branch.name')
+                    ->label('สาขา')
+                    ->searchable()
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
+                TextColumn::make('creator.name')
+                    ->label('ผู้สร้าง')
+                    ->searchable()
+                    ->toggleable(),
+                TextColumn::make('created_at')
+                    ->label('วันที่สร้าง')
+                    ->dateTime('d/m/Y H:i')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
+                TextColumn::make('deleted_at')
+                    ->label('วันที่ลบ')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable()
+                    ->toggleable()
+                    ->toggledHiddenByDefault(),
             ])
             ->filters([
-                TrashedFilter::make()->label('ที่ถูกลบไปแล้ว'),
+                SelectFilter::make('supplier_id')
+                    ->label('ผู้จัดจำหน่าย')
+                    ->relationship('supplier', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->placeholder('ทุกผู้จัดจำหน่าย')
+                    ->native(false),
+                SelectFilter::make('status')
+                    ->label('สถานะ')
+                    ->options(\App\Enums\OrderStatus::class)
+                    ->placeholder('ทุกสถานะ')
+                    ->native(false),
+                TrashedFilter::make()
+                    ->label('รายการที่ถูกลบ')
+                    ->placeholder('ไม่รวมรายการที่ลบ')
+                    ->native(false),
             ])
             ->recordActions([
-                EditAction::make()->label('แก้ไข')->icon('heroicon-o-pencil-square'),
+                ViewAction::make()->label('ดู')->icon('heroicon-o-eye')->color('info'),
+                EditAction::make()->label('แก้ไข')->icon('heroicon-o-pencil-square')->color('warning'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()->label('ลบ')->icon('heroicon-o-trash'),
-                    ForceDeleteBulkAction::make()->label('ลบถาวร')->icon('heroicon-o-trash'),
-                    RestoreBulkAction::make()->label('กู้คืน')->icon('heroicon-o-arrow-uturn-left'),
+                    DeleteBulkAction::make()->label('ลบรายการที่เลือก')->icon('heroicon-o-trash')->color('danger'),
+                    ForceDeleteBulkAction::make()->label('ลบถาวร')->icon('heroicon-o-trash')->color('danger'),
+                    RestoreBulkAction::make()->label('กู้คืนรายการที่เลือก')->icon('heroicon-o-arrow-uturn-left')->color('success'),
                 ]),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->striped()
+            ->paginated([10, 25, 50, 100])
+            ->emptyStateHeading('ยังไม่มีใบสั่งซื้อในระบบ')
+            ->emptyStateDescription('เริ่มต้นโดยการสร้างใบสั่งซื้อใหม่')
+            ->emptyStateIcon('heroicon-o-document-text');
     }
 }

@@ -15,11 +15,40 @@ class EditGoodsReceipt extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            $this->getSaveFormAction()->formId('form'),
-            $this->getCancelFormAction(),
-            DeleteAction::make()->label('ลบ')->icon('heroicon-o-trash'),
-            ForceDeleteAction::make()->label('ลบถาวร')->icon('heroicon-o-trash'),
-            RestoreAction::make()->label('กู้คืน')->icon('heroicon-o-arrow-uturn-left'),
+            $this
+                ->getSaveFormAction()
+                ->formId('form')
+                ->label('บันทึก')
+                ->icon('heroicon-o-check')
+                ->requiresConfirmation()
+                ->modalHeading('ยืนยันการบันทึก')
+                ->modalDescription('คุณแน่ใจหรือไม่ว่าต้องการบันทึกการเปลี่ยนแปลง?')
+                ->modalSubmitActionLabel('ยืนยัน'),
+            $this
+                ->getCancelFormAction()
+                ->label('ยกเลิก')
+                ->icon('heroicon-o-x-mark'),
+            DeleteAction::make()
+                ->label('ลบ')
+                ->icon('heroicon-o-trash')
+                ->requiresConfirmation()
+                ->modalHeading('ลบใบรับสินค้า')
+                ->modalDescription('คุณแน่ใจหรือไม่ว่าต้องการลบใบรับสินค้านี้?')
+                ->modalSubmitActionLabel('ยืนยันการลบ'),
+            ForceDeleteAction::make()
+                ->label('ลบถาวร')
+                ->icon('heroicon-o-trash')
+                ->requiresConfirmation()
+                ->modalHeading('ลบใบรับสินค้าถาวร')
+                ->modalDescription('คุณแน่ใจหรือไม่ว่าต้องการลบใบรับสินค้าถาวร? การกระทำนี้ไม่สามารถย้อนกลับได้')
+                ->modalSubmitActionLabel('ยืนยันการลบถาวร'),
+            RestoreAction::make()
+                ->label('กู้คืน')
+                ->icon('heroicon-o-arrow-uturn-left')
+                ->requiresConfirmation()
+                ->modalHeading('กู้คืนใบรับสินค้า')
+                ->modalDescription('คุณแน่ใจหรือไม่ว่าต้องการกู้คืนใบรับสินค้านี้?')
+                ->modalSubmitActionLabel('ยืนยันการกู้คืน'),
         ];
     }
 
@@ -28,4 +57,8 @@ class EditGoodsReceipt extends EditRecord
         return [];
     }
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->previousUrl ?? $this->getResource()::getUrl('index');
+    }
 }

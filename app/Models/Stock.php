@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Model;
 
 class Stock extends Model
 {
@@ -12,6 +12,7 @@ class Stock extends Model
 
     protected $fillable = [
         'product_id',
+        'branch_id',
         'quantity',
         'cost_price',
         'selling_price',
@@ -29,5 +30,10 @@ class Stock extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
     }
 }

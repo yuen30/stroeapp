@@ -7,6 +7,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Support\Icons\Heroicon;
 
 class EditSaleOrder extends EditRecord
 {
@@ -15,11 +16,10 @@ class EditSaleOrder extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            $this->getSaveFormAction()->formId('form'),
-            $this->getCancelFormAction(),
-            DeleteAction::make()->label('ลบ')->icon('heroicon-o-trash'),
-            ForceDeleteAction::make()->label('ลบถาวร')->icon('heroicon-o-trash'),
-            RestoreAction::make()->label('กู้คืน')->icon('heroicon-o-arrow-uturn-left'),
+            $this->getSaveFormAction()->formId('form')->label('บันทึกการเปลี่ยนแปลง')->icon(Heroicon::Check)->color('success'),
+            $this->getCancelFormAction()->label('ยกเลิก')->icon(Heroicon::XMark)->color('gray'),
+            DeleteAction::make()->label('ลบ')->icon(Heroicon::Trash)->color('danger'),
+            RestoreAction::make()->label('กู้คืน')->icon(Heroicon::ArrowUturnLeft)->color('success'),
         ];
     }
 
@@ -28,4 +28,8 @@ class EditSaleOrder extends EditRecord
         return [];
     }
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->previousUrl ?? $this->getResource()::getUrl('index');
+    }
 }

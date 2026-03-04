@@ -2,8 +2,8 @@
 
 namespace App\Filament\Pages\Auth;
 
-use Filament\Forms\Components\TextInput;
 use Filament\Auth\Pages\Login as BaseLogin;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 use Illuminate\Validation\ValidationException;
 
@@ -22,7 +22,7 @@ class Login extends BaseLogin
     protected function getLoginFormComponent()
     {
         return TextInput::make('email')
-            ->label('Email or Username')
+            ->label('E-Mail หรือชื่อผู้ใช้งาน')
             ->required()
             ->autocomplete()
             ->autofocus()
@@ -35,7 +35,7 @@ class Login extends BaseLogin
 
         return [
             $login_type => $data['email'],
-            'password'  => $data['password'],
+            'password' => $data['password'],
         ];
     }
 

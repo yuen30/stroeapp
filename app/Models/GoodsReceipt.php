@@ -4,14 +4,16 @@ namespace App\Models;
 
 use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class GoodsReceipt extends Model
 {
-    use HasUlids, SoftDeletes;
+    use HasUlids, SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'company_id',
@@ -24,6 +26,7 @@ class GoodsReceipt extends Model
         'document_date',
         'status',
         'notes',
+        'attachments',
     ];
 
     protected function casts(): array
@@ -31,7 +34,29 @@ class GoodsReceipt extends Model
         return [
             'document_date' => 'date',
             'status' => OrderStatus::class,
+            'attachments' => 'array',
         ];
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'receipt_number',
+                'supplier_delivery_no',
+                'document_date',
+                'status',
+                'notes',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => match ($eventName) {
+                'created' => 'สร้างใบรับสินค้า',
+                'updated' => 'แก้ไขใบรับสินค้า',
+                'deleted' => 'ลบใบรับสินค้า',
+                default => $eventName,
+            })
+            ->useLogName('goods_receipt');
     }
 
     public function company(): BelongsTo

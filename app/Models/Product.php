@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
@@ -24,6 +24,8 @@ class Product extends Model
         'cost_price',
         'selling_price',
         'stock_quantity',
+        'min_stock',
+        'max_stock',
         'photo_path',
         'credit_limit',
         'credit_days',
@@ -37,6 +39,8 @@ class Product extends Model
             'cost_price' => 'decimal:2',
             'selling_price' => 'decimal:2',
             'stock_quantity' => 'integer',
+            'min_stock' => 'integer',
+            'max_stock' => 'integer',
             'credit_limit' => 'integer',
             'credit_days' => 'integer',
             'vat_rate' => 'integer',
@@ -97,5 +101,17 @@ class Product extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class);
+    }
+
+    // ตรวจสอบว่า stock ต่ำกว่าขั้นต่ำหรือไม่
+    public function isLowStock(): bool
+    {
+        return $this->min_stock > 0 && $this->stock_quantity <= $this->min_stock;
+    }
+
+    // ตรวจสอบว่า stock เกินขั้นสูงสุดหรือไม่
+    public function isOverStock(): bool
+    {
+        return $this->max_stock > 0 && $this->stock_quantity >= $this->max_stock;
     }
 }
