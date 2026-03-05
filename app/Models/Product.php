@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasUlids, SoftDeletes;
+    use HasFactory, HasUlids, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -101,6 +102,26 @@ class Product extends Model
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class);
+    }
+
+    public function stockReservations(): HasMany
+    {
+        return $this->hasMany(StockReservation::class);
+    }
+
+    // Accessor สำหรับ reserved quantity
+    public function getReservedQuantityAttribute(): int
+    {
+        return $this
+            ->stockReservations()
+            ->where('expires_at', '>', now())
+            ->sum('reserved_quantity');
+    }
+
+    // Accessor สำหรับ available stock
+    public function getAvailableStockAttribute(): int
+    {
+        return max(0, $this->stock_quantity - $this->reserved_quantity);
     }
 
     // ตรวจสอบว่า stock ต่ำกว่าขั้นต่ำหรือไม่

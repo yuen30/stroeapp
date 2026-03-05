@@ -2,16 +2,39 @@
 
 namespace App\Observers;
 
+use App\Enums\OrderStatus;
 use App\Models\SaleOrderItem;
+use App\Services\StockReservationService;
 
 class SaleOrderItemObserver
 {
+    /**
+     * Create a new observer instance.
+     */
+    public function __construct(
+        private StockReservationService $reservationService
+    ) {}
+
     /**
      * Handle the SaleOrderItem "created" event.
      */
     public function created(SaleOrderItem $item): void
     {
+        // จองสต็อกถ้าเป็น draft status
+        if ($item->saleOrder->status === OrderStatus::Draft) {
+            $this->reservationService->createReservation($item);
+        }
+
         $this->recalculateSaleOrderTotals($item);
+    }
+
+    /**
+     * Handle the SaleOrderItem "updating" event.
+     */
+    public function updating(SaleOrderItem $item): void
+    {
+        // เก็บ quantity เดิมไว้สำหรับ updated event
+        $item->_oldQuantity = $item->getOriginal('quantity');
     }
 
     /**
@@ -19,6 +42,15 @@ class SaleOrderItemObserver
      */
     public function updated(SaleOrderItem $item): void
     {
+        // อัพเดทการจองถ้าเปลี่ยน quantity ในสถานะ draft
+        if ($item->saleOrder->status === OrderStatus::Draft &&
+                $item->wasChanged('quantity')) {
+            $this->reservationService->updateReservation(
+                $item,
+                $item->_oldQuantity
+            );
+        }
+
         $this->recalculateSaleOrderTotals($item);
     }
 
@@ -27,6 +59,9 @@ class SaleOrderItemObserver
      */
     public function deleted(SaleOrderItem $item): void
     {
+        // ลบการจอง
+        $this->reservationService->deleteReservation($item);
+
         $this->recalculateSaleOrderTotals($item);
     }
 

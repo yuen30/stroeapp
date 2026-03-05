@@ -20,20 +20,39 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Create Company and Branch
-        $company = Company::updateOrCreate([
-            'name' => 'บริษัท อะไหล่ไทย จำกัด (มหาชน)',
-            'code' => 'COMP-001',
-            'tax_id' => '0105555555555',
-            'tel' => '02-111-2222',
-            'address_0' => '123 ถ.สุขุมวิท กรุงเทพมหานคร 10110'
-        ]);
+        $company = Company::updateOrCreate(
+            ['code' => 'COMP-001'],
+            [
+                'name' => 'บริษัท อะไหล่ไทย จำกัด (มหาชน)',
+                'code' => 'COMP-001',
+                'tax_id' => '0105555555555',
+                'tel' => '02-111-2222',
+                'fax' => '02-111-2223',
+                'address_0' => '123 ถ.สุขุมวิท',
+                'address_1' => 'แขวงคลองเตยเหนือ',
+                'amphoe' => 'วัฒนา',
+                'province' => 'กรุงเทพมหานคร',
+                'postal_code' => '10110',
+                'is_active' => true,
+            ]
+        );
 
-        $branch = Branch::updateOrCreate([
-            'company_id' => $company->id,
-            'name' => 'สำนักงานใหญ่',
-            'code' => 'HQ001',
-            'address_0' => '123 ถ.สุขุมวิท กรุงเทพมหานคร 10110'
-        ]);
+        $branch = Branch::updateOrCreate(
+            ['code' => 'HQ001'],
+            [
+                'company_id' => $company->id,
+                'name' => 'สำนักงานใหญ่',
+                'code' => 'HQ001',
+                'tel' => '02-111-2222',
+                'fax' => '02-111-2223',
+                'address_0' => '123 ถ.สุขุมวิท',
+                'address_1' => 'แขวงคลองเตยเหนือ',
+                'amphoe' => 'วัฒนา',
+                'province' => 'กรุงเทพมหานคร',
+                'postal_code' => '10110',
+                'is_active' => true,
+            ]
+        );
 
         // 2. Create Admin User
         User::updateOrCreate([
@@ -75,13 +94,60 @@ class DatabaseSeeder extends Seeder
         $catFluid = Category::updateOrCreate(['name' => 'น้ำมันและสารหล่อลื่น', 'code' => 'FLD']);
 
         // 4. Create Trading Partners (Suppliers & Customers)
-        $supplier1 = Supplier::updateOrCreate([
-            'company_id' => $company->id,
-            'name' => 'บริษัท โตโยต้า มอเตอร์ (ประเทศไทย)',
-            'code' => 'SUP-001',
-            'contact_name' => 'สมเกียรติ',
-            'tel' => '02-386-2000'
-        ]);
+        $suppliers = [
+            [
+                'name' => 'บริษัท โตโยต้า มอเตอร์ (ประเทศไทย) จำกัด',
+                'code' => 'SUP-001',
+                'contact_name' => 'คุณสมเกียรติ วงศ์ใหญ่',
+                'tel' => '02-386-2000',
+                'fax' => '02-386-2001',
+                'address_0' => '186/1 ถ.มิตรไมตรี',
+                'address_1' => 'แขวงดินแดง',
+                'amphoe' => 'ดินแดง',
+                'province' => 'กรุงเทพมหานคร',
+                'postal_code' => '10400',
+                'tax_id' => '0107537000151',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'บริษัท เบรมโบ้ (ประเทศไทย) จำกัด',
+                'code' => 'SUP-002',
+                'contact_name' => 'คุณวิชัย สุขสันต์',
+                'tel' => '02-719-8888',
+                'fax' => '02-719-8889',
+                'address_0' => '700/199 หมู่ 1 ถ.บางนา-ตราด',
+                'address_1' => 'ต.บางแก้ว',
+                'amphoe' => 'บางพลี',
+                'province' => 'สมุทรปราการ',
+                'postal_code' => '10540',
+                'tax_id' => '0105548012345',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'บริษัท โมทูล (ประเทศไทย) จำกัด',
+                'code' => 'SUP-003',
+                'contact_name' => 'คุณประสิทธิ์ ชัยชนะ',
+                'tel' => '02-361-5555',
+                'fax' => '02-361-5556',
+                'address_0' => '1010 ถ.วิภาวดีรังสิต',
+                'address_1' => 'แขวงจตุจักร',
+                'amphoe' => 'จตุจักร',
+                'province' => 'กรุงเทพมหานคร',
+                'postal_code' => '10900',
+                'tax_id' => '0105549023456',
+                'is_active' => true,
+            ],
+        ];
+
+        foreach ($suppliers as $supplierData) {
+            Supplier::updateOrCreate(
+                [
+                    'company_id' => $company->id,
+                    'code' => $supplierData['code'],
+                ],
+                $supplierData + ['company_id' => $company->id]
+            );
+        }
 
         // สร้างลูกค้าหลายรายการ พร้อมเงื่อนไขการชำระเงินที่แตกต่างกัน
         $customers = [
@@ -89,79 +155,145 @@ class DatabaseSeeder extends Seeder
                 'name' => 'อู่ขจรเจริญยนต์',
                 'code' => 'CUS-001',
                 'tel' => '081-222-3333',
-                'address_0' => '456 ถ.พระราม 2 สมุทรสาคร',
+                'fax' => '034-123-456',
+                'address_0' => '456 ถ.พระราม 2',
+                'address_1' => 'ต.ท่าทราย',
+                'amphoe' => 'เมืองสมุทรสาคร',
+                'province' => 'สมุทรสาคร',
+                'postal_code' => '74000',
                 'tax_id' => '0105566677788',
                 'credit_days' => 0,  // เงินสด
                 'credit_limit' => 0,
+                'vat_rate' => 7,
                 'is_head_office' => true,
+                'branch_no' => null,
+                'is_active' => true,
             ],
             [
                 'name' => 'บริษัท ศรีสมบูรณ์ ออโต้พาร์ท จำกัด',
                 'code' => 'CUS-002',
                 'tel' => '02-555-6666',
-                'address_0' => '789 ถ.รัชดาภิเษก กรุงเทพฯ',
+                'fax' => '02-555-6667',
+                'address_0' => '789 ถ.รัชดาภิเษก',
+                'address_1' => 'แขวงดินแดง',
+                'amphoe' => 'ดินแดง',
+                'province' => 'กรุงเทพมหานคร',
+                'postal_code' => '10400',
                 'tax_id' => '0105577788899',
                 'credit_days' => 7,  // เครดิต 7 วัน
                 'credit_limit' => 50000,
+                'vat_rate' => 7,
                 'is_head_office' => true,
+                'branch_no' => null,
+                'is_active' => true,
             ],
             [
                 'name' => 'ห้างหุ้นส่วนจำกัด วิชัยการช่าง',
                 'code' => 'CUS-003',
                 'tel' => '089-333-4444',
-                'address_0' => '321 ถ.บางนา-ตราด กรุงเทพฯ',
+                'fax' => null,
+                'address_0' => '321 ถ.บางนา-ตราด',
+                'address_1' => 'แขวงบางนา',
+                'amphoe' => 'บางนา',
+                'province' => 'กรุงเทพมหานคร',
+                'postal_code' => '10260',
                 'tax_id' => '0105588899900',
                 'credit_days' => 15,  // เครดิต 15 วัน
                 'credit_limit' => 100000,
+                'vat_rate' => 7,
                 'is_head_office' => true,
+                'branch_no' => null,
+                'is_active' => true,
             ],
             [
                 'name' => 'อู่ประชาชื่น',
                 'code' => 'CUS-004',
                 'tel' => '092-444-5555',
-                'address_0' => '654 ถ.เพชรบุรี กรุงเทพฯ',
+                'fax' => null,
+                'address_0' => '654 ถ.เพชรบุรี',
+                'address_1' => 'แขวงมักกะสัน',
+                'amphoe' => 'ราชเทวี',
+                'province' => 'กรุงเทพมหานคร',
+                'postal_code' => '10400',
+                'tax_id' => null,  // ไม่มีเลขผู้เสียภาษี (ร้านเล็ก)
                 'credit_days' => 0,  // เงินสด
                 'credit_limit' => 0,
+                'vat_rate' => 0,  // ไม่คิด VAT
                 'is_head_office' => true,
+                'branch_no' => null,
+                'is_active' => true,
             ],
             [
                 'name' => 'บริษัท มหานครออโต้ จำกัด',
                 'code' => 'CUS-005',
                 'tel' => '02-777-8888',
-                'address_0' => '987 ถ.ลาดพร้าว กรุงเทพฯ',
+                'fax' => '02-777-8889',
+                'address_0' => '987 ถ.ลาดพร้าว',
+                'address_1' => 'แขวงจันทรเกษม',
+                'amphoe' => 'จตุจักร',
+                'province' => 'กรุงเทพมหานคร',
+                'postal_code' => '10900',
                 'tax_id' => '0105599900011',
                 'credit_days' => 30,  // เครดิต 30 วัน
                 'credit_limit' => 200000,
+                'vat_rate' => 7,
                 'is_head_office' => true,
+                'branch_no' => null,
+                'is_active' => true,
             ],
             [
                 'name' => 'ห้างหุ้นส่วนจำกัด สุขสันต์การช่าง',
                 'code' => 'CUS-006',
                 'tel' => '088-666-7777',
-                'address_0' => '147 ถ.พระราม 3 กรุงเทพฯ',
+                'fax' => '02-294-5678',
+                'address_0' => '147 ถ.พระราม 3',
+                'address_1' => 'แขวงบางโพงพาง',
+                'amphoe' => 'ยานนาวา',
+                'province' => 'กรุงเทพมหานคร',
+                'postal_code' => '10120',
                 'tax_id' => '0105500011122',
                 'credit_days' => 45,  // เครดิต 45 วัน
                 'credit_limit' => 150000,
-                'is_head_office' => true,
+                'vat_rate' => 7,
+                'is_head_office' => false,
+                'branch_no' => '00001',  // สาขาที่ 1
+                'is_active' => true,
             ],
             [
                 'name' => 'อู่เจริญศิลป์',
                 'code' => 'CUS-007',
                 'tel' => '095-888-9999',
-                'address_0' => '258 ถ.สุขุมวิท กรุงเทพฯ',
+                'fax' => null,
+                'address_0' => '258 ถ.สุขุมวิท',
+                'address_1' => 'แขวงคลองเตย',
+                'amphoe' => 'คลองเตย',
+                'province' => 'กรุงเทพมหานคร',
+                'postal_code' => '10110',
+                'tax_id' => null,  // ไม่มีเลขผู้เสียภาษี
                 'credit_days' => 0,  // เงินสด
                 'credit_limit' => 0,
+                'vat_rate' => 0,  // ไม่คิด VAT
                 'is_head_office' => true,
+                'branch_no' => null,
+                'is_active' => true,
             ],
             [
                 'name' => 'บริษัท ไทยออโต้ซัพพลาย จำกัด',
                 'code' => 'CUS-008',
                 'tel' => '02-999-0000',
-                'address_0' => '369 ถ.วิภาวดีรังสิต กรุงเทพฯ',
+                'fax' => '02-999-0001',
+                'address_0' => '369 ถ.วิภาวดีรังสิต',
+                'address_1' => 'แขวงจอมพล',
+                'amphoe' => 'จตุจักร',
+                'province' => 'กรุงเทพมหานคร',
+                'postal_code' => '10900',
                 'tax_id' => '0105511122233',
                 'credit_days' => 60,  // เครดิต 60 วัน
                 'credit_limit' => 300000,
-                'is_head_office' => true,
+                'vat_rate' => 7,
+                'is_head_office' => false,
+                'branch_no' => '00002',  // สาขาที่ 2
+                'is_active' => true,
             ],
         ];
 

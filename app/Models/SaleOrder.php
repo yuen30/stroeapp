@@ -7,6 +7,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,7 @@ use Spatie\Activitylog\LogOptions;
 
 class SaleOrder extends Model
 {
-    use HasUlids, SoftDeletes, LogsActivity;
+    use HasFactory, HasUlids, SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'company_id',
@@ -29,6 +30,7 @@ class SaleOrder extends Model
         'order_date',
         'due_date',
         'term_of_payment',
+        'reference_number',
         'status',
         'payment_status',
         'payment_method',
@@ -38,6 +40,11 @@ class SaleOrder extends Model
         'total_amount',
         'notes',
         'attachments',
+        'delivery_date',
+        'shipping_method',
+        'shipping_address',
+        'contact_person',
+        'contact_phone',
     ];
 
     protected function casts(): array
@@ -45,6 +52,7 @@ class SaleOrder extends Model
         return [
             'order_date' => 'date',
             'due_date' => 'date',
+            'delivery_date' => 'date',
             'document_type' => DocumentType::class,
             'status' => OrderStatus::class,
             'payment_status' => PaymentStatus::class,

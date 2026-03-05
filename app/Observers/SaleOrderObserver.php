@@ -49,13 +49,27 @@ class SaleOrderObserver
         if ($saleOrder->wasChanged('status') &&
                 $saleOrder->status === OrderStatus::Confirmed &&
                 $saleOrder->getOriginal('status') === OrderStatus::Draft) {
+            // ปลดล็อคการจองสต็อก (เพราะจะตัดสต็อกจริงแล้ว)
+            $this->releaseReservations($saleOrder);
+
+            // ตัดสต็อก
             $this->createStockMovements($saleOrder);
         }
 
         // ถ้ายกเลิก ให้คืนสต็อก
         if ($saleOrder->wasChanged('status') &&
                 $saleOrder->status === OrderStatus::Cancelled) {
-            $this->revertStockMovements($saleOrder);
+            $originalStatus = $saleOrder->getOriginal('status');
+
+            // ถ้ายกเลิกจาก Confirmed ให้คืนสต็อก
+            if ($originalStatus === OrderStatus::Confirmed) {
+                $this->revertStockMovements($saleOrder);
+            }
+
+            // ถ้ายกเลิกจาก Draft ให้ปลดล็อคการจอง
+            if ($originalStatus === OrderStatus::Draft) {
+                $this->releaseReservations($saleOrder);
+            }
         }
     }
 
@@ -107,5 +121,13 @@ class SaleOrderObserver
             // ลบ StockMovement
             $movement->delete();
         }
+    }
+
+    /**
+     * ปลดล็อคการจองสต็อก
+     */
+    private function releaseReservations(SaleOrder $saleOrder): void
+    {
+        \App\Models\StockReservation::where('sale_order_id', $saleOrder->id)->delete();
     }
 }

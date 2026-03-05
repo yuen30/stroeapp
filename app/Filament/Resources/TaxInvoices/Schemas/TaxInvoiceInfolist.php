@@ -37,7 +37,6 @@ class TaxInvoiceInfolist
                                 ->badge()
                                 ->color('info'),
                         ]),
-
                     Section::make('ข้อมูลลูกค้าผู้เอาประกัน/ผู้เสียภาษี')
                         ->icon('heroicon-o-identification')
                         ->columns(2)
@@ -50,13 +49,22 @@ class TaxInvoiceInfolist
                                 ->label('เลขประจำตัวผู้เสียภาษี'),
                             TextEntry::make('customer_is_head_office')
                                 ->label('ประเภทสาขา')
-                                ->formatStateUsing(fn ($record) => $record->customer_is_head_office ? 'สำนักงานใหญ่' : 'สาขา: ' . ($record->customer_branch_no ?: '-')),
-                            TextEntry::make('customer_address')
+                                ->formatStateUsing(fn($record) => $record->customer_is_head_office ? 'สำนักงานใหญ่' : 'สาขา: ' . ($record->customer_branch_no ?: '-')),
+                            TextEntry::make('full_address')
                                 ->label('ที่อยู่ลูกค้า')
-                                ->columnSpan(2),
+                                ->columnSpan(2)
+                                ->formatStateUsing(function ($record) {
+                                    $parts = array_filter([
+                                        $record->customer_address_line1,
+                                        $record->customer_address_line2,
+                                        $record->customer_amphoe ? "อ.{$record->customer_amphoe}" : null,
+                                        $record->customer_province ? "จ.{$record->customer_province}" : null,
+                                        $record->customer_postal_code,
+                                    ]);
+                                    return implode(' ', $parts) ?: '-';
+                                }),
                         ]),
                 ])->columnSpan(['lg' => 2]),
-
                 Group::make()->schema([
                     Section::make('ยอดเงินและภาษี')
                         ->icon('heroicon-o-calculator')
@@ -80,7 +88,6 @@ class TaxInvoiceInfolist
                                 ->weight('bold')
                                 ->color('success'),
                         ]),
-
                     Section::make('สถานะ')
                         ->schema([
                             TextEntry::make('payment_status')

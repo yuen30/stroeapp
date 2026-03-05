@@ -17,8 +17,8 @@ class TaxInvoiceObserver
     public function creating(TaxInvoice $taxInvoice): void
     {
         // สร้างเลขที่เอกสารอัตโนมัติถ้ายังไม่มี
-        if (empty($taxInvoice->invoice_number)) {
-            $taxInvoice->invoice_number = $this->documentNumberService->generate(
+        if (empty($taxInvoice->tax_invoice_number)) {
+            $taxInvoice->tax_invoice_number = $this->documentNumberService->generate(
                 'INV',
                 $taxInvoice->company_id ?? null,
                 $taxInvoice->branch_id ?? null

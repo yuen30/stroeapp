@@ -190,13 +190,33 @@ class SaleOrderInfolist
                                                                     return '-';
                                                                 }
 
-                                                                $stock = $product->stock_quantity;
-                                                                $color = $stock > 10 ? 'success' : ($stock > 0 ? 'warning' : 'danger');
+                                                                $totalStock = $product->stock_quantity;
+                                                                $reserved = $product->reserved_quantity;
+                                                                $available = $product->available_stock;
 
-                                                                return new \Illuminate\Support\HtmlString(
-                                                                    '<span class="text-' . $color . '-600 dark:text-' . $color . '-400 font-semibold text-lg">'
-                                                                    . number_format($stock) . ' หน่วย</span>'
-                                                                );
+                                                                // บวกสต็อกที่จองไว้สำหรับ item นี้กลับมา
+                                                                $currentReservation = \App\Models\StockReservation::where('sale_order_item_id', $itemId)
+                                                                    ->where('expires_at', '>', now())
+                                                                    ->first();
+                                                                if ($currentReservation) {
+                                                                    $available += $currentReservation->reserved_quantity;
+                                                                }
+
+                                                                $color = $available > 10 ? 'success' : ($available > 0 ? 'warning' : 'danger');
+
+                                                                return new \Illuminate\Support\HtmlString('
+                                                                    <div class="space-y-2">
+                                                                        <div class="flex items-center gap-4">
+                                                                            <span class="text-' . $color . '-600 dark:text-' . $color . '-400 font-bold text-2xl">'
+                                                                    . number_format($available) . ' หน่วย</span>
+                                                                            <span class="text-sm text-gray-500 dark:text-gray-400">พร้อมใช้งาน</span>
+                                                                        </div>
+                                                                        <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                                                                            <div>สต็อกทั้งหมด: <span class="font-semibold">' . number_format($totalStock) . '</span></div>
+                                                                            ' . ($reserved > 0 ? '<div class="text-warning-600 dark:text-warning-400">ถูกจองโดยใบอื่น: <span class="font-semibold">' . number_format($reserved - ($currentReservation ? $currentReservation->reserved_quantity : 0)) . '</span></div>' : '') . '
+                                                                        </div>
+                                                                    </div>
+                                                                ');
                                                             })
                                                             ->columnSpanFull(),
                                                         \Filament\Forms\Components\Textarea::make('description')
@@ -226,7 +246,17 @@ class SaleOrderInfolist
                                                                     return null;
                                                                 }
 
-                                                                return "สต็อกคงเหลือ: {$product->stock_quantity} หน่วย";
+                                                                $available = $product->available_stock;
+
+                                                                // บวกสต็อกที่จองไว้สำหรับ item นี้กลับมา
+                                                                $currentReservation = \App\Models\StockReservation::where('sale_order_item_id', $itemId)
+                                                                    ->where('expires_at', '>', now())
+                                                                    ->first();
+                                                                if ($currentReservation) {
+                                                                    $available += $currentReservation->reserved_quantity;
+                                                                }
+
+                                                                return "พร้อมใช้: {$available} หน่วย";
                                                             })
                                                             ->reactive()
                                                             ->afterStateUpdated(function ($state, callable $get, callable $set) {
@@ -304,12 +334,25 @@ class SaleOrderInfolist
                                                     return;
                                                 }
 
-                                                // ตรวจสอบสต็อกเพียงพอหรือไม่
-                                                if ($product->stock_quantity < $data['quantity']) {
+                                                // ตรวจสอบสต็อกพร้อมใช้งาน
+                                                $availableStock = $product->available_stock;
+
+                                                // บวกสต็อกที่จองไว้สำหรับ item นี้กลับมา
+                                                $currentReservation = \App\Models\StockReservation::where('sale_order_item_id', $item->id)
+                                                    ->where('expires_at', '>', now())
+                                                    ->first();
+                                                if ($currentReservation) {
+                                                    $availableStock += $currentReservation->reserved_quantity;
+                                                }
+
+                                                if ($availableStock < $data['quantity']) {
+                                                    $reserved = $product->reserved_quantity;
+                                                    $totalStock = $product->stock_quantity;
+
                                                     \Filament\Notifications\Notification::make()
                                                         ->danger()
                                                         ->title('สต็อกไม่เพียงพอ')
-                                                        ->body("สินค้า {$product->name} มีสต็อกเหลือ {$product->stock_quantity} หน่วย ไม่สามารถแก้ไขเป็น {$data['quantity']} หน่วยได้")
+                                                        ->body("สินค้า {$product->name}\n• สต็อกทั้งหมด: {$totalStock} หน่วย\n• ถูกจองแล้ว: {$reserved} หน่วย\n• พร้อมใช้: {$availableStock} หน่วย\n• ต้องการ: {$data['quantity']} หน่วย")
                                                         ->duration(10000)
                                                         ->send();
                                                     return;
@@ -328,7 +371,7 @@ class SaleOrderInfolist
                                                 \Filament\Notifications\Notification::make()
                                                     ->success()
                                                     ->title('แก้ไขสินค้าสำเร็จ')
-                                                    ->body('รายการสินค้าได้รับการอัปเดตแล้ว')
+                                                    ->body('รายการสินค้าได้รับการอัปเดตแล้ว การจองสต็อกได้รับการปรับปรุงอัตโนมัติ')
                                                     ->duration(3000)
                                                     ->send();
 
@@ -354,7 +397,7 @@ class SaleOrderInfolist
                                                     \Filament\Notifications\Notification::make()
                                                         ->success()
                                                         ->title('ลบสินค้าสำเร็จ')
-                                                        ->body('รายการสินค้าถูกลบออกจากใบสั่งขายแล้ว')
+                                                        ->body('รายการสินค้าถูกลบออกจากใบสั่งขายแล้ว การจองสต็อกได้ถูกปลดล็อคอัตโนมัติ')
                                                         ->duration(3000)
                                                         ->send();
 
@@ -428,8 +471,77 @@ class SaleOrderInfolist
                         TextEntry::make('document_type')
                             ->label('ประเภทเอกสาร')
                             ->formatStateUsing(fn($state) => $state?->getLabel() ?? '-'),
+                        TextEntry::make('reference_number')
+                            ->label('เลขที่อ้างอิง')
+                            ->placeholder('-')
+                            ->icon(Heroicon::DocumentDuplicate)
+                            ->columnSpan(2),
                     ])
                     ->columns(4)
+                    ->columnSpanFull(),
+                Section::make('ข้อมูลการจัดส่ง')
+                    ->icon(Heroicon::Truck)
+                    ->collapsible()
+                    ->collapsed(fn($record) => !$record->delivery_date && !$record->shipping_method && !$record->shipping_address)
+                    ->visible(fn($record) => $record->delivery_date || $record->shipping_method || $record->shipping_address)
+                    ->schema([
+                        TextEntry::make('delivery_date')
+                            ->label('วันที่จัดส่ง')
+                            ->date('d/m/Y')
+                            ->placeholder('-')
+                            ->icon(Heroicon::Calendar),
+                        TextEntry::make('shipping_method')
+                            ->label('วิธีการจัดส่ง')
+                            ->placeholder('-')
+                            ->icon(Heroicon::Truck),
+                        TextEntry::make('shipping_address')
+                            ->label('ที่อยู่จัดส่ง')
+                            ->placeholder('ใช้ที่อยู่ลูกค้า')
+                            ->icon(Heroicon::MapPin)
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull(),
+                Section::make('ข้อมูลผู้ติดต่อ')
+                    ->icon(Heroicon::Phone)
+                    ->collapsible()
+                    ->collapsed(fn($record) => !$record->contact_person && !$record->contact_phone)
+                    ->visible(fn($record) => $record->contact_person || $record->contact_phone)
+                    ->schema([
+                        TextEntry::make('contact_person')
+                            ->label('ชื่อผู้ติดต่อ')
+                            ->placeholder('-')
+                            ->icon(Heroicon::User),
+                        TextEntry::make('contact_phone')
+                            ->label('เบอร์โทรติดต่อ')
+                            ->placeholder('-')
+                            ->icon(Heroicon::Phone),
+                    ])
+                    ->columns(2)
+                    ->columnSpanFull(),
+                Section::make('ไฟล์แนบ')
+                    ->icon(Heroicon::PaperClip)
+                    ->collapsible()
+                    ->collapsed()
+                    ->visible(fn($record) => !empty($record->attachments))
+                    ->schema([
+                        TextEntry::make('attachments')
+                            ->label('ไฟล์แนบ')
+                            ->listWithLineBreaks()
+                            ->formatStateUsing(function ($state) {
+                                if (empty($state)) {
+                                    return '-';
+                                }
+                                $files = [];
+                                foreach ($state as $file) {
+                                    $filename = basename($file);
+                                    $url = \Storage::url($file);
+                                    $files[] = "<a href='{$url}' target='_blank' class='text-primary-600 hover:underline'>{$filename}</a>";
+                                }
+                                return new \Illuminate\Support\HtmlString(implode('<br>', $files));
+                            })
+                            ->columnSpanFull(),
+                    ])
                     ->columnSpanFull(),
                 Section::make('หมายเหตุและข้อมูลเพิ่มเติม')
                     ->icon(Heroicon::InformationCircle)

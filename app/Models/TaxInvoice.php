@@ -4,8 +4,8 @@ namespace App\Models;
 
 use App\Enums\PaymentStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TaxInvoice extends Model
@@ -22,7 +22,11 @@ class TaxInvoice extends Model
         'document_date',
         'customer_name',
         'customer_tax_id',
-        'customer_address',
+        'customer_address_line1',
+        'customer_address_line2',
+        'customer_amphoe',
+        'customer_province',
+        'customer_postal_code',
         'customer_is_head_office',
         'customer_branch_no',
         'subtotal',
@@ -71,5 +75,19 @@ class TaxInvoice extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    // Accessor: รวมที่อยู่เป็น string เดียว
+    public function getFullAddressAttribute(): string
+    {
+        $parts = array_filter([
+            $this->customer_address_line1,
+            $this->customer_address_line2,
+            $this->customer_amphoe ? "อ.{$this->customer_amphoe}" : null,
+            $this->customer_province ? "จ.{$this->customer_province}" : null,
+            $this->customer_postal_code,
+        ]);
+
+        return implode(' ', $parts);
     }
 }

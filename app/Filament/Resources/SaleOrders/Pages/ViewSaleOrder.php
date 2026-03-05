@@ -57,12 +57,24 @@ class ViewSaleOrder extends ViewRecord
                                     if (!$product) {
                                         return '-';
                                     }
-                                    $stock = $product->stock_quantity;
-                                    $color = $stock > 10 ? 'success' : ($stock > 0 ? 'warning' : 'danger');
-                                    return new \Illuminate\Support\HtmlString(
-                                        '<span class="text-' . $color . '-600 dark:text-' . $color . '-400 font-semibold text-lg">'
-                                        . number_format($stock) . ' หน่วย</span>'
-                                    );
+                                    $totalStock = $product->stock_quantity;
+                                    $reserved = $product->reserved_quantity;
+                                    $available = $product->available_stock;
+                                    $color = $available > 10 ? 'success' : ($available > 0 ? 'warning' : 'danger');
+
+                                    return new \Illuminate\Support\HtmlString('
+                                        <div class="space-y-2">
+                                            <div class="flex items-center gap-4">
+                                                <span class="text-' . $color . '-600 dark:text-' . $color . '-400 font-bold text-2xl">'
+                                        . number_format($available) . ' หน่วย</span>
+                                                <span class="text-sm text-gray-500 dark:text-gray-400">พร้อมใช้งาน</span>
+                                            </div>
+                                            <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                                                <div>สต็อกทั้งหมด: <span class="font-semibold">' . number_format($totalStock) . '</span></div>
+                                                ' . ($reserved > 0 ? '<div class="text-warning-600 dark:text-warning-400">ถูกจอง: <span class="font-semibold">' . number_format($reserved) . '</span></div>' : '') . '
+                                            </div>
+                                        </div>
+                                    ');
                                 })
                                 ->columnSpanFull(),
                             \Filament\Forms\Components\Textarea::make('description')
@@ -85,7 +97,11 @@ class ViewSaleOrder extends ViewRecord
                                     if (!$product) {
                                         return null;
                                     }
-                                    return "สต็อกคงเหลือ: {$product->stock_quantity} หน่วย";
+                                    $available = $product->available_stock;
+                                    $reserved = $product->reserved_quantity;
+                                    return $reserved > 0
+                                        ? "พร้อมใช้: {$available} หน่วย (ถูกจอง: {$reserved})"
+                                        : "พร้อมใช้: {$available} หน่วย";
                                 })
                                 ->reactive()
                                 ->afterStateUpdated(function ($state, callable $get, callable $set) {
@@ -154,12 +170,27 @@ class ViewSaleOrder extends ViewRecord
                         $requestedQuantity += $existingItem->quantity;
                     }
 
-                    // ตรวจสอบสต็อกเพียงพอหรือไม่
-                    if ($product->stock_quantity < $requestedQuantity) {
+                    // ตรวจสอบสต็อกพร้อมใช้งาน (หักการจองแล้ว)
+                    $availableStock = $product->available_stock;
+
+                    // ถ้ามีรายการเดิมอยู่แล้ว ต้องบวกสต็อกที่จองไว้กลับมา
+                    if ($existingItem) {
+                        $existingReservation = \App\Models\StockReservation::where('sale_order_item_id', $existingItem->id)
+                            ->where('expires_at', '>', now())
+                            ->first();
+                        if ($existingReservation) {
+                            $availableStock += $existingReservation->reserved_quantity;
+                        }
+                    }
+
+                    if ($availableStock < $requestedQuantity) {
+                        $reserved = $product->reserved_quantity;
+                        $totalStock = $product->stock_quantity;
+
                         \Filament\Notifications\Notification::make()
                             ->danger()
                             ->title('สต็อกไม่เพียงพอ')
-                            ->body("สินค้า {$product->name} มีสต็อกเหลือ {$product->stock_quantity} หน่วย ไม่สามารถเพิ่ม {$requestedQuantity} หน่วยได้")
+                            ->body("สินค้า {$product->name}\n• สต็อกทั้งหมด: {$totalStock} หน่วย\n• ถูกจองแล้ว: {$reserved} หน่วย\n• พร้อมใช้: {$availableStock} หน่วย\n• ต้องการ: {$requestedQuantity} หน่วย")
                             ->duration(10000)
                             ->send();
                         return;
@@ -181,7 +212,7 @@ class ViewSaleOrder extends ViewRecord
                         \Filament\Notifications\Notification::make()
                             ->success()
                             ->title('อัปเดตสินค้าสำเร็จ')
-                            ->body('เพิ่มจำนวนสินค้าที่มีอยู่แล้ว')
+                            ->body('เพิ่มจำนวนสินค้าที่มีอยู่แล้ว (การจองสต็อกได้รับการอัปเดตอัตโนมัติ)')
                             ->duration(3000)
                             ->send();
                     } else {
@@ -192,6 +223,7 @@ class ViewSaleOrder extends ViewRecord
                         \Filament\Notifications\Notification::make()
                             ->success()
                             ->title('เพิ่มสินค้าสำเร็จ')
+                            ->body('สต็อกได้ถูกจองอัตโนมัติแล้ว')
                             ->duration(3000)
                             ->send();
                     }
@@ -270,8 +302,19 @@ class ViewSaleOrder extends ViewRecord
                     $insufficientStock = [];
                     foreach ($this->record->items as $item) {
                         $product = $item->product;
-                        if ($product->stock_quantity < $item->quantity) {
-                            $insufficientStock[] = "{$product->name} (มีอยู่ {$product->stock_quantity}, ต้องการ {$item->quantity})";
+                        $availableStock = $product->available_stock;
+
+                        // บวกสต็อกที่จองไว้สำหรับ item นี้กลับมา
+                        $reservation = \App\Models\StockReservation::where('sale_order_item_id', $item->id)
+                            ->where('expires_at', '>', now())
+                            ->first();
+                        if ($reservation) {
+                            $availableStock += $reservation->reserved_quantity;
+                        }
+
+                        if ($availableStock < $item->quantity) {
+                            $reserved = $product->reserved_quantity;
+                            $insufficientStock[] = "{$product->name} (สต็อกทั้งหมด: {$product->stock_quantity}, ถูกจอง: {$reserved}, พร้อมใช้: {$availableStock}, ต้องการ: {$item->quantity})";
                         }
                     }
 
@@ -310,7 +353,7 @@ class ViewSaleOrder extends ViewRecord
                         \Filament\Notifications\Notification::make()
                             ->success()
                             ->title('ยืนยันใบสั่งขายสำเร็จ')
-                            ->body('ใบสั่งขายเลขที่ ' . $this->record->invoice_number . ' ได้รับการยืนยันแล้ว')
+                            ->body('ใบสั่งขายเลขที่ ' . $this->record->invoice_number . ' ได้รับการยืนยันแล้ว สต็อกถูกตัดและการจองถูกปลดล็อคอัตโนมัติ')
                             ->send();
                     } catch (\Exception $e) {
                         \Filament\Notifications\Notification::make()
@@ -356,7 +399,7 @@ class ViewSaleOrder extends ViewRecord
                     \Filament\Notifications\Notification::make()
                         ->success()
                         ->title('ยกเลิกใบสั่งขายสำเร็จ')
-                        ->body('ใบสั่งขายเลขที่ ' . $this->record->invoice_number . ' ถูกยกเลิกแล้ว')
+                        ->body('ใบสั่งขายเลขที่ ' . $this->record->invoice_number . ' ถูกยกเลิกแล้ว สต็อกและการจองได้รับการคืนอัตโนมัติ')
                         ->duration(3000)
                         ->send();
                 }),

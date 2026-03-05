@@ -5,23 +5,24 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 use App\Enums\Roles;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasAvatar;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Filament\Models\Contracts\HasAvatar;
+use Illuminate\Support\Facades\Storage;
 use Leek\FilamentDiceBear\Concerns\HasDiceBearAvatar;
 use Leek\FilamentDiceBear\Enums\DiceBearStyle;
-use Illuminate\Support\Facades\Storage;
 
-class User extends Authenticatable implements HasAvatar
+class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasUlids, SoftDeletes;
-    use HasDiceBearAvatar;
+    use HasFactory, Notifiable, HasUlids, SoftDeletes, HasDiceBearAvatar;
 
     /**
      * The attributes that are mass assignable.
@@ -90,6 +91,11 @@ class User extends Authenticatable implements HasAvatar
         return $this->hasMany(StockMovement::class, 'created_by');
     }
 
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
+    }
+
     protected function getCustomAvatarUrl(): ?string
     {
         if ($this->profile_photo_path) {
@@ -97,56 +103,56 @@ class User extends Authenticatable implements HasAvatar
         }
 
         $imgs = [
-            "/avatars/bear.png",
-            "/avatars/dog.png",
-            "/avatars/fox1.png",
-            "/avatars/kitty.png",
-            "/avatars/polar-bear.png",
-            "/avatars/tiger.png",
-            "/avatars/beaver.png",
-            "/avatars/dog1.png",
-            "/avatars/frog-.png",
-            "/avatars/koala.png",
-            "/avatars/polar-bear1.png",
-            "/avatars/walrus.png",
-            "/avatars/cat1.png",
-            "/avatars/dog2.png",
-            "/avatars/frog.png",
-            "/avatars/lion.png",
-            "/avatars/puffer-fish.png",
-            "/avatars/weasel.png",
-            "/avatars/chick.png",
-            "/avatars/dragon.png",
-            "/avatars/giraffe.png",
-            "/avatars/meerkat.png",
-            "/avatars/rabbit.png",
-            "/avatars/wild-boar.png",
-            "/avatars/chicken.png",
-            "/avatars/duck.png",
-            "/avatars/gorilla.png",
-            "/avatars/monkey.png",
-            "/avatars/rabbit1.png",
-            "/avatars/wolf.png",
-            "/avatars/cool-.png",
-            "/avatars/eagle.png",
-            "/avatars/hare.png",
-            "/avatars/owl.png",
-            "/avatars/rat.png",
-            "/avatars/cool.png",
-            "/avatars/elephant.png",
-            "/avatars/hen.png",
-            "/avatars/panda.png",
-            "/avatars/sea-lion.png",
-            "/avatars/cow.png",
-            "/avatars/error.png",
-            "/avatars/hippopotamus.png",
-            "/avatars/panda1.png",
-            "/avatars/shark.png",
-            "/avatars/dog-house.png",
-            "/avatars/fox.png",
-            "/avatars/horse.png",
-            "/avatars/pig.png",
-            "/avatars/snake.png",
+            '/avatars/bear.png',
+            '/avatars/dog.png',
+            '/avatars/fox1.png',
+            '/avatars/kitty.png',
+            '/avatars/polar-bear.png',
+            '/avatars/tiger.png',
+            '/avatars/beaver.png',
+            '/avatars/dog1.png',
+            '/avatars/frog-.png',
+            '/avatars/koala.png',
+            '/avatars/polar-bear1.png',
+            '/avatars/walrus.png',
+            '/avatars/cat1.png',
+            '/avatars/dog2.png',
+            '/avatars/frog.png',
+            '/avatars/lion.png',
+            '/avatars/puffer-fish.png',
+            '/avatars/weasel.png',
+            '/avatars/chick.png',
+            '/avatars/dragon.png',
+            '/avatars/giraffe.png',
+            '/avatars/meerkat.png',
+            '/avatars/rabbit.png',
+            '/avatars/wild-boar.png',
+            '/avatars/chicken.png',
+            '/avatars/duck.png',
+            '/avatars/gorilla.png',
+            '/avatars/monkey.png',
+            '/avatars/rabbit1.png',
+            '/avatars/wolf.png',
+            '/avatars/cool-.png',
+            '/avatars/eagle.png',
+            '/avatars/hare.png',
+            '/avatars/owl.png',
+            '/avatars/rat.png',
+            '/avatars/cool.png',
+            '/avatars/elephant.png',
+            '/avatars/hen.png',
+            '/avatars/panda.png',
+            '/avatars/sea-lion.png',
+            '/avatars/cow.png',
+            '/avatars/error.png',
+            '/avatars/hippopotamus.png',
+            '/avatars/panda1.png',
+            '/avatars/shark.png',
+            '/avatars/dog-house.png',
+            '/avatars/fox.png',
+            '/avatars/horse.png',
+            '/avatars/pig.png',
+            '/avatars/snake.png',
         ];
 
         return $imgs[array_rand($imgs)];

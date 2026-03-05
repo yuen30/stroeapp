@@ -2,28 +2,29 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Login;
+use Awcodes\Gravatar\GravatarPlugin;
+use Awcodes\Gravatar\GravatarProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
-use Filament\Panel;
-use Filament\PanelProvider;
 use Filament\Support\Colors\Color as FilamentColor;
 use Filament\Support\Enums\Width;
-use Openplain\FilamentShadcnTheme\Color as ShadcnColor;
 use Filament\Widgets\AccountWidget;
-use Leek\FilamentDiceBear\DiceBearPlugin;
-use Leek\FilamentDiceBear\DiceBearProvider;
-use Leek\FilamentDiceBear\Enums\DiceBearStyle;
 use Filament\Widgets\FilamentInfoWidget;
+use Filament\Panel;
+use Filament\PanelProvider;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use App\Filament\Pages\Auth\Login;
+use Leek\FilamentDiceBear\Enums\DiceBearStyle;
+use Leek\FilamentDiceBear\DiceBearPlugin;
+use Openplain\FilamentShadcnTheme\Color as ShadcnColor;
 
 class StorePanelProvider extends PanelProvider
 {
@@ -41,10 +42,11 @@ class StorePanelProvider extends PanelProvider
                     darkColor: FilamentColor::Teal
                 )
             ])
-            // ->defaultAvatarProvider(DiceBearProvider::class)
+            ->defaultAvatarProvider(GravatarProvider::class)
             ->plugins([
                 DiceBearPlugin::make()
                     ->style(DiceBearStyle::Adventurer),
+                GravatarPlugin::make(),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

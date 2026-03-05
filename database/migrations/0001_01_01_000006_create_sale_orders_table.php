@@ -26,6 +26,7 @@ return new class extends Migration {
             $table->date('order_date');
             $table->date('due_date')->nullable();
             $table->string('term_of_payment')->nullable();
+            $table->string('reference_number')->nullable();  // เลขที่อ้างอิง (PO ลูกค้า)
             $table->string('status')->default(OrderStatus::Draft->value);
             $table->string('payment_status')->default(PaymentStatus::Unpaid->value);
             $table->string('payment_method')->nullable();
@@ -35,6 +36,13 @@ return new class extends Migration {
             $table->decimal('total_amount', 15, 2)->default(0);
             $table->text('notes')->nullable();
             $table->json('attachments')->nullable();  // ไฟล์แนบ
+            // ข้อมูลการจัดส่ง
+            $table->date('delivery_date')->nullable();
+            $table->string('shipping_method')->nullable();
+            $table->text('shipping_address')->nullable();
+            // ข้อมูลผู้ติดต่อ
+            $table->string('contact_person')->nullable();
+            $table->string('contact_phone', 20)->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
