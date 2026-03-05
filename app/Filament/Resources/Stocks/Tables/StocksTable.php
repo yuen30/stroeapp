@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Stocks\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -95,6 +96,9 @@ class StocksTable
                     ->native(false),
             ])
             ->recordActions([
+                ViewAction::make()
+                    ->label('ดู')
+                    ->icon('heroicon-o-eye'),
                 EditAction::make()
                     ->label('แก้ไข')
                     ->icon('heroicon-o-pencil-square'),

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\SaleOrders;
 use App\Filament\Resources\SaleOrders\Pages\CreateSaleOrder;
 use App\Filament\Resources\SaleOrders\Pages\EditSaleOrder;
 use App\Filament\Resources\SaleOrders\Pages\ListSaleOrders;
+use App\Filament\Resources\SaleOrders\Pages\ViewSaleOrder;
 use App\Filament\Resources\SaleOrders\Schemas\SaleOrderForm;
 use App\Filament\Resources\SaleOrders\Tables\SaleOrdersTable;
 use App\Models\SaleOrder;
@@ -13,6 +14,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Filament\Infolists\Infolist;
+use App\Filament\Resources\SaleOrders\Schemas\SaleOrderInfolist;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -42,6 +45,11 @@ class SaleOrderResource extends Resource
         return SaleOrdersTable::configure($table);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return SaleOrderInfolist::configure($schema);
+    }
+
     public static function getRelations(): array
     {
         return [
@@ -54,6 +62,7 @@ class SaleOrderResource extends Resource
         return [
             'index' => ListSaleOrders::route('/'),
             'create' => CreateSaleOrder::route('/create'),
+            'view' => ViewSaleOrder::route('/{record}'),
             'edit' => EditSaleOrder::route('/{record}/edit'),
         ];
     }

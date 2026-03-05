@@ -7,25 +7,27 @@ use App\Enums\StockMovementType;
 use App\Models\GoodsReceipt;
 use App\Models\Stock;
 use App\Models\StockMovement;
+use App\Services\DocumentNumberService;
 
 class GoodsReceiptObserver
 {
+    public function __construct(
+        private DocumentNumberService $documentNumberService
+    ) {}
+
+    /**
+     * Handle the GoodsReceipt "creating" event.
+     * สร้างเลขที่ใบรับสินค้าอัตโนมัติผ่าน DocumentNumberService
+     */
     public function creating(GoodsReceipt $goodsReceipt): void
     {
-        // Auto-generate receipt_number
+        // สร้างเลขที่เอกสารอัตโนมัติถ้ายังไม่มี
         if (empty($goodsReceipt->receipt_number)) {
-            $lastReceipt = GoodsReceipt::withTrashed()
-                ->where('receipt_number', 'like', 'GR-%')
-                ->orderBy('receipt_number', 'desc')
-                ->first();
-
-            if ($lastReceipt && preg_match('/GR-(\d+)/', $lastReceipt->receipt_number, $matches)) {
-                $nextNumber = intval($matches[1]) + 1;
-            } else {
-                $nextNumber = 1;
-            }
-
-            $goodsReceipt->receipt_number = 'GR-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+            $goodsReceipt->receipt_number = $this->documentNumberService->generate(
+                'GR',
+                $goodsReceipt->company_id,
+                $goodsReceipt->branch_id
+            );
         }
     }
 

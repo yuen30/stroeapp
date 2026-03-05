@@ -5,12 +5,14 @@ namespace App\Filament\Resources\TaxInvoices;
 use App\Filament\Resources\TaxInvoices\Pages\CreateTaxInvoice;
 use App\Filament\Resources\TaxInvoices\Pages\EditTaxInvoice;
 use App\Filament\Resources\TaxInvoices\Pages\ListTaxInvoices;
+use App\Filament\Resources\TaxInvoices\Pages\ViewTaxInvoice;
 use App\Filament\Resources\TaxInvoices\Schemas\TaxInvoiceForm;
 use App\Filament\Resources\TaxInvoices\Tables\TaxInvoicesTable;
 use App\Models\TaxInvoice;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use App\Filament\Resources\TaxInvoices\Schemas\TaxInvoiceInfolist;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -42,6 +44,11 @@ class TaxInvoiceResource extends Resource
         return TaxInvoicesTable::configure($table);
     }
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return TaxInvoiceInfolist::configure($schema);
+    }
+
     public static function getRelations(): array
     {
         return [
@@ -54,6 +61,7 @@ class TaxInvoiceResource extends Resource
         return [
             'index' => ListTaxInvoices::route('/'),
             'create' => CreateTaxInvoice::route('/create'),
+            'view' => ViewTaxInvoice::route('/{record}'),
             'edit' => EditTaxInvoice::route('/{record}/edit'),
         ];
     }
