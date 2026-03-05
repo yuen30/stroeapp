@@ -13,6 +13,7 @@ class CreateSaleOrder extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['created_by'] = auth()->id() ?? 'system';
+        $data['status'] = 'draft';  // บังคับให้เป็น draft เสมอ
         return $data;
     }
 
@@ -31,6 +32,6 @@ class CreateSaleOrder extends CreateRecord
 
     protected function getRedirectUrl(): string
     {
-        return $this->previousUrl ?? $this->getResource()::getUrl('index');
+        return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
     }
 }

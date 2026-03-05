@@ -83,12 +83,97 @@ class DatabaseSeeder extends Seeder
             'tel' => '02-386-2000'
         ]);
 
-        $customer1 = Customer::updateOrCreate([
-            'company_id' => $company->id,
-            'name' => 'อู่ขจรเจริญยนต์',
-            'code' => 'CUS-001',
-            'tel' => '081-222-3333'
-        ]);
+        // สร้างลูกค้าหลายรายการ พร้อมเงื่อนไขการชำระเงินที่แตกต่างกัน
+        $customers = [
+            [
+                'name' => 'อู่ขจรเจริญยนต์',
+                'code' => 'CUS-001',
+                'tel' => '081-222-3333',
+                'address_0' => '456 ถ.พระราม 2 สมุทรสาคร',
+                'tax_id' => '0105566677788',
+                'credit_days' => 0,  // เงินสด
+                'credit_limit' => 0,
+                'is_head_office' => true,
+            ],
+            [
+                'name' => 'บริษัท ศรีสมบูรณ์ ออโต้พาร์ท จำกัด',
+                'code' => 'CUS-002',
+                'tel' => '02-555-6666',
+                'address_0' => '789 ถ.รัชดาภิเษก กรุงเทพฯ',
+                'tax_id' => '0105577788899',
+                'credit_days' => 7,  // เครดิต 7 วัน
+                'credit_limit' => 50000,
+                'is_head_office' => true,
+            ],
+            [
+                'name' => 'ห้างหุ้นส่วนจำกัด วิชัยการช่าง',
+                'code' => 'CUS-003',
+                'tel' => '089-333-4444',
+                'address_0' => '321 ถ.บางนา-ตราด กรุงเทพฯ',
+                'tax_id' => '0105588899900',
+                'credit_days' => 15,  // เครดิต 15 วัน
+                'credit_limit' => 100000,
+                'is_head_office' => true,
+            ],
+            [
+                'name' => 'อู่ประชาชื่น',
+                'code' => 'CUS-004',
+                'tel' => '092-444-5555',
+                'address_0' => '654 ถ.เพชรบุรี กรุงเทพฯ',
+                'credit_days' => 0,  // เงินสด
+                'credit_limit' => 0,
+                'is_head_office' => true,
+            ],
+            [
+                'name' => 'บริษัท มหานครออโต้ จำกัด',
+                'code' => 'CUS-005',
+                'tel' => '02-777-8888',
+                'address_0' => '987 ถ.ลาดพร้าว กรุงเทพฯ',
+                'tax_id' => '0105599900011',
+                'credit_days' => 30,  // เครดิต 30 วัน
+                'credit_limit' => 200000,
+                'is_head_office' => true,
+            ],
+            [
+                'name' => 'ห้างหุ้นส่วนจำกัด สุขสันต์การช่าง',
+                'code' => 'CUS-006',
+                'tel' => '088-666-7777',
+                'address_0' => '147 ถ.พระราม 3 กรุงเทพฯ',
+                'tax_id' => '0105500011122',
+                'credit_days' => 45,  // เครดิต 45 วัน
+                'credit_limit' => 150000,
+                'is_head_office' => true,
+            ],
+            [
+                'name' => 'อู่เจริญศิลป์',
+                'code' => 'CUS-007',
+                'tel' => '095-888-9999',
+                'address_0' => '258 ถ.สุขุมวิท กรุงเทพฯ',
+                'credit_days' => 0,  // เงินสด
+                'credit_limit' => 0,
+                'is_head_office' => true,
+            ],
+            [
+                'name' => 'บริษัท ไทยออโต้ซัพพลาย จำกัด',
+                'code' => 'CUS-008',
+                'tel' => '02-999-0000',
+                'address_0' => '369 ถ.วิภาวดีรังสิต กรุงเทพฯ',
+                'tax_id' => '0105511122233',
+                'credit_days' => 60,  // เครดิต 60 วัน
+                'credit_limit' => 300000,
+                'is_head_office' => true,
+            ],
+        ];
+
+        foreach ($customers as $customerData) {
+            Customer::updateOrCreate(
+                [
+                    'company_id' => $company->id,
+                    'code' => $customerData['code'],
+                ],
+                $customerData + ['company_id' => $company->id]
+            );
+        }
 
         // 5. Create Products
         $products = [

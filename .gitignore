@@ -10,6 +10,7 @@
 /.nova
 /.phpunit.cache
 /.vscode
+/.kiro
 /.zed
 /auth.json
 /node_modules
@@ -27,3 +28,4 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 docs/
+.kiro

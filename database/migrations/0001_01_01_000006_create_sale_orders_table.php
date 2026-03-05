@@ -8,8 +8,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -35,6 +34,7 @@ return new class extends Migration
             $table->decimal('vat_amount', 15, 2)->default(0);
             $table->decimal('total_amount', 15, 2)->default(0);
             $table->text('notes')->nullable();
+            $table->json('attachments')->nullable();  // ไฟล์แนบ
             $table->softDeletes();
             $table->timestamps();
         });

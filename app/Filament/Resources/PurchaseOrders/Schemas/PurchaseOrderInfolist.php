@@ -163,21 +163,22 @@ class PurchaseOrderInfolist
                                             ->color('warning')
                                             ->visible(fn($record): bool => $record->status->value === 'draft')
                                             ->form([
-                                                \Filament\Schemas\Components\Grid::make(4)
+                                                \Filament\Schemas\Components\Grid::make(3)
                                                     ->schema([
                                                         \Filament\Forms\Components\Select::make('product_id')
                                                             ->label('สินค้า')
-                                                            ->relationship('product', 'name')
+                                                            ->options(\App\Models\Product::pluck('name', 'id'))
                                                             ->required()
                                                             ->searchable()
                                                             ->preload()
                                                             ->native(false)
                                                             ->disabled()
-                                                            ->columnSpan(2),
+                                                            ->columnSpanFull(),
                                                         \Filament\Forms\Components\Textarea::make('description')
                                                             ->label('รายละเอียด')
                                                             ->rows(2)
-                                                            ->columnSpan(2),
+                                                            ->columnSpanFull()
+                                                            ->columnStart(1),
                                                         \Filament\Forms\Components\TextInput::make('quantity')
                                                             ->label('จำนวน')
                                                             ->required()
@@ -206,7 +207,7 @@ class PurchaseOrderInfolist
                                                 'unit_price' => PurchaseOrderItem::find($state)?->unit_price,
                                                 'discount' => PurchaseOrderItem::find($state)?->discount,
                                             ]))
-                                            ->action(function (array $data, $state) {
+                                            ->action(function (array $data, $state, $livewire) {
                                                 $item = PurchaseOrderItem::find($state);
                                                 if ($item) {
                                                     $totalPrice = ($data['unit_price'] * $data['quantity']) - ($data['discount'] ?? 0);
@@ -223,6 +224,9 @@ class PurchaseOrderInfolist
                                                         ->success()
                                                         ->title('แก้ไขสินค้าสำเร็จ')
                                                         ->send();
+
+                                                    // Refresh the record
+                                                    $livewire->record->refresh();
                                                 }
                                             })
                                     )
@@ -236,7 +240,7 @@ class PurchaseOrderInfolist
                                             ->requiresConfirmation()
                                             ->modalHeading('ลบสินค้า')
                                             ->modalDescription('คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?')
-                                            ->action(function ($state) {
+                                            ->action(function ($state, $livewire) {
                                                 $item = PurchaseOrderItem::find($state);
                                                 if ($item) {
                                                     $item->delete();
@@ -245,6 +249,9 @@ class PurchaseOrderInfolist
                                                         ->success()
                                                         ->title('ลบสินค้าสำเร็จ')
                                                         ->send();
+
+                                                    // Refresh the record
+                                                    $livewire->record->refresh();
                                                 }
                                             })
                                     ),

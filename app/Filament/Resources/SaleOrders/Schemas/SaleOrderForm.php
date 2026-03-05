@@ -8,8 +8,8 @@ use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
@@ -25,10 +25,9 @@ class SaleOrderForm
                     ->icon(Heroicon::ExclamationTriangle)
                     ->visible(fn($context) => $context === 'edit')
                     ->columnSpanFull(),
-
                 \Filament\Schemas\Components\Section::make('ข้อมูลทั่วไป')
                     ->description('ข้อมูลพื้นฐานของใบสั่งขาย')
-                    ->icon(\Filament\Support\Icons\Heroicon::DocumentText)
+                    ->icon(Heroicon::DocumentText)
                     ->collapsible()
                     ->schema([
                         DatePicker::make('order_date')
@@ -52,6 +51,21 @@ class SaleOrderForm
                             ->preload()
                             ->native(false)
                             ->placeholder('เลือกลูกค้า')
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                if ($state) {
+                                    $customer = \App\Models\Customer::find($state);
+                                    if ($customer) {
+                                        // ดึงข้อมูลจากลูกค้ามาแสดงตามที่มี
+                                        $set('term_of_payment', $customer->credit_days ?? null);
+
+                                        // คำนวณวันครบกำหนดถ้ามี credit_days
+                                        if ($customer->credit_days > 0) {
+                                            $set('due_date', now()->addDays($customer->credit_days)->format('Y-m-d'));
+                                        }
+                                    }
+                                }
+                            })
                             ->createOptionForm([
                                 TextInput::make('name')
                                     ->label('ชื่อลูกค้า')
@@ -75,6 +89,80 @@ class SaleOrderForm
                             ])
                             ->createOptionModalHeading('เพิ่มลูกค้าใหม่')
                             ->columnSpan(2),
+                        \Filament\Forms\Components\Placeholder::make('credit_info')
+                            ->label('ข้อมูลวงเงินเครดิต')
+                            ->content(function (callable $get) {
+                                $customerId = $get('customer_id');
+                                if (!$customerId) {
+                                    return 'กรุณาเลือกลูกค้าก่อน';
+                                }
+
+                                $customer = \App\Models\Customer::find($customerId);
+                                if (!$customer) {
+                                    return '-';
+                                }
+
+                                // ถ้าไม่มีวงเงินเครดิต (เงินสด)
+                                if ($customer->credit_limit <= 0) {
+                                    return new \Illuminate\Support\HtmlString('
+                                        <div class="text-sm">
+                                            <div class="flex items-center gap-2 text-success-600 dark:text-success-400">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                <span class="font-semibold">ลูกค้าเงินสด</span>
+                                            </div>
+                                        </div>
+                                    ');
+                                }
+
+                                $outstanding = $customer->getTotalOutstandingAmount();
+                                $remaining = $customer->getRemainingCreditLimit();
+                                $percentage = $customer->getCreditUsagePercentage();
+
+                                $statusColor = match (true) {
+                                    $percentage >= 90 => 'danger',
+                                    $percentage >= 70 => 'warning',
+                                    default => 'success',
+                                };
+
+                                return new \Illuminate\Support\HtmlString('
+                                    <div class="space-y-2 text-sm">
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <span class="text-gray-500 dark:text-gray-400">วงเงินทั้งหมด:</span>
+                                                <span class="font-semibold ml-1">' . number_format($customer->credit_limit, 2) . ' ฿</span>
+                                            </div>
+                                            <div>
+                                                <span class="text-gray-500 dark:text-gray-400">ยอดค้างชำระ:</span>
+                                                <span class="font-semibold ml-1">' . number_format($outstanding, 2) . ' ฿</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between items-center mb-1">
+                                                <span class="text-gray-500 dark:text-gray-400">วงเงินคงเหลือ:</span>
+                                                <span class="font-bold text-' . $statusColor . '-600 dark:text-' . $statusColor . '-400">' . number_format($remaining, 2) . ' ฿</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                                                <div class="bg-' . $statusColor . '-600 h-2 rounded-full" style="width: ' . $percentage . '%"></div>
+                                            </div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                ใช้ไปแล้ว ' . number_format($percentage, 1) . '%
+                                            </div>
+                                        </div>
+                                    </div>
+                                ');
+                            })
+                            ->visible(fn(callable $get) => $get('customer_id') !== null)
+                            ->columnSpan(2),
+                        Select::make('salesman_id')
+                            ->label('พนักงานขาย')
+                            ->relationship('salesman', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->native(false)
+                            ->placeholder('เลือกพนักงานขาย')
+                            ->default(fn() => auth()->user()?->id),
                         Select::make('company_id')
                             ->label('บริษัท')
                             ->relationship('company', 'name')
@@ -96,22 +184,12 @@ class SaleOrderForm
                             ->placeholder('เลือกสาขา')
                             ->default(fn() => auth()->user()?->branch_id)
                             ->columnSpan(1),
-                        Select::make('salesman_id')
-                            ->label('พนักงานขาย')
-                            ->relationship('salesman', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->native(false)
-                            ->placeholder('เลือกพนักงานขาย')
-                            ->default(fn() => auth()->user()?->id)
-                            ->columnSpan(2),
                     ])
                     ->columns(2)
                     ->columnSpanFull(),
-
                 \Filament\Schemas\Components\Section::make('รายการสินค้า')
                     ->description('เพิ่มรายการสินค้าลงในใบสั่งขาย กำหนดจำนวนและราคา')
-                    ->icon(\Filament\Support\Icons\Heroicon::ShoppingCart)
+                    ->icon(Heroicon::ShoppingCart)
                     ->schema([
                         \Filament\Forms\Components\Repeater::make('items')
                             ->relationship()
@@ -179,12 +257,13 @@ class SaleOrderForm
                             ->addActionLabel('เพิ่มรายการสินค้า')
                             ->defaultItems(1)
                     ])
+                    ->visibleOn('edit')
                     ->columnSpanFull(),
-
                 \Filament\Schemas\Components\Section::make('สรุปยอดเงิน')
                     ->description('ยอดยกมา หักส่วนลด และคำนวณภาษี')
-                    ->icon(\Filament\Support\Icons\Heroicon::Calculator)
+                    ->icon(Heroicon::Calculator)
                     ->collapsible()
+                    ->visibleOn('edit')
                     ->schema([
                         TextInput::make('subtotal')
                             ->label('มูลค่าสินค้า (Subtotal)')
@@ -228,17 +307,16 @@ class SaleOrderForm
                     ])
                     ->columns(2)
                     ->columnSpanFull(),
-
                 \Filament\Schemas\Components\Section::make('ข้อมูลสถานะและเพิ่มเติม')
                     ->description('ข้อมูลการอ้างอิงและสถานะเอกสาร')
-                    ->icon(\Filament\Support\Icons\Heroicon::InformationCircle)
+                    ->icon(Heroicon::InformationCircle)
                     ->collapsible()
                     ->schema([
                         TextInput::make('invoice_number')
                             ->label('เลขที่เอกสาร')
-                            ->placeholder('ระบบจะสร้างอัตโนมัติ')
-                            ->disabled()
-                            ->dehydrated(false)
+                            ->placeholder('ถ้าไม่ระบุ ระบบจะสร้างอัตโนมัติ')
+                            ->maxLength(50)
+                            ->unique(ignoreRecord: true)
                             ->visibleOn('create')
                             ->columnSpan(1),
                         TextInput::make('invoice_number')
@@ -261,6 +339,7 @@ class SaleOrderForm
                         Select::make('payment_method')
                             ->label('ช่องทางการชำระเงิน')
                             ->options(PaymentMethod::class)
+                            ->required()
                             ->native(false)
                             ->columnSpan(1),
                         Select::make('status')
@@ -269,6 +348,7 @@ class SaleOrderForm
                             ->default('draft')
                             ->required()
                             ->native(false)
+                            ->visibleOn('edit')
                             ->columnSpan(1),
                         Select::make('payment_status')
                             ->label('สถานะการชำระเงิน')

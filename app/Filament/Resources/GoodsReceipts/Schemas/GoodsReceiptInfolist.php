@@ -143,28 +143,50 @@ class GoodsReceiptInfolist
                                                         \Filament\Forms\Components\TextInput::make('product_name')
                                                             ->label('สินค้าจากใบสั่งซื้อ')
                                                             ->disabled()
-                                                            ->columnSpan(2),
+                                                            ->columnSpanFull(),
                                                         \Filament\Forms\Components\Textarea::make('description')
                                                             ->label('รายละเอียด')
                                                             ->rows(2)
-                                                            ->columnSpan(2),
+                                                            ->columnSpanFull(),
                                                         \Filament\Forms\Components\TextInput::make('quantity')
                                                             ->label('จำนวนที่รับ')
                                                             ->required()
                                                             ->numeric()
                                                             ->minValue(1)
                                                             ->suffix('หน่วย')
+                                                            ->helperText(function ($state, callable $get) {
+                                                                $item = GoodsReceiptItem::find($get('../../item_id'));
+                                                                $maxQty = $item?->purchaseOrderItem?->quantity;
+                                                                return $maxQty ? "จำนวนสูงสุดที่สั่งซื้อ: {$maxQty} หน่วย" : null;
+                                                            })
                                                             ->columnSpan(1),
                                                     ]),
                                             ])
-                                            ->mountUsing(fn($form, $state) => $form->fill([
-                                                'product_name' => GoodsReceiptItem::find($state)?->product->name ?? '-',
-                                                'description' => GoodsReceiptItem::find($state)?->description,
-                                                'quantity' => GoodsReceiptItem::find($state)?->quantity,
-                                            ]))
-                                            ->action(function (array $data, $state) {
+                                            ->mountUsing(function ($form, $state) {
+                                                $item = GoodsReceiptItem::find($state);
+                                                $maxQuantity = $item?->purchaseOrderItem?->quantity ?? 999999;
+
+                                                $form->fill([
+                                                    'product_name' => $item?->product->name ?? '-',
+                                                    'description' => $item?->description,
+                                                    'quantity' => $item?->quantity,
+                                                    'max_quantity' => $maxQuantity,
+                                                ]);
+                                            })
+                                            ->action(function (array $data, $state, $livewire) {
                                                 $item = GoodsReceiptItem::find($state);
                                                 if ($item) {
+                                                    // ตรวจสอบว่าจำนวนที่รับไม่เกินจำนวนที่สั่งใน PO
+                                                    $purchaseOrderItem = $item->purchaseOrderItem;
+                                                    if ($purchaseOrderItem && $data['quantity'] > $purchaseOrderItem->quantity) {
+                                                        \Filament\Notifications\Notification::make()
+                                                            ->danger()
+                                                            ->title('ไม่สามารถรับสินค้าได้')
+                                                            ->body('จำนวนที่รับ (' . $data['quantity'] . ') เกินจำนวนที่สั่งซื้อ (' . $purchaseOrderItem->quantity . ')')
+                                                            ->send();
+                                                        return;
+                                                    }
+
                                                     $item->update([
                                                         'description' => $data['description'] ?? null,
                                                         'quantity' => $data['quantity'],
@@ -174,6 +196,9 @@ class GoodsReceiptInfolist
                                                         ->success()
                                                         ->title('แก้ไขสินค้าสำเร็จ')
                                                         ->send();
+
+                                                    // Refresh the record
+                                                    $livewire->record->refresh();
                                                 }
                                             })
                                     )
@@ -187,7 +212,7 @@ class GoodsReceiptInfolist
                                             ->requiresConfirmation()
                                             ->modalHeading('ลบสินค้า')
                                             ->modalDescription('คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?')
-                                            ->action(function ($state) {
+                                            ->action(function ($state, $livewire) {
                                                 $item = GoodsReceiptItem::find($state);
                                                 if ($item) {
                                                     $item->delete();
@@ -196,6 +221,9 @@ class GoodsReceiptInfolist
                                                         ->success()
                                                         ->title('ลบสินค้าสำเร็จ')
                                                         ->send();
+
+                                                    // Refresh the record
+                                                    $livewire->record->refresh();
                                                 }
                                             })
                                     ),

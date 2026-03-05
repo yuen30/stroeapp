@@ -3,9 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Customer extends Model
@@ -57,5 +57,49 @@ class Customer extends Model
     public function saleOrders(): HasMany
     {
         return $this->hasMany(SaleOrder::class);
+    }
+
+    // คำนวณยอดค้างชำระทั้งหมด (ใบสั่งขายที่ยังไม่ชำระเงิน)
+    public function getTotalOutstandingAmount(): float
+    {
+        return $this
+            ->saleOrders()
+            ->whereIn('status', ['confirmed', 'partially_received'])
+            ->whereIn('payment_status', ['unpaid', 'partial'])
+            ->sum('total_amount');
+    }
+
+    // คำนวณวงเงินคงเหลือ
+    public function getRemainingCreditLimit(): float
+    {
+        if ($this->credit_limit <= 0) {
+            return 0;
+        }
+
+        $outstanding = $this->getTotalOutstandingAmount();
+        return max(0, $this->credit_limit - $outstanding);
+    }
+
+    // ตรวจสอบว่าสามารถสร้างใบสั่งขายได้หรือไม่
+    public function canCreateSaleOrder(float $amount): bool
+    {
+        // ถ้าไม่มีวงเงินเครดิต (เงินสด) ให้สร้างได้เสมอ
+        if ($this->credit_limit <= 0) {
+            return true;
+        }
+
+        $remaining = $this->getRemainingCreditLimit();
+        return $amount <= $remaining;
+    }
+
+    // คำนวณเปอร์เซ็นต์การใช้วงเงิน
+    public function getCreditUsagePercentage(): float
+    {
+        if ($this->credit_limit <= 0) {
+            return 0;
+        }
+
+        $outstanding = $this->getTotalOutstandingAmount();
+        return min(100, ($outstanding / $this->credit_limit) * 100);
     }
 }

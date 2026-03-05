@@ -7,17 +7,16 @@ use App\Filament\Resources\SaleOrders\Pages\EditSaleOrder;
 use App\Filament\Resources\SaleOrders\Pages\ListSaleOrders;
 use App\Filament\Resources\SaleOrders\Pages\ViewSaleOrder;
 use App\Filament\Resources\SaleOrders\Schemas\SaleOrderForm;
+use App\Filament\Resources\SaleOrders\Schemas\SaleOrderInfolist;
 use App\Filament\Resources\SaleOrders\Tables\SaleOrdersTable;
 use App\Models\SaleOrder;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
-use Filament\Infolists\Infolist;
-use App\Filament\Resources\SaleOrders\Schemas\SaleOrderInfolist;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use BackedEnum;
 
 class SaleOrderResource extends Resource
 {

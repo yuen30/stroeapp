@@ -20,7 +20,7 @@ class SaleOrdersTable
         return $table
             ->columns([
                 TextColumn::make('row_id')->label('#')->rowIndex()->alignCenter(),
-                TextColumn::make('invoice_number')->label('เลขที่ใบกำกับภาษี')->searchable()->sortable()->weight('medium')->icon('heroicon-o-document-text')->iconColor('primary')->copyable(),
+                TextColumn::make('invoice_number')->label('เลขที่ใบกำกับภาษี')->searchable()->sortable()->weight('medium'),
                 TextColumn::make('customer.name')->label('ลูกค้า')->searchable()->sortable()->icon('heroicon-o-user-group')->iconColor('info'),
                 TextColumn::make('order_date')->label('วันที่สั่งซื้อ')->date('d/m/Y')->sortable()->icon('heroicon-o-calendar'),
                 TextColumn::make('status')->label('สถานะ')->badge()->sortable()->alignCenter(),

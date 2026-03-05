@@ -33,7 +33,7 @@ class ViewPurchaseOrder extends ViewRecord
                         ->schema([
                             \Filament\Forms\Components\Select::make('product_id')
                                 ->label('สินค้า')
-                                ->relationship('items.product', 'name')
+                                ->options(\App\Models\Product::pluck('name', 'id'))
                                 ->required()
                                 ->searchable()
                                 ->preload()
