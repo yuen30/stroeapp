@@ -11,6 +11,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 class SaleOrderForm
 {
@@ -21,7 +22,7 @@ class SaleOrderForm
                 \Filament\Schemas\Components\Callout::make('คำเตือน')
                     ->description('การแก้ไขใบสั่งขายจะส่งผลต่อสต็อกสินค้าและรายการเอกสารที่เกี่ยวข้อง')
                     ->warning()
-                    ->icon(\Filament\Support\Icons\Heroicon::ExclamationTriangle)
+                    ->icon(Heroicon::ExclamationTriangle)
                     ->visible(fn($context) => $context === 'edit')
                     ->columnSpanFull(),
 
