@@ -4,13 +4,14 @@ namespace App\Filament\Resources\TaxInvoices\Pages;
 
 use App\Filament\Resources\TaxInvoices\TaxInvoiceResource;
 use App\Models\SaleOrder;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateTaxInvoice extends CreateRecord
 {
     protected static string $resource = TaxInvoiceResource::class;
 
-    protected function afterFill(): void
+    protected function mutateFormDataBeforeFill(array $data): array
     {
         // ดึง sale_order_id จาก URL query parameter
         $saleOrderId = request()->query('sale_order_id');
@@ -20,8 +21,37 @@ class CreateTaxInvoice extends CreateRecord
                 ->find($saleOrderId);
 
             if ($saleOrder) {
+                // ตรวจสอบว่า Sale Order ต้องเป็นสถานะ Confirmed
+                if ($saleOrder->status->value !== 'confirmed') {
+                    Notification::make()
+                        ->warning()
+                        ->title('ไม่สามารถสร้างใบกำกับภาษีได้')
+                        ->body('ใบสั่งขายต้องอยู่ในสถานะ "ยืนยันแล้ว" เท่านั้น')
+                        ->persistent()
+                        ->send();
+
+                    $this->redirect($this->getResource()::getUrl('index'));
+                    return $data;
+                }
+
+                // ตรวจสอบว่ามีใบกำกับภาษีสำหรับ Sale Order นี้แล้วหรือไม่
+                if ($saleOrder->taxInvoices()->exists()) {
+                    $existingInvoice = $saleOrder->taxInvoices()->first();
+
+                    Notification::make()
+                        ->warning()
+                        ->title('มีใบกำกับภาษีอยู่แล้ว')
+                        ->body("ใบสั่งขายนี้มีใบกำกับภาษีเลขที่ {$existingInvoice->tax_invoice_number} อยู่แล้ว")
+                        ->persistent()
+                        ->send();
+
+                    $this->redirect(route('filament.store.resources.tax-invoices.view', ['record' => $existingInvoice->id]));
+                    return $data;
+                }
+
                 // Auto-fill ข้อมูลจาก Sale Order
-                $this->form->fill([
+                $data = [
+                    ...$data,
                     'sale_order_id' => $saleOrder->id,
                     'company_id' => $saleOrder->company_id,
                     'branch_id' => $saleOrder->branch_id,
@@ -45,9 +75,11 @@ class CreateTaxInvoice extends CreateRecord
                     'payment_status' => $saleOrder->payment_status->value,
                     // วันที่เอกสาร
                     'document_date' => now(),
-                ]);
+                ];
             }
         }
+
+        return $data;
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array
@@ -55,6 +87,15 @@ class CreateTaxInvoice extends CreateRecord
         $data['created_by'] = auth()->id() ?? 'system';
 
         return $data;
+    }
+
+    protected function afterCreate(): void
+    {
+        Notification::make()
+            ->success()
+            ->title('สร้างใบกำกับภาษีสำเร็จ')
+            ->body("ใบกำกับภาษีเลขที่ {$this->record->tax_invoice_number} ถูกสร้างเรียบร้อยแล้ว")
+            ->send();
     }
 
     protected function getHeaderActions(): array

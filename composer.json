@@ -18,6 +18,7 @@
         "leek/filament-dicebear": "^1.1",
         "marcelweidum/filament-expiration-notice": "^1.0",
         "openplain/filament-shadcn-theme": "^1.1",
+        "predis/predis": "^3.4",
         "pxlrbt/filament-excel": "^3.6",
         "spatie/laravel-activitylog": "^4.12"
     },

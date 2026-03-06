@@ -7,7 +7,6 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Components\Callout;
 
 class EditTaxInvoice extends EditRecord
 {
@@ -56,16 +55,6 @@ class EditTaxInvoice extends EditRecord
     protected function getFormActions(): array
     {
         return [];
-    }
-
-    public function getHeaderWidgets(): array
-    {
-        return [
-            Callout::make('⚠️ คำเตือน')
-                ->description('การแก้ไขใบกำกับภาษีอาจส่งผลต่อการรายงานภาษี กรุณาตรวจสอบข้อมูลให้ถูกต้องตามกฎหมายก่อนบันทึก')
-                ->warning()
-                ->columnSpanFull(),
-        ];
     }
 
     protected function getRedirectUrl(): string

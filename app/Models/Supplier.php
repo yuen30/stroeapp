@@ -2,15 +2,19 @@
 
 namespace App\Models;
 
+use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
+use Leek\FilamentDiceBear\Concerns\HasDiceBearAvatar;
+use Leek\FilamentDiceBear\Enums\DiceBearStyle;
 
-class Supplier extends Model
+class Supplier extends Model implements HasAvatar
 {
-    use HasUlids, SoftDeletes;
+    use HasUlids, SoftDeletes, HasDiceBearAvatar;
 
     protected $fillable = [
         'company_id',
@@ -44,5 +48,26 @@ class Supplier extends Model
     public function purchaseOrders(): HasMany
     {
         return $this->hasMany(PurchaseOrder::class);
+    }
+
+    protected function getCustomAvatarUrl(): ?string
+    {
+        if ($this->photo_path) {
+            return Storage::url($this->photo_path);
+        }
+
+        return null;  // Falls back to DiceBear
+    }
+
+    public function dicebearAvatarStyle(): DiceBearStyle
+    {
+        return DiceBearStyle::Initials;
+    }
+
+    public function dicebearAvatarOptions(): array
+    {
+        return [
+            'seed' => $this->name,
+        ];
     }
 }

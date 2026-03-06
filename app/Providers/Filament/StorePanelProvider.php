@@ -55,8 +55,16 @@ class StorePanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                // Dashboard Widgets
+                \App\Filament\Widgets\StatsOverviewWidget::class,
+                \App\Filament\Widgets\SalesChartWidget::class,
+                \App\Filament\Widgets\TopProductsChartWidget::class,
+                \App\Filament\Widgets\StockStatusChartWidget::class,
+                \App\Filament\Widgets\PaymentStatusChartWidget::class,
+                \App\Filament\Widgets\RecentSaleOrdersWidget::class,
+                \App\Filament\Widgets\LowStockProductsWidget::class,
+                \App\Filament\Widgets\PendingPurchaseOrdersWidget::class,
+                \App\Filament\Widgets\OutstandingPaymentsWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

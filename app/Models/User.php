@@ -102,64 +102,18 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             return Storage::url($this->profile_photo_path);
         }
 
-        $imgs = [
-            '/avatars/bear.png',
-            '/avatars/dog.png',
-            '/avatars/fox1.png',
-            '/avatars/kitty.png',
-            '/avatars/polar-bear.png',
-            '/avatars/tiger.png',
-            '/avatars/beaver.png',
-            '/avatars/dog1.png',
-            '/avatars/frog-.png',
-            '/avatars/koala.png',
-            '/avatars/polar-bear1.png',
-            '/avatars/walrus.png',
-            '/avatars/cat1.png',
-            '/avatars/dog2.png',
-            '/avatars/frog.png',
-            '/avatars/lion.png',
-            '/avatars/puffer-fish.png',
-            '/avatars/weasel.png',
-            '/avatars/chick.png',
-            '/avatars/dragon.png',
-            '/avatars/giraffe.png',
-            '/avatars/meerkat.png',
-            '/avatars/rabbit.png',
-            '/avatars/wild-boar.png',
-            '/avatars/chicken.png',
-            '/avatars/duck.png',
-            '/avatars/gorilla.png',
-            '/avatars/monkey.png',
-            '/avatars/rabbit1.png',
-            '/avatars/wolf.png',
-            '/avatars/cool-.png',
-            '/avatars/eagle.png',
-            '/avatars/hare.png',
-            '/avatars/owl.png',
-            '/avatars/rat.png',
-            '/avatars/cool.png',
-            '/avatars/elephant.png',
-            '/avatars/hen.png',
-            '/avatars/panda.png',
-            '/avatars/sea-lion.png',
-            '/avatars/cow.png',
-            '/avatars/error.png',
-            '/avatars/hippopotamus.png',
-            '/avatars/panda1.png',
-            '/avatars/shark.png',
-            '/avatars/dog-house.png',
-            '/avatars/fox.png',
-            '/avatars/horse.png',
-            '/avatars/pig.png',
-            '/avatars/snake.png',
-        ];
-
-        return $imgs[array_rand($imgs)];
+        return null;  // Falls back to DiceBear
     }
 
     public function dicebearAvatarStyle(): DiceBearStyle
     {
         return DiceBearStyle::Adventurer;
+    }
+
+    public function dicebearAvatarOptions(): array
+    {
+        return [
+            'seed' => $this->name ?? $this->email,
+        ];
     }
 }

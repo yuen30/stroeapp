@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class TaxInvoice extends Model
 {
-    use HasUlids, SoftDeletes;
+    use HasUlids, SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'company_id',
@@ -50,6 +52,26 @@ class TaxInvoice extends Model
             'vat_amount' => 'decimal:2',
             'total_amount' => 'decimal:2',
         ];
+    }
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'tax_invoice_number',
+                'payment_status',
+                'total_amount',
+                'customer_name',
+                'notes',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => match ($eventName) {
+                'created' => 'สร้างใบกำกับภาษี',
+                'updated' => 'แก้ไขใบกำกับภาษี',
+                'deleted' => 'ลบใบกำกับภาษี',
+                default => $eventName,
+            });
     }
 
     public function company(): BelongsTo

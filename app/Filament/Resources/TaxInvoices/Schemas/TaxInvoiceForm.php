@@ -13,7 +13,6 @@ use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Support\View\Components\ViewComponent;
 
 class TaxInvoiceForm
 {
@@ -21,6 +20,14 @@ class TaxInvoiceForm
     {
         return $schema
             ->components([
+                // Callout คำเตือนสำหรับหน้า Edit
+                Callout::make('edit_warning')
+                    ->visible(fn($livewire) => $livewire instanceof \Filament\Resources\Pages\EditRecord)
+                    ->warning()
+                    ->icon('heroicon-o-exclamation-triangle')
+                    ->heading('⚠️ คำเตือน')
+                    ->description('การแก้ไขใบกำกับภาษีอาจส่งผลต่อการรายงานภาษี กรุณาตรวจสอบข้อมูลให้ถูกต้องตามกฎหมายก่อนบันทึก')
+                    ->columnSpanFull(),
                 // Callout แสดงข้อมูล Sale Order (ถ้ามี)
                 Callout::make('sale_order_info')
                     ->visible(fn($get) => !empty($get('sale_order_id')))
@@ -80,6 +87,7 @@ class TaxInvoiceForm
                                         ->preload()
                                         ->required()
                                         ->disabled(fn($get) => !empty($get('sale_order_id')))
+                                        ->dehydrated()
                                         ->placeholder('เลือกบริษัท')
                                         ->columnSpan(1),
                                     Select::make('branch_id')
@@ -88,6 +96,7 @@ class TaxInvoiceForm
                                         ->searchable()
                                         ->preload()
                                         ->disabled(fn($get) => !empty($get('sale_order_id')))
+                                        ->dehydrated()
                                         ->placeholder('เลือกสาขา')
                                         ->columnSpan(1),
                                     Select::make('customer_id')
@@ -97,6 +106,7 @@ class TaxInvoiceForm
                                         ->preload()
                                         ->required()
                                         ->disabled(fn($get) => !empty($get('sale_order_id')))
+                                        ->dehydrated()
                                         ->placeholder('เลือกลูกค้า')
                                         ->columnSpan(1),
                                     Select::make('sale_order_id')
@@ -105,6 +115,7 @@ class TaxInvoiceForm
                                         ->searchable()
                                         ->preload()
                                         ->disabled(fn($get) => !empty($get('sale_order_id')))
+                                        ->dehydrated()
                                         ->placeholder('เลือกใบสั่งขาย')
                                         ->columnSpan(1),
                                 ]),
@@ -207,7 +218,7 @@ class TaxInvoiceForm
                                         ->prefix('฿')
                                         ->placeholder('0.00')
                                         ->reactive()
-                                        ->afterStateUpdated(fn($state, callable $set, callable $get) => self::calculateTotals($set, $get))
+                                        ->afterStateUpdated(fn(callable $set, callable $get) => self::calculateTotals($set, $get))
                                         ->extraInputAttributes(['class' => 'text-right']),
                                     TextInput::make('vat_rate')
                                         ->label('อัตราภาษีมูลค่าเพิ่ม')
@@ -218,7 +229,7 @@ class TaxInvoiceForm
                                         ->suffix('%')
                                         ->placeholder('7')
                                         ->reactive()
-                                        ->afterStateUpdated(fn($state, callable $set, callable $get) => self::calculateTotals($set, $get))
+                                        ->afterStateUpdated(fn(callable $set, callable $get) => self::calculateTotals($set, $get))
                                         ->extraInputAttributes(['class' => 'text-right']),
                                     TextInput::make('vat_amount')
                                         ->label('ภาษีมูลค่าเพิ่ม')

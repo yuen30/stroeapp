@@ -369,6 +369,10 @@ class ViewSaleOrder extends ViewRecord
                 ->icon(Heroicon::DocumentText)
                 ->color('primary')
                 ->visible(fn(): bool => $this->record->status->value === 'confirmed')
+                ->disabled(fn(): bool => $this->record->taxInvoices()->exists())
+                ->tooltip(fn(): ?string => $this->record->taxInvoices()->exists()
+                    ? 'มีใบกำกับภาษีสำหรับใบสั่งขายนี้แล้ว'
+                    : null)
                 ->url(fn() => route('filament.store.resources.tax-invoices.create', [
                     'sale_order_id' => $this->record->id
                 ])),

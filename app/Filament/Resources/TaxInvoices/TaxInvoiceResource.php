@@ -7,16 +7,16 @@ use App\Filament\Resources\TaxInvoices\Pages\EditTaxInvoice;
 use App\Filament\Resources\TaxInvoices\Pages\ListTaxInvoices;
 use App\Filament\Resources\TaxInvoices\Pages\ViewTaxInvoice;
 use App\Filament\Resources\TaxInvoices\Schemas\TaxInvoiceForm;
+use App\Filament\Resources\TaxInvoices\Schemas\TaxInvoiceInfolist;
 use App\Filament\Resources\TaxInvoices\Tables\TaxInvoicesTable;
 use App\Models\TaxInvoice;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use App\Filament\Resources\TaxInvoices\Schemas\TaxInvoiceInfolist;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use BackedEnum;
 
 class TaxInvoiceResource extends Resource
 {
@@ -32,7 +32,7 @@ class TaxInvoiceResource extends Resource
 
     protected static ?string $pluralModelLabel = 'ใบกำกับภาษี';
 
-    protected static ?string $recordTitleAttribute = 'document_no';
+    protected static ?string $recordTitleAttribute = 'tax_invoice_number';
 
     public static function form(Schema $schema): Schema
     {
