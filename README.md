@@ -8,7 +8,7 @@
 
 ระบบ **Enterprise Auto-Parts Inventory System (Store App)** คือแพลตฟอร์มบริหารจัดการคลังสินค้าสำหรับธุรกิจจัดจำหน่ายอะไหล่ยนต์ ที่ถูกออกแบบและพัฒนามาเพื่อรองรับการดำเนินธุรกิจขนาดกลางจนถึงระดับ **Enterprise** อย่างเต็มรูปแบบ
 
-ระบบมาพร้อมกับโครงสร้างข้อมูลที่ซับซ้อนแต่ยืดหยุ่น เช่น **ระบบตั้งราคาแบบลดหลั่นตามประเภทลูกค้า (Tiered Pricing)**, **ระบบรันเลขเอกสารอัตโนมัติ**, **การรับสินค้าแบบย่อย (Goods Receipt - GR)** และ **การจำแนกเอกสารใบกำกับภาษี (Tax Invoice)** ทั้งหมดดำเนินการผ่านแดชบอร์ดล้ำสมัยที่จัดการง่าย ขับเคลื่อนด้วย **Laravel** และ **Filament PHP**
+ระบบมาพร้อมกับโครงสร้างข้อมูลที่ซับซ้อนแต่ยืดหยุ่น เช่น **ระบบตั้งราคาแบบลดหลั่นตามประเภทลูกค้า (Tiered Pricing)**, **ระบบจองสต็อกสำหรับ Draft Sale Order**, **การรับสินค้าแบบย่อย (Goods Receipt - GR)**, **แดชบอร์ดและรายงาน**, และ **การจำแนกเอกสารใบกำกับภาษี (Tax Invoice)** ทั้งหมดดำเนินการผ่านแผงจัดการที่สร้างด้วย **Laravel** และ **Filament PHP**
 
 ---
 
@@ -31,22 +31,23 @@
 - **Multi-Branch & Company:** รองรับการขยายสาขาในองค์กรรูปแบบ Multi-Tenant / Branch
 - **Automated Stock Management:** ระบบจัดการสต็อกอัตโนมัติผ่าน Laravel Observers
   - รับสินค้า (GR) เพิ่มสต็อกและสร้าง StockMovement อัตโนมัติ
-  - ขายสินค้า (SO) ตัดสต็อกและสร้าง StockMovement อัตโนมัติ
-  - ยกเลิกเอกสาร คืนสต็อกอัตโนมัติ
-  - ตรวจสอบสต็อกเพียงพอก่อนขายอัตโนมัติ
+  - สร้าง Draft Sale Order แล้วจองสต็อกทันทีผ่าน `stock_reservations`
+  - ยืนยัน Sale Order แล้วปลดการจองก่อนตัดสต็อกจริง
+  - ยกเลิกเอกสาร คืนสต็อกหรือปลดการจองอัตโนมัติ
 - **Stock Movement Tracking:** บันทึกการเคลื่อนไหวสต็อกทุกครั้งพร้อม stock_before และ stock_after เพื่อ audit trail
 - **Comprehensive Relations:** ระบบจัดเก็บคู่ค้าซัพพลายเออร์ (Suppliers) และลูกค้า (Customers) ที่เชื่อมโยงไปหาเอกสารซื้อ-ขายได้อย่างง่ายดาย
+- **Dashboard & Reports:** มี dashboard widgets 9 ตัว และหน้ารายงาน low stock / goods receipt ภายใน Filament
 
 ### 📄 4. การจัดการเอกสาร (Document Lifecycles)
 
-- **Automated Document Numbering:** ออกเลขที่เอกสารแบบอัตโนมัติผ่าน DocumentNumberService
+- **Automated Document Numbering:** ออกเลขที่เอกสารผ่าน `document_running_numbers` ร่วมกับ `DocumentObserver`
   - รองรับ Multi-Company และ Multi-Branch
   - ป้องกัน Race Condition ด้วย Database Lock
   - รูปแบบ: `PO2026-0001`, `SO2026-0002`, `GR2026-0003`, `INV2026-0004`
 - **Purchase Order (PO):** สร้างเอกสารสั่งซื้อไปยังซัพพลายเออร์พร้อมเลขที่เอกสารอัตโนมัติ
 - **Goods Receipt (GR):** รองรับรูปแบบเมื่อโรงงานส่งสินค้าไม่ครบตาม PO (Partial Receive) ด้วยระบบการเปิดบิลรับสินค้า
-- **Sale Order (SO):** ใบสั่งขายพร้อมระบบตัดสต็อกอัตโนมัติ
-- **Tax Invoice (INV):** แยกเอกสารใบกำกับภาษีออกจาก Sale Order ทำให้การทำบัญชีคล่องตัว
+- **Sale Order (SO):** ใบสั่งขายที่แยกสถานะ `draft` และ `confirmed` ชัดเจน พร้อมระบบจอง/ตัดสต็อก
+- **Tax Invoice (INV):** แยกเอกสารใบกำกับภาษีออกจาก Sale Order และรองรับ auto-fill จาก Sale Order ที่ยืนยันแล้ว
 
 ---
 
@@ -58,16 +59,20 @@
 - **Admin Panel:** [Filament PHP v5.3](https://filamentphp.com/) - Server-Driven UI Framework
 - **UI Theme:** [Filament Shadcn Theme](https://github.com/openplain/filament-shadcn-theme)
 - **Avatar Generator:** [Filament DiceBear](https://github.com/leek/filament-dicebear)
+- **PDF Export:** [barryvdh/laravel-dompdf](https://github.com/barryvdh/laravel-dompdf)
+- **Activity Log:** [spatie/laravel-activitylog](https://spatie.be/docs/laravel-activitylog)
+- **Excel Export:** [pxlrbt/filament-excel](https://github.com/pxlrbt/filament-excel)
 
 ### Filament Architecture
 
 Filament เป็น **Server-Driven UI (SDUI) Framework** ที่ใช้ Livewire, Alpine.js และ Tailwind CSS:
 
-- **Resources:** CRUD interfaces สำหรับ Eloquent models
+- **Resources:** CRUD interfaces สำหรับ Eloquent models (14 resources)
+- **Pages:** Custom pages เช่น Login page และ Reports pages
 - **Schemas:** Component-based UI builders (Forms, Tables, Infolists)
 - **Actions:** Encapsulated button + modal + logic
 - **Notifications:** Flash, Database, และ Broadcast notifications
-- **Widgets:** Dashboard components สำหรับแสดงข้อมูลสถิติ
+- **Widgets:** Dashboard components สำหรับแสดงข้อมูลสถิติ (9 widgets)
 
 ### Database Architecture
 
@@ -79,18 +84,19 @@ Filament เป็น **Server-Driven UI (SDUI) Framework** ที่ใช้ L
 ### Design Patterns & Best Practices
 
 - **Observer Pattern:** ใช้ Laravel Observers สำหรับ business logic อัตโนมัติ
-  - GoodsReceiptObserver - จัดการสต็อกเมื่อรับสินค้า
-  - SaleOrderObserver - ตัดสต็อกเมื่อขาย
-  - PurchaseOrderObserver - สร้างเลขที่เอกสาร PO
-  - TaxInvoiceObserver - สร้างเลขที่ใบกำกับภาษี
-  - ProductObserver - ป้องกันการลบสินค้าที่มีสต็อก
-- **Service Layer:** DocumentNumberService สำหรับจัดการเลขที่เอกสารแบบรวมศูนย์
+  - DocumentObserver - จัดการเลขที่เอกสาร/รหัสสำหรับ model ที่ใช้ `DocumentObservable`
+  - GoodsReceiptObserver - อัปเดตสต็อกและสถานะใบสั่งซื้อเมื่อรับสินค้า
+  - SaleOrderObserver - ยืนยัน, ตัดสต็อก, ยกเลิก, และคืนสต็อก
+  - SaleOrderItemObserver - จองสต็อกและคำนวณยอดขายใหม่
+  - PurchaseOrderItemObserver - คำนวณยอดใบสั่งซื้อใหม่
+  - ProductObserver / StockObserver - sync สต็อกระหว่าง `products` และ `stocks`
+- **Service Layer:** มี service สำคัญ เช่น `StockReservationService` และ `DocumentNumberService`
 - **Modular Architecture:** แยก Form/Table Schema ออกจาก Resource เพื่อความเป็นระเบียบ
   - ทุก Resource มี Pages, Schemas, และ Tables แยกกัน
   - Component Classes สำหรับ reusable components
   - Action Classes สำหรับ complex actions
 - **Enum Classes:** ใช้ PHP Enums สำหรับค่าคงที่ (OrderStatus, StockMovementType, DocumentType, PaymentStatus)
-- **Authorization:** Model Policies สำหรับ access control ทุก Resource
+- **Panel Provider:** ตั้งค่า Filament panel, widgets, theme, middleware และ route ที่ `app/Providers/Filament/StorePanelProvider.php`
 
 ---
 
@@ -159,7 +165,7 @@ php artisan serve
 composer dev
 ```
 
-เข้าใช้งานที่: `http://localhost:8000/admin`
+เข้าใช้งานที่: `http://localhost:8000/store`
 
 ---
 
@@ -170,9 +176,14 @@ composer dev
 ```text
 storeapp/
 ├── app/
+│   ├── Console/
+│   │   └── Commands/             # Artisan commands (cleanup reservations, sync stocks)
 │   ├── Enums/                    # PHP Enums (OrderStatus, StockMovementType, etc.)
+│   ├── Exports/                  # Export classes
 │   ├── Filament/
-│   │   ├── Pages/                # Custom Filament Pages
+│   │   ├── Pages/                # Custom Login + Reports pages
+│   │   │   ├── Auth/
+│   │   │   └── Reports/
 │   │   └── Resources/            # Filament CRUD Resources (14 Resources)
 │   │       ├── Branches/
 │   │       ├── Brands/
@@ -184,29 +195,38 @@ storeapp/
 │   │       ├── PurchaseOrders/
 │   │       ├── SaleOrders/
 │   │       ├── Stocks/
-│   │       ├── StockMovements/
 │   │       ├── Suppliers/
 │   │       ├── TaxInvoices/
-│   │       └── Units/
+│   │       ├── Units/
+│   │       └── Users/
+│   │   └── Widgets/              # Dashboard widgets (9 files)
 │   ├── Models/                   # Eloquent Models (20+ models)
-│   ├── Observers/                # Laravel Observers (5 observers)
-│   │   ├── GoodsReceiptObserver.php
-│   │   ├── SaleOrderObserver.php
-│   │   ├── PurchaseOrderObserver.php
-│   │   ├── TaxInvoiceObserver.php
-│   │   └── ProductObserver.php
-│   ├── Policies/                 # Authorization Policies
-│   └── Services/                 # Service Classes
-│       └── DocumentNumberService.php
+│   ├── Observers/                # Laravel Observers (13 files)
+│   ├── Providers/
+│   │   └── Filament/             # StorePanelProvider.php
+│   ├── Services/                 # Business services
+│   │   ├── DocumentNumberService.php
+│   │   └── StockReservationService.php
+│   └── Traits/
+│       └── DocumentObservable.php
 ├── database/
-│   ├── migrations/               # 21 migration files
+│   ├── migrations/               # 26 migration files
 │   └── seeders/
 ├── docs/                         # Filament v5 Documentation
 │   ├── docs-actions/             # Actions documentation
 │   ├── docs-forms/               # Form fields documentation
+│   ├── docs-infolists/           # Infolist documentation
 │   ├── docs-schemas/             # Schema components documentation
 │   ├── docs-tables/              # Table columns/filters documentation
 │   └── ...
+├── resources/
+│   ├── css/
+│   ├── js/
+│   └── views/
+│       └── pdf/                  # PDF templates
+├── tests/
+│   ├── Feature/
+│   └── Unit/
 └── ...
 ```
 
@@ -220,7 +240,8 @@ app/Filament/Resources/{Entity}/
 ├── Pages/                         # CRUD Pages (Livewire Components)
 │   ├── Create{Entity}.php        # Create page with custom actions
 │   ├── Edit{Entity}.php          # Edit page with custom actions
-│   └── List{Entity}.php          # List page with table
+│   ├── List{Entity}.php          # List page with table
+│   └── View{Entity}.php          # View page (ถ้ามี)
 ├── Schemas/                       # Form/Infolist Schemas (แยกออกมา)
 │   ├── {Entity}Form.php          # Form schema with Sections/Callouts
 │   └── {Entity}Infolist.php      # Infolist schema (optional)
@@ -251,6 +272,7 @@ Companies/
 - `Callout` - แสดงคำเตือน/ข้อมูลสำคัญ (info, warning, danger, success)
 - `Tabs` - แบ่งฟอร์มเป็น tabs
 - `Wizard` - Multi-step forms พร้อม validation
+- `Grid` / `Text` / `Placeholder` - layout และข้อมูล dynamic ใน modal/action
 
 **Form Fields:**
 
@@ -266,6 +288,7 @@ Companies/
 - `TextColumn` - แสดงข้อความพร้อม icons, badges, tooltips
 - `ImageColumn` - แสดงรูปภาพ (circular, square)
 - `IconColumn` - แสดง icon ตามเงื่อนไข (boolean, status)
+- `RepeatableEntry` - แสดงรายการสินค้าใน infolist แบบตาราง
 
 **Actions:**
 
@@ -278,31 +301,39 @@ Companies/
 
 ## 🎯 ฟีเจอร์อัตโนมัติ (Automated Features)
 
-### 1. การจัดการสต็อกอัตโนมัติ (Automated Stock Management)
+### 1. การจัดการสต็อกและการจองอัตโนมัติ (Automated Stock Management)
 
 ระบบใช้ **Laravel Observers** จัดการสต็อกอัตโนมัติ:
 
 **เมื่อรับสินค้า (GoodsReceipt Confirmed):**
 
 - สร้าง StockMovement (type: In)
-- เพิ่มสต็อกสินค้าอัตโนมัติ
+- เพิ่มสต็อกในตาราง `stocks`
+- sync กลับไปยัง `products.stock_quantity`
 - บันทึก stock_before และ stock_after
 
-**เมื่อขายสินค้า (SaleOrder Confirmed):**
+**เมื่อเพิ่มสินค้าใน Draft Sale Order:**
+
+- สร้าง `stock_reservations`
+- ตรวจสอบ `available_stock` ก่อนเพิ่มหรือแก้ไข
+- ป้องกัน Overselling ระหว่างหลาย draft orders
+
+**เมื่อยืนยัน Sale Order (Draft -> Confirmed):**
 
 - ตรวจสอบสต็อกเพียงพอ
+- ปลดล็อก reservation ของเอกสารนั้น
 - สร้าง StockMovement (type: Out)
 - ตัดสต็อกสินค้าอัตโนมัติ
 - บันทึก stock_before และ stock_after
 
 **เมื่อยกเลิกเอกสาร:**
 
-- คืนสต็อกอัตโนมัติ
-- ลบ StockMovement ที่เกี่ยวข้อง
+- ยกเลิกจาก `draft` -> ปลด reservation
+- ยกเลิกจาก `confirmed` -> คืนสต็อกและลบ StockMovement ที่เกี่ยวข้อง
 
 ### 2. เลขที่เอกสารอัตโนมัติ (Automated Document Numbering)
 
-ระบบใช้ **DocumentNumberService** สร้างเลขที่เอกสารอัตโนมัติ:
+ระบบใช้ `document_running_numbers` ร่วมกับ `DocumentObserver` ในการออกเลขที่เอกสาร:
 
 - **PO:** PO2026-0001, PO2026-0002, ...
 - **SO:** SO2026-0001, SO2026-0002, ...
@@ -315,12 +346,19 @@ Companies/
 - ป้องกัน Race Condition ด้วย Database Lock
 - Configurable format (prefix, date format, running length)
 
-### 3. การป้องกันข้อมูล (Data Protection)
+### 3. Tax Invoice Auto-Fill
 
-**ProductObserver** ป้องกัน:
+- สร้างใบกำกับภาษีจาก Sale Order ที่ `confirmed` ได้โดยตรง
+- pre-fill บริษัท, สาขา, ลูกค้า, ที่อยู่, ยอดเงิน และ payment status
+- ป้องกันการสร้างใบกำกับภาษีซ้ำให้กับ Sale Order เดิม
+
+### 4. การป้องกันข้อมูล (Data Protection)
+
+**ProductObserver / StockObserver** ป้องกันและ sync ข้อมูล:
 
 - ลบสินค้าที่มีสต็อกคงเหลือ
 - ลบสินค้าที่มีประวัติการเคลื่อนไหวสต็อก
+- sync `products.stock_quantity` และ `stocks.quantity`
 
 ---
 
@@ -362,10 +400,14 @@ Companies/
 
 - `stocks` - สต็อกสินค้า
 - `stock_movements` - การเคลื่อนไหวสต็อก
+- `stock_reservations` - การจองสต็อกสำหรับ Draft Sale Order
 
 **ระบบ:**
 
 - `document_running_numbers` - เลขที่เอกสารอัตโนมัติ
+- `notifications` - Database notifications
+- `activity_log` - ประวัติการเปลี่ยนแปลงจาก Spatie Activity Log
+- `jobs` / `cache` - ตารางระบบของ Laravel
 
 ---
 
@@ -377,6 +419,9 @@ composer test
 
 # หรือ
 php artisan test
+
+# รันเฉพาะ unit test ของ stock reservation
+php artisan test --filter=StockReservationServiceTest
 ```
 
 ---
@@ -398,6 +443,12 @@ php artisan make:filament-user
 
 # ดู logs แบบ real-time
 php artisan pail
+
+# ลบการจองสต็อกที่หมดอายุ
+php artisan reservations:cleanup
+
+# sync ตาราง stocks กับ products
+php artisan stock:sync --force
 ```
 
 ---
@@ -427,6 +478,12 @@ public function boot(): void
 ```bash
 php artisan make:filament-resource YourModel --generate
 ```
+
+### การตั้งค่า Filament Panel
+
+- Panel หลักถูกตั้งค่าใน `app/Providers/Filament/StorePanelProvider.php`
+- URL หลักของระบบคือ `/store`
+- Dashboard widgets และ theme ถูกลงทะเบียนที่ provider นี้
 
 ### Code Style
 
