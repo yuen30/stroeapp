@@ -3,29 +3,9 @@
 namespace App\Observers;
 
 use App\Models\PurchaseOrder;
-use App\Services\DocumentNumberService;
 
 class PurchaseOrderObserver
 {
-    public function __construct(
-        private DocumentNumberService $documentNumberService
-    ) {}
-
-    /**
-     * Handle the PurchaseOrder "creating" event.
-     */
-    public function creating(PurchaseOrder $purchaseOrder): void
-    {
-        // สร้างเลขที่เอกสารอัตโนมัติถ้ายังไม่มี
-        if (empty($purchaseOrder->order_number)) {
-            $purchaseOrder->order_number = $this->documentNumberService->generate(
-                'PO',
-                $purchaseOrder->company_id,
-                $purchaseOrder->branch_id
-            );
-        }
-    }
-
     /**
      * Handle the PurchaseOrder "updated" event.
      */

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\DocumentObservable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory, HasUlids, SoftDeletes;
+    use HasFactory, HasUlids, SoftDeletes, DocumentObservable;
+
+    protected $documentNumberField = 'code';
+
+    public function getDocumentType(): string
+    {
+        return 'product';
+    }
 
     protected $fillable = [
         'name',

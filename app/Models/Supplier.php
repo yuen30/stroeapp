@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\DocumentObservable;
 use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,7 +15,14 @@ use Leek\FilamentDiceBear\Enums\DiceBearStyle;
 
 class Supplier extends Model implements HasAvatar
 {
-    use HasUlids, SoftDeletes, HasDiceBearAvatar;
+    use HasUlids, SoftDeletes, HasDiceBearAvatar, DocumentObservable;
+
+    protected $documentNumberField = 'code';
+
+    public function getDocumentType(): string
+    {
+        return 'supplier';
+    }
 
     protected $fillable = [
         'company_id',

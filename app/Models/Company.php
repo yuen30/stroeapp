@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\DocumentObservable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,7 +11,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Company extends Model
 {
-    use HasFactory, HasUlids, SoftDeletes;
+    use HasFactory, HasUlids, SoftDeletes, DocumentObservable;
+
+    protected $documentNumberField = 'code';
+
+    public function getDocumentType(): string
+    {
+        return 'company';
+    }
 
     protected $fillable = [
         'name',

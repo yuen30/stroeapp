@@ -19,12 +19,14 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Create Company and Branch
+        // 0. Setup Global Document Running Numbers
+        // Initialize sequences for this company (now that the company exists)
+        (new DocumentRunningNumberSeeder())->run();
+
+        // 1. Create Company
         $company = Company::updateOrCreate(
-            ['code' => 'COMP-001'],
+            ['name' => 'บริษัท ถัง กู๊ดพาร์ท จำกัด'],
             [
-                'name' => 'บริษัท อะไหล่ไทย จำกัด (มหาชน)',
-                'code' => 'COMP-001',
                 'tax_id' => '0105555555555',
                 'tel' => '02-111-2222',
                 'fax' => '02-111-2223',
@@ -37,12 +39,11 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Create Branch (will use BR- prefix if new)
         $branch = Branch::updateOrCreate(
-            ['code' => 'HQ001'],
+            ['company_id' => $company->id, 'name' => 'สำนักงานใหญ่'],
             [
-                'company_id' => $company->id,
-                'name' => 'สำนักงานใหญ่',
-                'code' => 'HQ001',
+                'is_headquarter' => true,
                 'tel' => '02-111-2222',
                 'fax' => '02-111-2223',
                 'address_0' => '123 ถ.สุขุมวิท',
@@ -140,10 +141,13 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($suppliers as $supplierData) {
+            $code = $supplierData['code'];
+            unset($supplierData['code']); // Let observer handle it if new
+
             Supplier::updateOrCreate(
                 [
                     'company_id' => $company->id,
-                    'code' => $supplierData['code'],
+                    'name' => $supplierData['name'],
                 ],
                 $supplierData + ['company_id' => $company->id]
             );
@@ -298,10 +302,12 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($customers as $customerData) {
+            unset($customerData['code']); // Let observer handle it
+
             Customer::updateOrCreate(
                 [
                     'company_id' => $company->id,
-                    'code' => $customerData['code'],
+                    'name' => $customerData['name'],
                 ],
                 $customerData + ['company_id' => $company->id]
             );
@@ -371,8 +377,11 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($products as $productData) {
+            $code = $productData['code'];
+            unset($productData['code']); // Let observer handle it
+
             $product = Product::updateOrCreate(
-                ['code' => $productData['code']],
+                ['name' => $productData['name']],
                 [
                     'company_id' => $company->id,
                     'branch_id' => $branch->id,

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PaymentStatus;
+use App\Traits\DocumentObservable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,14 @@ use Spatie\Activitylog\LogOptions;
 
 class TaxInvoice extends Model
 {
-    use HasUlids, SoftDeletes, LogsActivity;
+    use HasUlids, SoftDeletes, LogsActivity, DocumentObservable;
+
+    protected $documentNumberField = 'tax_invoice_number';
+
+    public function getDocumentType(): string
+    {
+        return 'tax_invoice';
+    }
 
     protected $fillable = [
         'company_id',

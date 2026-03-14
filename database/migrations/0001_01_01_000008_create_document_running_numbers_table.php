@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('document_running_numbers', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignUlid('company_id')->constrained()->cascadeOnDelete();
+            $table->foreignUlid('company_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignUlid('branch_id')->nullable()->constrained()->nullOnDelete();
             $table->string('document_type'); // e.g., sale_order, purchase_order, tax_invoice
             $table->string('prefix')->nullable(); // e.g., INV, PO, TI
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->unique(['company_id', 'branch_id', 'document_type']);
+            $table->unique(['company_id', 'branch_id', 'document_type'], 'drn_co_br_type_unique');
         });
     }
 

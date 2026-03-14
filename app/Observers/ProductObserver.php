@@ -13,9 +13,7 @@ class ProductObserver
      */
     public function creating(Product $product): void
     {
-        if (empty($product->code)) {
-            $product->code = $this->generateProductCode();
-        }
+        // รหัสสินค้าจะถูกจัดการโดย DocumentObserver อัตโนมัติ
     }
 
     /**

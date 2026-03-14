@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="th">
+    <head>
+        <meta charset="UTF-8" />
+        <title>รายงานใบกำกับภาษี - TGP</title>
+        <style>
+            @import url("https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap");
+
+            body {
+                font-family: "Sarabun", sans-serif;
+                font-size: 14px;
+                margin: 0;
+                padding: 20px;
+                background-color: #f0f0f0;
+            }
+
+            .invoice-box {
+                max-width: 800px;
+                margin: auto;
+                padding: 30px;
+                border: 1px solid #eee;
+                background-color: #fff;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+            }
+
+            .header-table {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+
+            .company-info h2 {
+                color: #d32f2f;
+                margin: 0;
+                font-size: 24px;
+            }
+
+            .document-title {
+                text-align: right;
+                vertical-align: top;
+            }
+
+            .title-badge {
+                border: 1px solid #000;
+                padding: 5px 10px;
+                display: inline-block;
+                font-weight: bold;
+            }
+
+            .info-section {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 20px;
+                border: 1px solid #ccc;
+                padding: 10px;
+            }
+
+            .customer-info,
+            .invoice-details {
+                width: 48%;
+            }
+
+            table.items-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 20px;
+            }
+
+            table.items-table th {
+                background-color: #f8f8f8;
+                border: 1px solid #ccc;
+                padding: 8px;
+                text-align: center;
+            }
+
+            table.items-table td {
+                border: 1px solid #ccc;
+                padding: 8px;
+                vertical-align: top;
+            }
+
+            .text-right {
+                text-align: right;
+            }
+            .text-center {
+                text-align: center;
+            }
+
+            .summary-section {
+                width: 100%;
+                display: flex;
+                justify-content: flex-end;
+            }
+
+            .summary-table {
+                width: 300px;
+                border-collapse: collapse;
+            }
+
+            .summary-table td {
+                padding: 5px;
+                border: 1px solid #ccc;
+            }
+
+            .footer-section {
+                margin-top: 40px;
+                display: flex;
+                justify-content: space-between;
+                text-align: center;
+            }
+
+            .signature-box {
+                width: 30%;
+                border-top: 1px solid #000;
+                padding-top: 5px;
+                margin-top: 50px;
+            }
+
+            @media print {
+                body {
+                    background-color: #fff;
+                    padding: 0;
+                }
+                .invoice-box {
+                    box-shadow: none;
+                    border: none;
+                    width: 100%;
+                    max-width: none;
+                }
+                button {
+                    display: none;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="invoice-box">
+            <table class="header-table">
+                <tr>
+                    <td class="company-info">
+                        <h2>บริษัท ถัง กู๊ดพาร์ท จำกัด (สำนักงานใหญ่)</h2>
+                        <p>
+                            316/10 หมู่ 1 ต.คลองบางปลากด อ.พระสมุทรเจดีย์
+                            จ.สมุทรปราการ 10290<br />
+                            โทร. 093-969-0946, 093-969-0964 | TAX ID:
+                            0115557021689
+                        </p>
+                    </td>
+                    <td class="document-title">
+                        <div class="title-badge">
+                            ใบกำกับภาษี/ใบแจ้งหนี้/ใบส่งสินค้า<br />(TAX
+                            INVOICE/INVOICE/DELIVERY ORDER)
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="info-section">
+                <div class="customer-info">
+                    <strong>ชื่อลูกค้า:</strong> ร้าน บุ๊ก แชโล้ว (หลออะไหล่)<br />
+                    <strong>ที่อยู่:</strong> แปดริ้ว ฉะเชิงเทรา<br />
+                    <strong>พนักงานขาย:</strong> fern
+                </div>
+                <div class="invoice-details">
+                    <strong>เลขที่ No.:</strong> TGP-CA690226018<br />
+                    <strong>วันที่ Date:</strong> 26/02/2569<br />
+                </div>
+            </div>
+
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>ลำดับ</th>
+                        <th>รหัสสินค้า</th>
+                        <th>รายละเอียดสินค้า</th>
+                        <th>จำนวน</th>
+                        <th>ราคา/หน่วย</th>
+                        <th>ส่วนลด</th>
+                        <th>จำนวนเงิน</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-center">1</td>
+                        <td>AT 2901CH</td>
+                        <td>ไดชาร์จ MITSU STRADA 2500 12V 65A</td>
+                        <td class="text-center">40</td>
+                        <td class="text-right">2,300.00</td>
+                        <td class="text-right">0.00</td>
+                        <td class="text-right">92,000.00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">2</td>
+                        <td>AT 2501CH</td>
+                        <td>ไดชาร์จ NISSAN BIG-M 12V 50A</td>
+                        <td class="text-center">20</td>
+                        <td class="text-right">2,200.00</td>
+                        <td class="text-right">0.00</td>
+                        <td class="text-right">44,000.00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">3</td>
+                        <td>AT 2204CH</td>
+                        <td>ไดชาร์จ ISUZU มังกร ND 12V 55A</td>
+                        <td class="text-center">20</td>
+                        <td class="text-right">2,300.00</td>
+                        <td class="text-right">0.00</td>
+                        <td class="text-right">46,000.00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">4</td>
+                        <td>AT 2701</td>
+                        <td>
+                            ไดชาร์จ HINO EH700 MEGA JO ฝาต่ำ ใหม่ IC 4 ขา 24V
+                            50A
+                        </td>
+                        <td class="text-center">10</td>
+                        <td class="text-right">3,400.00</td>
+                        <td class="text-right">100.00</td>
+                        <td class="text-right">33,000.00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">5</td>
+                        <td>HS 012</td>
+                        <td>ฝาปิดซองถ่าน D-MAX 3000</td>
+                        <td class="text-center">200</td>
+                        <td class="text-right">65.00</td>
+                        <td class="text-right">0.00</td>
+                        <td class="text-right">13,000.00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">6</td>
+                        <td>ST 1701</td>
+                        <td>ไดสตาร์ท HINO EH 700 ND 4.5KW 24V</td>
+                        <td class="text-center">10</td>
+                        <td class="text-right">2,100.00</td>
+                        <td class="text-right">0.00</td>
+                        <td class="text-right">21,000.00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">7</td>
+                        <td>ST 1701A</td>
+                        <td>
+                            ไดสตาร์ท HINO EH 700 KT/KL HO7C 24V หน้าแปลนตรงรุ่น
+                        </td>
+                        <td class="text-center">10</td>
+                        <td class="text-right">2,100.00</td>
+                        <td class="text-right">0.00</td>
+                        <td class="text-right">21,000.00</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center">8</td>
+                        <td>ST 1219</td>
+                        <td>ไดสตาร์ท ISUZU JCM รถเกี่ยวข้าว 24V 4.5KW</td>
+                        <td class="text-center">10</td>
+                        <td class="text-right">2,100.00</td>
+                        <td class="text-right">0.00</td>
+                        <td class="text-right">21,000.00</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="summary-section">
+                <table class="summary-table">
+                    <tr>
+                        <td>ยอดรวม (Total)</td>
+                        <td class="text-right">291,000.00</td>
+                    </tr>
+                    <tr>
+                        <td>ภาษีมูลค่าเพิ่ม (VAT 0%)</td>
+                        <td class="text-right">0.00</td>
+                    </tr>
+                    <tr style="font-weight: bold; background-color: #eee">
+                        <td>ยอดรวมสุทธิ (Grand Total)</td>
+                        <td class="text-right">291,000.00</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="footer-section">
+                <div class="signature-box">ผู้รับสินค้า / Received By</div>
+                <div class="signature-box">ผู้ส่งสินค้า / Delivered By</div>
+                <div class="signature-box">
+                    ผู้อนุมัติ / Authorized Signature
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; text-align: center">
+                <button
+                    onclick="window.print()"
+                    style="padding: 10px 20px; cursor: pointer"
+                >
+                    พิมพ์เอกสาร
+                </button>
+            </div>
+        </div>
+    </body>
+</html>

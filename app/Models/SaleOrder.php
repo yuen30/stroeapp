@@ -6,6 +6,7 @@ use App\Enums\DocumentType;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Traits\DocumentObservable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,7 +18,14 @@ use Spatie\Activitylog\LogOptions;
 
 class SaleOrder extends Model
 {
-    use HasFactory, HasUlids, SoftDeletes, LogsActivity;
+    use HasFactory, HasUlids, SoftDeletes, LogsActivity, DocumentObservable;
+
+    protected $documentNumberField = 'invoice_number';
+
+    public function getDocumentType(): string
+    {
+        return 'sale_order';
+    }
 
     protected $fillable = [
         'company_id',

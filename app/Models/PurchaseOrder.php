@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OrderStatus;
+use App\Traits\DocumentObservable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,7 +14,14 @@ use Spatie\Activitylog\LogOptions;
 
 class PurchaseOrder extends Model
 {
-    use HasUlids, SoftDeletes, LogsActivity;
+    use HasUlids, SoftDeletes, LogsActivity, DocumentObservable;
+
+    protected $documentNumberField = 'order_number';
+
+    public function getDocumentType(): string
+    {
+        return 'purchase_order';
+    }
 
     protected $fillable = [
         'company_id',

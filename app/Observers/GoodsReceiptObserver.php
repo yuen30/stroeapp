@@ -7,30 +7,9 @@ use App\Enums\StockMovementType;
 use App\Models\GoodsReceipt;
 use App\Models\Stock;
 use App\Models\StockMovement;
-use App\Services\DocumentNumberService;
 
 class GoodsReceiptObserver
 {
-    public function __construct(
-        private DocumentNumberService $documentNumberService
-    ) {}
-
-    /**
-     * Handle the GoodsReceipt "creating" event.
-     * สร้างเลขที่ใบรับสินค้าอัตโนมัติผ่าน DocumentNumberService
-     */
-    public function creating(GoodsReceipt $goodsReceipt): void
-    {
-        // สร้างเลขที่เอกสารอัตโนมัติถ้ายังไม่มี
-        if (empty($goodsReceipt->receipt_number)) {
-            $goodsReceipt->receipt_number = $this->documentNumberService->generate(
-                'GR',
-                $goodsReceipt->company_id,
-                $goodsReceipt->branch_id
-            );
-        }
-    }
-
     public function updated(GoodsReceipt $goodsReceipt): void
     {
         // ตรวจสอบว่ามีการเปลี่ยนสถานะเป็น confirmed หรือไม่

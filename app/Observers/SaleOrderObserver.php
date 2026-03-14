@@ -6,29 +6,9 @@ use App\Enums\OrderStatus;
 use App\Enums\StockMovementType;
 use App\Models\SaleOrder;
 use App\Models\StockMovement;
-use App\Services\DocumentNumberService;
 
 class SaleOrderObserver
 {
-    public function __construct(
-        private DocumentNumberService $documentNumberService
-    ) {}
-
-    /**
-     * Handle the SaleOrder "creating" event.
-     */
-    public function creating(SaleOrder $saleOrder): void
-    {
-        // สร้างเลขที่เอกสารอัตโนมัติถ้ายังไม่มี
-        if (empty($saleOrder->invoice_number)) {
-            $saleOrder->invoice_number = $this->documentNumberService->generate(
-                'SO',
-                $saleOrder->company_id,
-                $saleOrder->branch_id
-            );
-        }
-    }
-
     /**
      * Handle the SaleOrder "created" event.
      */
