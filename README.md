@@ -184,21 +184,21 @@ storeapp/
 │   │   ├── Pages/                # Custom Login + Reports pages
 │   │   │   ├── Auth/
 │   │   │   └── Reports/
-│   │   └── Resources/            # Filament CRUD Resources (14 Resources)
-│   │       ├── Branches/
-│   │       ├── Brands/
-│   │       ├── Categories/
-│   │       ├── Companies/
-│   │       ├── Customers/
-│   │       ├── GoodsReceipts/
-│   │       ├── Products/
-│   │       ├── PurchaseOrders/
-│   │       ├── SaleOrders/
-│   │       ├── Stocks/
-│   │       ├── Suppliers/
-│   │       ├── TaxInvoices/
-│   │       ├── Units/
-│   │       └── Users/
+│   │   ├── Resources/            # Filament CRUD Resources (14 Resources)
+│   │   │   ├── Branches/
+│   │   │   ├── Brands/
+│   │   │   ├── Categories/
+│   │   │   ├── Companies/
+│   │   │   ├── Customers/
+│   │   │   ├── GoodsReceipts/
+│   │   │   ├── Products/
+│   │   │   ├── PurchaseOrders/
+│   │   │   ├── SaleOrders/
+│   │   │   ├── Stocks/
+│   │   │   ├── Suppliers/
+│   │   │   ├── TaxInvoices/
+│   │   │   ├── Units/
+│   │   │   └── Users/
 │   │   └── Widgets/              # Dashboard widgets (9 files)
 │   ├── Models/                   # Eloquent Models (20+ models)
 │   ├── Observers/                # Laravel Observers (13 files)
@@ -273,6 +273,7 @@ Companies/
 - `Tabs` - แบ่งฟอร์มเป็น tabs
 - `Wizard` - Multi-step forms พร้อม validation
 - `Grid` / `Text` / `Placeholder` - layout และข้อมูล dynamic ใน modal/action
+- `RepeatableEntry` - แสดงรายการสินค้าใน infolist แบบตาราง
 
 **Form Fields:**
 
@@ -288,7 +289,6 @@ Companies/
 - `TextColumn` - แสดงข้อความพร้อม icons, badges, tooltips
 - `ImageColumn` - แสดงรูปภาพ (circular, square)
 - `IconColumn` - แสดง icon ตามเงื่อนไข (boolean, status)
-- `RepeatableEntry` - แสดงรายการสินค้าใน infolist แบบตาราง
 
 **Actions:**
 
@@ -309,7 +309,7 @@ Companies/
 
 - สร้าง StockMovement (type: In)
 - เพิ่มสต็อกในตาราง `stocks`
-- sync กลับไปยัง `products.stock_quantity`
+- รองรับการ sync กลับไปยัง `products.stock_quantity` ผ่าน observer/command
 - บันทึก stock_before และ stock_after
 
 **เมื่อเพิ่มสินค้าใน Draft Sale Order:**
@@ -358,7 +358,7 @@ Companies/
 
 - ลบสินค้าที่มีสต็อกคงเหลือ
 - ลบสินค้าที่มีประวัติการเคลื่อนไหวสต็อก
-- sync `products.stock_quantity` และ `stocks.quantity`
+- รองรับการ sync ระหว่าง `products.stock_quantity` และ `stocks.quantity`
 
 ---
 
