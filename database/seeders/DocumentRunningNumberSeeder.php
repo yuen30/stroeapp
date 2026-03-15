@@ -35,7 +35,7 @@ class DocumentRunningNumberSeeder extends Seeder
             // 3. Branch level sequences
             foreach ($branches as $branch) {
                 $this->createDefaults($company->id, $branch->id, [
-                    'sale_order' => ['prefix' => 'SO', 'date_format' => 'Ym', 'field' => 'invoice_number', 'length' => 5],
+                    'sale_order' => ['prefix' => 'TGP-CA', 'date_format' => 'Ym', 'field' => 'invoice_number', 'length' => 5],
                     'purchase_order' => ['prefix' => 'PO', 'date_format' => 'Ym', 'field' => 'order_number', 'length' => 5],
                     'tax_invoice' => ['prefix' => 'INV', 'date_format' => 'Ym', 'field' => 'tax_invoice_number', 'length' => 5],
                     'goods_receipt' => ['prefix' => 'GR', 'date_format' => 'Ym', 'field' => 'receipt_number', 'length' => 5],
