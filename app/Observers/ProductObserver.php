@@ -8,15 +8,6 @@ use App\Models\Stock;
 class ProductObserver
 {
     /**
-     * Handle the Product "creating" event.
-     * สร้างรหัสสินค้าอัตโนมัติถ้าไม่ได้ระบุ
-     */
-    public function creating(Product $product): void
-    {
-        // รหัสสินค้าจะถูกจัดการโดย DocumentObserver อัตโนมัติ
-    }
-
-    /**
      * Handle the Product "created" event.
      * สร้าง Stock record อัตโนมัติเมื่อสร้างสินค้าใหม่
      */
@@ -84,33 +75,5 @@ class ProductObserver
 
         // ลบ Stock record ที่เกี่ยวข้อง
         $product->stocks()->delete();
-    }
-
-    /**
-     * สร้างรหัสสินค้าอัตโนมัติ
-     * รูปแบบ: PROD-XXXXXX (X = เลข 6 หัก)
-     */
-    private function generateProductCode(): string
-    {
-        do {
-            // หาเลขลำดับถัดไป
-            $lastProduct = Product::withTrashed()
-                ->where('code', 'like', 'PROD-%')
-                ->orderBy('code', 'desc')
-                ->first();
-
-            if ($lastProduct && preg_match('/PROD-(\d+)/', $lastProduct->code, $matches)) {
-                $nextNumber = intval($matches[1]) + 1;
-            } else {
-                $nextNumber = 1;
-            }
-
-            $code = 'PROD-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
-
-            // ตรวจสอบว่ารหัสนี้ยังไม่มีในระบบ
-            $exists = Product::withTrashed()->where('code', $code)->exists();
-        } while ($exists);
-
-        return $code;
     }
 }

@@ -2,15 +2,24 @@
 
 namespace App\Models;
 
+use App\Traits\DocumentObservable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockReservation extends Model
 {
-    use HasUlids;
+    use DocumentObservable, HasUlids;
+
+    protected $documentNumberField = 'code';
+
+    public function getDocumentType(): string
+    {
+        return 'stock_reservation';
+    }
 
     protected $fillable = [
+        'code',
         'product_id',
         'sale_order_id',
         'sale_order_item_id',

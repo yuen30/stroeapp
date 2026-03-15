@@ -12,6 +12,7 @@ return new class extends Migration {
     {
         Schema::create('stock_reservations', function (Blueprint $table) {
             $table->ulid('id')->primary();
+            $table->string('code')->unique();
             $table->foreignUlid('product_id')->constrained()->cascadeOnDelete();
             $table->foreignUlid('sale_order_id')->constrained()->cascadeOnDelete();
             $table->foreignUlid('sale_order_item_id')->constrained()->cascadeOnDelete();

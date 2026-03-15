@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->ulid('id')->primary();
             $table->string('name')->unique();
             $table->string('code')->unique();
+            $table->string('sku')->unique();
             $table->longText('description')->nullable();
             $table->foreignUlid('company_id')->references('id')->on('companies');
             $table->foreignUlid('branch_id')->references('id')->on('branches');

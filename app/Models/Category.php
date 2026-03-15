@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\DocumentObservable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
-    use HasUlids, SoftDeletes;
+    use DocumentObservable, HasUlids, SoftDeletes;
+
+    protected $documentNumberField = 'code';
+
+    public function getDocumentType(): string
+    {
+        return 'category';
+    }
 
     protected $fillable = [
         'parent_id',
