@@ -1,402 +1,127 @@
 <!DOCTYPE html>
 <html lang="th">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ใบส่งของ - Delivery Note</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap");
-
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        font-family: "Sarabun", sans-serif;
-        font-size: 11pt;
-        margin: 0;
-        padding: 0;
-        background: #525659;
-      }
-
-      .page {
-        width: 210mm;
-        height: 297mm;
-        padding: 10mm;
-        margin: 10mm auto;
-        background: white;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-        position: relative;
-        color: #000;
-      }
-
-      /* Top Left Header */
-      .header-main {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-      }
-      .logo-section {
-        width: 10%;
-        font-size: 32pt;
-        font-weight: bold;
-      }
-      .company-section {
-        width: 55%;
-        font-size: 10pt;
-        line-height: 1.2;
-      }
-      .company-name-th {
-        font-size: 14pt;
-        font-weight: bold;
-      }
-
-      /* Top Right Header */
-      .title-section {
-        width: 35%;
-        text-align: right;
-      }
-      .cust-copy {
-        font-size: 10pt;
-        font-weight: bold;
-      }
-      .title-th {
-        font-size: 12pt;
-        font-weight: bold;
-        text-decoration: underline;
-        margin: 2px 0;
-      }
-      .title-en {
-        font-size: 9pt;
-        font-weight: bold;
-        margin-bottom: 5px;
-      }
-      .multi-doc {
-        color: red;
-        font-size: 9pt;
-        border: 1px solid red;
-        display: inline-block;
-        padding: 2px 5px;
-      }
-
-      /* Customer & Document Info Grid */
-      .info-grid {
-        display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
-        margin-top: 10px;
-        border: 1px solid #000;
-      }
-      .grid-box {
-        padding: 5px;
-        position: relative;
-      }
-      .border-right {
-        border-right: 1px solid #000;
-      }
-      .row {
-        display: flex;
-        margin-bottom: 2px;
-      }
-      .label {
-        min-width: 60px;
-        font-weight: bold;
-      }
-      .label-long {
-        min-width: 120px;
-        font-weight: bold;
-      }
-
-      /* Checkbox Style */
-      .branch-info {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        margin-top: 5px;
-      }
-      .check-box {
-        width: 15px;
-        height: 15px;
-        border: 1px solid #000;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 10pt;
-      }
-
-      /* Items Table */
-      .table-container {
-        margin-top: -1px;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-        border: 1px solid #000;
-      }
-      th {
-        border: 1px solid #000;
-        padding: 5px;
-        font-size: 10pt;
-        background: #f2f2f2;
-      }
-      td {
-        border-right: 1px solid #000;
-        padding: 4px 8px;
-        vertical-align: top;
-        font-size: 10pt;
-        min-height: 25px;
-      }
-      .text-center {
-        text-align: center;
-      }
-      .text-right {
-        text-align: right;
-      }
-      .empty-rows {
-        height: 350px;
-      }
-
-      /* Footer Section */
-      .footer-grid {
-        display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
-        border: 1px solid #000;
-        border-top: none;
-      }
-      .remark {
-        padding: 8px;
-        font-size: 9pt;
-        line-height: 1.4;
-        border-right: 1px solid #000;
-      }
-      .totals-table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-      .totals-table td {
-        border: none;
-        border-bottom: 1px solid #000;
-        padding: 5px;
-      }
-      .totals-table tr:last-child td {
-        border-bottom: none;
-        font-weight: bold;
-        font-size: 12pt;
-      }
-
-      /* Signatures */
-      .sig-container {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        margin-top: 15px;
-        text-align: center;
-        font-size: 9pt;
-      }
-      .sig-box {
-        border: 1px solid #000;
-        margin-right: -1px;
-        padding: 10px 5px;
-        height: 120px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
-      .sig-line {
-        border-bottom: 1px dotted #000;
-        width: 80%;
-        margin: 0 auto 5px auto;
-      }
+        /* บังคับใช้ฟอนต์ภาษาไทย และให้เครื่องพิมพ์พิมพ์สีพื้นหลังออกมาด้วย */
+        body {
+            font-family: 'Sarabun', sans-serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
     </style>
-  </head>
-  <body>
-    <div class="page">
-      <div class="header-main">
-        <div class="logo-section">G</div>
-        <div class="company-section">
-          <div class="company-name-th">
-            บริษัท ถัง กู๊ดพาร์ท จำกัด (สำนักงานใหญ่) [cite: 3]
-          </div>
-          <div>TANG GOODPARTS CO., LTD. (HEAD OFFICE) [cite: 3]</div>
-          <div>
-            316/10 หมู่ 1 ตำบลปากคลองบางปลากด อำเภอพระสมุทรเจดีย์
-            จังหวัดสมุทรปราการ 10290 [cite: 6]
-          </div>
-          <div>
-            Tel. 093-969-0946, 093-969-0964 Line ID: 0838185858 [cite: 14]
-          </div>
-          <div>เลขประจำตัวผู้เสียภาษีอากร TAX ID. 0115557021689 [cite: 15]</div>
-        </div>
-        <div class="title-section">
-          <div class="cust-copy">สำหรับลูกค้า / CUSTOMER</div>
-          <div class="title-th">
-            ใบกำกับภาษี/ใบแจ้งหนี้/ใบส่งสินค้า (สำเนา) [cite: 5]
-          </div>
-          <div class="title-en">
-            TAX INVOICE/INVOICE/DELIVERY ORDER (COPY) [cite: 7]
-          </div>
-          <div class="multi-doc">
-            เอกสารออกเป็นชุด (ไม่ใช่ใบกำกับภาษี) [cite: 9]
-          </div>
-        </div>
-      </div>
+</head>
+<body class="bg-gray-200 py-8 print:bg-white print:py-0 text-sm text-gray-700">v>
 
-      <div class="info-grid">
-        <div class="grid-box border-right">
-          <div class="row">
-            <span class="label">ชื่อผู้ซื้อ:</span>
-            <span class="value">ร้าน บุ๊ก แต่ ว(หลดอะไหล่) [cite: 16]</span>
-          </div>
-          <div class="row">
-            <span class="label">ที่อยู่:</span>
-            <span class="value">ฉะเชิงเทรา แปดริ้ว [cite: 17, 20]</span>
-          </div>
-          <div class="row">
-            <span class="label-long">เลขประจำตัวผู้เสียภาษีอากร:</span>
-            <span class="value"></span>
-          </div>
-          <div class="branch-info">
-            <span class="check-box">✓</span>
-            สำนักงานใหญ่
-            <span class="check-box"></span>
-            สาขาที่... [cite: 30, 31]
-          </div>
-        </div>
-        <div class="grid-box">
-          <div class="row">
-            <span class="label">เลขที่ No.:</span>
-            <span class="value">TGP-CA690304011 [cite: 18]</span>
-          </div>
-          <div class="row">
-            <span class="label">วันที่ Date:</span>
-            <span class="value">06/03/2569 [cite: 19]</span>
-          </div>
-          <div class="row">
-            <span class="label-long">กำหนดชำระเงิน Due Date:</span>
-            <span class="value"></span>
-            [cite: 21, 26]
-          </div>
-          <div class="row">
-            <span class="label">พนักงานขาย:</span>
-            <span class="value">เชอร์รี่ [cite: 33]</span>
-          </div>
-        </div>
-      </div>
+    <div class="w-[210mm] min-h-[297mm] mx-auto bg-white p-[15mm] sm:p-[20mm] shadow-lg box-border relative print:w-full print:min-h-0 print:p-0 print:m-0 print:shadow-none">
 
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th width="8%">
-                ลำดับ
-                <br />
-                Item
-              </th>
-              <th width="52%">
-                รายละเอียดสินค้า / รหัสสินค้า
-                <br />
-                Description / Product Code
-              </th>
-              <th width="10%">
-                จำนวน
-                <br />
-                Quantity
-              </th>
-              <th width="15%">
-                ราคาต่อหน่วย
-                <br />
-                Unit Price
-              </th>
-              <th width="15%">
-                จำนวนเงิน
-                <br />
-                Amount
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="text-center">1</td>
-              <td>คัทเอ้าท์ VIGO ดีเซล (RET 114)</td>
-              <td class="text-center">140</td>
-              <td class="text-right">210.00</td>
-              <td class="text-right">29,400.00</td>
-            </tr>
-            <tr>
-              <td class="text-center">2</td>
-              <td>คัทเอ้าท์ HITACHI DRAGONEYE (RET 116)</td>
-              <td class="text-center">65</td>
-              <td class="text-right">125.00</td>
-              <td class="text-right">8,125.00</td>
-            </tr>
-            <tr>
-              <td class="text-center">3</td>
-              <td>โซเรนอยส์ NISSAN BIG-M 12V (SS-1227)</td>
-              <td class="text-center">80</td>
-              <td class="text-right">365.00</td>
-              <td class="text-right">29,200.00</td>
-            </tr>
-            <tr class="empty-rows">
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-              <td></td>
-            </tr>
-          </tbody>
+        <div class="flex justify-between items-start border-b-2 border-blue-900 pb-4 mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-blue-900 mb-1 leading-tight">บริษัท คลาวด์ เทค จำกัด</h1>
+                <p class="m-0 text-gray-600">123 ถนนสุขุมวิท แขวงคลองเตยเหนือ</p>
+                <p class="m-0 text-gray-600">เขตวัฒนา กรุงเทพมหานคร 10110</p>
+                <p class="m-0 text-gray-600 mt-1">โทรศัพท์: 02-123-4567 | อีเมล: info@cloudtech.co.th</p>
+                <p class="m-0 text-gray-600">เลขประจำตัวผู้เสียภาษี: 01055xxxxxxxx</p>
+            </div>
+            <div class="text-right">
+                <h2 class="text-3xl font-bold text-blue-900 uppercase tracking-wider mb-3 mt-0">ใบส่งของ</h2>
+                <div class="inline-grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-left">
+                    <strong class="text-gray-900">เลขที่:</strong> <span>DN-2603-001</span>
+                    <strong class="text-gray-900">วันที่:</strong> <span>28 มี.ค. 2026</span>
+                    <strong class="text-gray-900">อ้างอิง PO:</strong> <span>PO-12345</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6 mb-6">
+            <div class="border border-gray-300 rounded-md p-4 bg-gray-50 print:bg-transparent">
+                <div class="font-bold text-blue-900 border-b border-gray-300 pb-1 mb-2 text-base">ส่งถึง (Customer)</div>
+                <p class="m-0 mb-1"><strong class="text-gray-900">บริษัท ตัวอย่าง จำกัด</strong></p>
+                <p class="m-0 mb-1">ผู้ติดต่อ: คุณสมชาย ใจดี</p>
+                <p class="m-0 mb-1">เบอร์โทร: 081-999-9999</p>
+                <p class="m-0">เลขประจำตัวผู้เสียภาษี: 0105599999999</p>
+            </div>
+            <div class="border border-gray-300 rounded-md p-4 bg-gray-50 print:bg-transparent">
+                <div class="font-bold text-blue-900 border-b border-gray-300 pb-1 mb-2 text-base">สถานที่จัดส่ง (Shipping Address)</div>
+                <p class="m-0 mb-1"><strong class="text-gray-900">ศูนย์กระจายสินค้า โกดัง B</strong></p>
+                <p class="m-0 mb-1">456 ถนนบางนา-ตราด กม.10</p>
+                <p class="m-0 mb-1">ตำบลบางพลีใหญ่ อำเภอบางพลี</p>
+                <p class="m-0">สมุทรปราการ 10540</p>
+            </div>
+        </div>
+
+        <table class="w-full border-collapse mb-8">
+            <thead>
+                <tr>
+                    <th class="border border-gray-300 bg-blue-900 text-white font-medium py-2 px-3 text-center w-[5%]">ลำดับ</th>
+                    <th class="border border-gray-300 bg-blue-900 text-white font-medium py-2 px-3 text-center w-[15%]">รหัสสินค้า</th>
+                    <th class="border border-gray-300 bg-blue-900 text-white font-medium py-2 px-3 text-left w-[45%]">รายละเอียดสินค้า</th>
+                    <th class="border border-gray-300 bg-blue-900 text-white font-medium py-2 px-3 text-center w-[10%]">จำนวน</th>
+                    <th class="border border-gray-300 bg-blue-900 text-white font-medium py-2 px-3 text-center w-[10%]">หน่วย</th>
+                    <th class="border border-gray-300 bg-blue-900 text-white font-medium py-2 px-3 text-center w-[15%]">หมายเหตุ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="border border-gray-300 py-2 px-3 text-center">1</td>
+                    <td class="border border-gray-300 py-2 px-3 text-center">PRD-001</td>
+                    <td class="border border-gray-300 py-2 px-3">จอแสดงผล Monitor 24 นิ้ว IPS</td>
+                    <td class="border border-gray-300 py-2 px-3 text-center font-medium">5</td>
+                    <td class="border border-gray-300 py-2 px-3 text-center">เครื่อง</td>
+                    <td class="border border-gray-300 py-2 px-3 text-gray-500"></td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-300 py-2 px-3 text-center">2</td>
+                    <td class="border border-gray-300 py-2 px-3 text-center">PRD-045</td>
+                    <td class="border border-gray-300 py-2 px-3">คีย์บอร์ดไร้สาย Mechanical</td>
+                    <td class="border border-gray-300 py-2 px-3 text-center font-medium">10</td>
+                    <td class="border border-gray-300 py-2 px-3 text-center">ชิ้น</td>
+                    <td class="border border-gray-300 py-2 px-3 text-gray-500"></td>
+                </tr>
+                <tr>
+                    <td class="border border-gray-300 py-2 px-3 text-center">3</td>
+                    <td class="border border-gray-300 py-2 px-3 text-center">PRD-088</td>
+                    <td class="border border-gray-300 py-2 px-3">สาย HDMI 2.0 ความยาว 2 เมตร</td>
+                    <td class="border border-gray-300 py-2 px-3 text-center font-medium">10</td>
+                    <td class="border border-gray-300 py-2 px-3 text-center">เส้น</td>
+                    <td class="border border-gray-300 py-2 px-3 text-center text-gray-500">แถมฟรี</td>
+                </tr>
+                <tr><td class="border border-gray-300 py-4 px-3">&nbsp;</td><td class="border border-gray-300"></td><td class="border border-gray-300"></td><td class="border border-gray-300"></td><td class="border border-gray-300"></td><td class="border border-gray-300"></td></tr>
+                <tr><td class="border border-gray-300 py-4 px-3">&nbsp;</td><td class="border border-gray-300"></td><td class="border border-gray-300"></td><td class="border border-gray-300"></td><td class="border border-gray-300"></td><td class="border border-gray-300"></td></tr>
+            </tbody>
         </table>
-      </div>
 
-      <div class="footer-grid">
-        <div class="remark">
-          <strong>หมายเหตุ / Remark:</strong>
-          <br />
-          1.
-          ผู้ซื้อได้รับสินค้าเรียบร้อยครบถ้วนตามรายการและจำนวนที่ระบุในเอกสารแล้ว
-          <br />
-          2. กรณีผิดนัดชำระเงิน ผู้ซื้อจำเป็นต้องจ่ายเบี้ยปรับ
-          และบริษัทมีสิทธิ์ดำเนินการทางกฎหมาย
-          <br />
-          3. กรรมสิทธิ์ในสินค้าจะเป็นของ บริษัท ถัง กู๊ดพาร์ท จำกัด
-          จนกว่าจะชำระครบถ้วน
-        </div>
-        <div class="totals-area">
-          <table class="totals-table">
-            <tr>
-              <td width="60%">ยอดรวม (Total)</td>
-              <td class="text-right">160,025.00</td>
-            </tr>
-            <tr>
-              <td>ภาษีมูลค่าเพิ่ม (VAT 0%)</td>
-              <td class="text-right">0.00</td>
-            </tr>
-            <tr>
-              <td>รวมเงินทั้งสิ้น (Grand Total) [cite: 37]</td>
-              <td class="text-right">160,025.00 [cite: 38]</td>
-            </tr>
-          </table>
-        </div>
-      </div>
+        <div class="mt-8 break-inside-avoid">
+            <div class="text-sm text-gray-600 mb-12">
+                <strong class="text-gray-900">หมายเหตุ:</strong><br>
+                1. กรุณาตรวจสอบความถูกต้องของสินค้าและจำนวนก่อนเซ็นรับ<br>
+                2. หากสินค้ามีตำหนิหรือไม่ตรงตามรายการ กรุณาแจ้งกลับภายใน 7 วันทำการ
+            </div>
 
-      <div class="sig-container">
-        <div class="sig-box">
-          <span>ได้รับสินค้าตามรายการข้างต้นโดยถูกต้อง [cite: 35]</span>
-          <div>
-            <div class="sig-line"></div>
-            ผู้รับสินค้า / Received By [cite: 40]
-          </div>
+            <div class="flex justify-between items-end mt-12 px-4">
+                <div class="w-[35%] text-center">
+                    <div class="border-b border-dashed border-gray-400 mb-2"></div>
+                    <p class="m-0 mb-1 text-gray-500">(..................................................)</p>
+                    <p class="m-0 mb-2 font-bold text-gray-900">ผู้ส่งสินค้า (Delivered by)</p>
+                    <p class="m-0 text-gray-600">วันที่: ______/______/______</p>
+                </div>
+
+                <div class="w-[35%] text-center">
+                    <p class="text-left text-xs text-gray-600 mb-6">ได้รับสินค้าตามรายการข้างต้นในสภาพเรียบร้อยแล้ว</p>
+                    <div class="border-b border-dashed border-gray-400 mb-2"></div>
+                    <p class="m-0 mb-1 text-gray-500">(..................................................)</p>
+                    <p class="m-0 mb-2 font-bold text-gray-900">ผู้รับสินค้า (Received by)</p>
+                    <p class="m-0 text-gray-600">วันที่: ______/______/______</p>
+                </div>
+            </div>
         </div>
-        <div class="sig-box">
-          <span>&nbsp;</span>
-          <div>
-            <div class="sig-line"></div>
-            ผู้ส่งสินค้า / Delivered By [cite: 41]
-          </div>
-        </div>
-        <div class="sig-box">
-          <span>ในนาม บริษัท ถัง กู๊ดพาร์ท จำกัด [cite: 39]</span>
-          <div>
-            <div class="sig-line"></div>
-            ผู้มีอำนาจลงนาม / Authorized Signature [cite: 47]
-          </div>
-        </div>
-      </div>
+
     </div>
-  </body>
+
+</body>
 </html>

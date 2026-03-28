@@ -162,7 +162,7 @@ class PurchaseOrderInfolist
                                             ->tooltip('แก้ไข')
                                             ->color('warning')
                                             ->visible(fn($record): bool => $record->status->value === 'draft')
-                                            ->form([
+                                            ->schema([
                                                 \Filament\Schemas\Components\Grid::make(3)
                                                     ->schema([
                                                         \Filament\Forms\Components\Select::make('product_id')

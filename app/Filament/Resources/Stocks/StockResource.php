@@ -31,6 +31,8 @@ class StockResource extends Resource
 
     protected static ?string $pluralModelLabel = 'สต๊อกสินค้า';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function form(Schema $schema): Schema
     {
         return StockForm::configure($schema);

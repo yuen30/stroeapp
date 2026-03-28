@@ -81,6 +81,8 @@ class DocumentObserver
             'tax_invoice' => 'INV',
             'stock_reservation' => 'RESV',
             'contact' => 'CONT',
+            'payment_method' => 'PM',
+            'payment_status' => 'PS',
         ];
 
         if (! isset($prefixes[$type])) {

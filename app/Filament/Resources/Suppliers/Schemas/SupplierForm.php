@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Suppliers\Schemas;
 
+use App\Models\Company;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -21,7 +22,7 @@ class SupplierForm
                     ->description('การแก้ไขข้อมูลผู้จัดจำหน่ายจะส่งผลต่อใบสั่งซื้อและเอกสารที่เกี่ยวข้องทั้งหมด')
                     ->warning()
                     ->icon(Heroicon::ExclamationTriangle)
-                    ->visible(fn($context) => $context === 'edit')
+                    ->visible(fn ($context) => $context === 'edit')
                     ->columnSpanFull(),
                 Section::make('ข้อมูลทั่วไป')
                     ->description('ข้อมูลพื้นฐานของผู้จัดจำหน่าย')
@@ -36,6 +37,7 @@ class SupplierForm
                             ->preload()
                             ->native(false)
                             ->placeholder('เลือกบริษัท')
+                            ->default(fn () => Company::first()?->id)
                             ->columnSpanFull(),
                         TextInput::make('name')
                             ->label('ชื่อผู้จัดจำหน่าย')

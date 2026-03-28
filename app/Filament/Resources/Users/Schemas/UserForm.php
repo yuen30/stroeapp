@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use App\Enums\Roles;
+use App\Models\Branch;
+use App\Models\Company;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -25,7 +27,7 @@ class UserForm
                     ->icon(Heroicon::ExclamationTriangle)
                     ->description('การแก้ไขข้อมูลผู้ใช้จะส่งผลต่อสิทธิ์การเข้าถึงระบบ กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนบันทึก')
                     ->color(null)
-                    ->visible(fn($operation) => $operation === 'edit')
+                    ->visible(fn ($operation) => $operation === 'edit')
                     ->columnSpanFull(),
                 // รูปโปรไฟล์
                 FileUpload::make('profile_photo_path')
@@ -85,13 +87,15 @@ class UserForm
                             ->preload()
                             ->required()
                             ->helperText('เลือกบริษัทที่ผู้ใช้สังกัด')
-                            ->live(),
+                            ->live()
+                            ->default(fn () => Company::first()?->id),
                         Select::make('branch_id')
                             ->label('สาขา')
                             ->relationship('branch', 'name')
                             ->searchable()
                             ->preload()
-                            ->helperText('เลือกสาขาที่ผู้ใช้สังกัด (ถ้ามี)'),
+                            ->helperText('เลือกสาขาที่ผู้ใช้สังกัด (ถ้ามี)')
+                            ->default(fn () => Branch::where('is_headquarter', true)->first()?->id),
                     ])
                     ->columns(2)
                     ->collapsible(),
@@ -103,8 +107,8 @@ class UserForm
                         TextInput::make('password')
                             ->label('รหัสผ่าน')
                             ->password()
-                            ->required(fn($operation) => $operation === 'create')
-                            ->dehydrated(fn($state) => filled($state))
+                            ->required(fn ($operation) => $operation === 'create')
+                            ->dehydrated(fn ($state) => filled($state))
                             ->minLength(8)
                             ->maxLength(255)
                             ->placeholder('••••••••')

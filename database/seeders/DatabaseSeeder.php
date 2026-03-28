@@ -7,6 +7,8 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Company;
 use App\Models\Customer;
+use App\Models\PaymentMethod;
+use App\Models\PaymentStatus;
 use App\Models\Product;
 use App\Models\Stock;
 use App\Models\Supplier;
@@ -53,6 +55,40 @@ class DatabaseSeeder extends Seeder
 
         // 0. Setup Global Document Running Numbers (after company/branch created)
         (new DocumentRunningNumberSeeder)->run();
+
+        // 0b. Create Payment Methods
+        $paymentMethods = [
+            ['code' => 'CASH', 'name' => 'เงินสด', 'description' => 'ชำระเงินสด ณ จุดรับชำระเงิน', 'sort_order' => 1],
+            ['code' => 'CREDIT', 'name' => 'บัตรเครดิต', 'description' => 'ชำระเงินผ่านบัตรเครดิต/เดบิต', 'sort_order' => 2],
+            ['code' => 'TRANSFER', 'name' => 'โอนเงิน', 'description' => 'โอนเงินผ่านธนาคาร', 'sort_order' => 3],
+            ['code' => 'QRCODE', 'name' => 'QR Code', 'description' => 'สแกน QR Code ผ่านแอปธนาคาร', 'sort_order' => 4],
+            ['code' => 'CHEQUE', 'name' => 'เช็ค', 'description' => 'ชำระด้วยเช็ค', 'sort_order' => 5],
+            ['code' => 'CREDIT_TERM', 'name' => 'เครดิต', 'description' => 'ชำระเงินตามระยะเวลาสินเชื่อที่กำหนด', 'sort_order' => 6],
+        ];
+
+        foreach ($paymentMethods as $method) {
+            PaymentMethod::firstOrCreate(
+                ['code' => $method['code']],
+                array_merge($method, ['is_active' => true])
+            );
+        }
+
+        // 0c. Create Payment Statuses
+        $paymentStatuses = [
+            ['code' => 'PENDING', 'name' => 'รอชำระเงิน', 'color' => '#F59E0B', 'description' => 'รอการชำระเงิน', 'sort_order' => 1],
+            ['code' => 'PAID', 'name' => 'ชำระแล้ว', 'color' => '#22C55E', 'description' => 'ชำระเงินเรียบร้อยแล้ว', 'sort_order' => 2],
+            ['code' => 'OVERDUE', 'name' => 'เกินกำหนด', 'color' => '#EF4444', 'description' => 'เกินกำหนดชำระเงิน', 'sort_order' => 3],
+            ['code' => 'CANCELLED', 'name' => 'ยกเลิก', 'color' => '#6B7280', 'description' => 'ยกเลิกการชำระเงิน', 'sort_order' => 4],
+            ['code' => 'PARTIAL', 'name' => 'ชำระบางส่วน', 'color' => '#3B82F6', 'description' => 'ชำระเงินบางส่วน', 'sort_order' => 5],
+            ['code' => 'REFUNDED', 'name' => 'คืนเงิน', 'color' => '#8B5CF6', 'description' => 'คืนเงินให้ลูกค้า', 'sort_order' => 6],
+        ];
+
+        foreach ($paymentStatuses as $status) {
+            PaymentStatus::firstOrCreate(
+                ['code' => $status['code']],
+                array_merge($status, ['is_active' => true])
+            );
+        }
 
         // Create Branch (use firstOrCreate to let Observer generate code)
         $branch = Branch::firstOrCreate(

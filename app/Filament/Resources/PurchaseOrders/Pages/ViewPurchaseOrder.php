@@ -28,7 +28,7 @@ class ViewPurchaseOrder extends ViewRecord
                 ->visible(fn(): bool => $this->record->status->value === 'draft')
                 ->modalHeading('เพิ่มสินค้าในใบสั่งซื้อ')
                 ->modalWidth('4xl')
-                ->form([
+                ->schema([
                     \Filament\Schemas\Components\Grid::make(3)
                         ->schema([
                             \Filament\Forms\Components\Select::make('product_id')
@@ -190,7 +190,7 @@ class ViewPurchaseOrder extends ViewRecord
                 ->visible(fn(): bool => in_array($this->record->status->value, ['confirmed', 'partially_received']))
                 ->modalHeading('สร้างใบรับสินค้า')
                 ->modalWidth('3xl')
-                ->form([
+                ->schema([
                     \Filament\Schemas\Components\Grid::make(2)
                         ->schema([
                             \Filament\Forms\Components\DatePicker::make('document_date')

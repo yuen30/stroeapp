@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ใบส่งของ - Delivery Note</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ตั้งค่าพื้นฐาน */
+        :root {
+            --primary-color: #1e3a8a; /* สีหลักของบริษัท (ปรับเปลี่ยนได้) */
+            --text-color: #374151;
+            --border-color: #d1d5db;
+            --bg-gray: #f9fafb;
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            color: var(--text-color);
+            background-color: #e5e7eb; /* สีพื้นหลังเบราว์เซอร์ */
+            margin: 0;
+            padding: 20px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* ตั้งค่าขนาดกระดาษ A4 */
+        .document-container {
+            width: 210mm;
+            min-height: 297mm;
+            background-color: #ffffff;
+            margin: 0 auto;
+            padding: 15mm 20mm;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* ปุ่ม Print (ซ่อนเมื่อสั่งปริ้น) */
+        .print-btn-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .btn-print {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-family: 'Sarabun', sans-serif;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-print:hover { background-color: #152c68; }
+
+        /* ส่วนหัวเอกสาร */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .company-info h1 {
+            color: var(--primary-color);
+            margin: 0 0 5px 0;
+            font-size: 24px;
+        }
+        .company-info p { margin: 2px 0; }
+        .document-title {
+            text-align: right;
+        }
+        .document-title h2 {
+            font-size: 28px;
+            color: var(--primary-color);
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .doc-meta {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            text-align: left;
+            row-gap: 5px;
+        }
+        .doc-meta strong { color: #111827; }
+
+        /* ข้อมูลลูกค้าและสถานที่จัดส่ง */
+        .customer-section {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .box {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 12px;
+            background-color: var(--bg-gray);
+        }
+        .box-title {
+            font-weight: 700;
+            color: var(--primary-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        .box p { margin: 4px 0; }
+
+        /* ตารางรายการสินค้า */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+        }
+        th {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            font-weight: 500;
+            text-align: center;
+        }
+        td.center { text-align: center; }
+        td.right { text-align: right; }
+
+        /* จัดความกว้างคอลัมน์ */
+        .col-no { width: 5%; }
+        .col-code { width: 15%; }
+        .col-desc { width: 45%; }
+        .col-qty { width: 10%; }
+        .col-unit { width: 10%; }
+        .col-note { width: 15%; }
+
+        /* ส่วนท้ายเอกสาร */
+        .footer {
+            margin-top: 30px;
+        }
+        .remarks {
+            font-size: 13px;
+            color: #4b5563;
+            margin-bottom: 40px;
+        }
+
+        /* ลายเซ็น */
+        .signatures {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            page-break-inside: avoid;
+        }
+        .sign-box {
+            width: 35%;
+            text-align: center;
+        }
+        .sign-line {
+            border-bottom: 1px dashed #9ca3af;
+            margin: 40px 10px 10px 10px;
+            height: 1px;
+        }
+        .sign-box p { margin: 5px 0; }
+
+        /* การตั้งค่าสำหรับการ Print */
+        @media print {
+            body { background-color: #ffffff; padding: 0; }
+            .document-container { box-shadow: none; margin: 0; padding: 10mm; width: 100%; }
+            .print-btn-container { display: none; }
+            /* บังคับให้พิมพ์พื้นหลังสี (บางเบราว์เซอร์อาจต้องตั้งค่าเพิ่มตอนสั่งพิมพ์) */
+            th { background-color: var(--primary-color) !important; color: white !important; }
+            .box { background-color: var(--bg-gray) !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="print-btn-container">
+        <button class="btn-print" onclick="window.print()">🖨️ พิมพ์เอกสาร</button>
+    </div>
+
+    <div class="document-container">
+
+        <div class="header">
+            <div class="company-info">
+                <h1>บริษัท คลาวด์ เทค จำกัด</h1>
+                <p>123 ถนนสุขุมวิท แขวงคลองเตยเหนือ</p>
+                <p>เขตวัฒนา กรุงเทพมหานคร 10110</p>
+                <p>โทรศัพท์: 02-123-4567 | อีเมล: info@cloudtech.co.th</p>
+                <p>เลขประจำตัวผู้เสียภาษี: 01055xxxxxxxx</p>
+            </div>
+            <div class="document-title">
+                <h2>ใบส่งของ</h2>
+                <div class="doc-meta">
+                    <strong>เลขที่:</strong> <span>DN-2603-001</span>
+                    <strong>วันที่:</strong> <span>28 มี.ค. 2026</span>
+                    <strong>อ้างอิง PO:</strong> <span>PO-12345</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="customer-section">
+            <div class="box">
+                <div class="box-title">ส่งถึง (Customer)</div>
+                <p><strong>บริษัท ตัวอย่าง จำกัด</strong></p>
+                <p>ผู้ติดต่อ: คุณสมชาย ใจดี</p>
+                <p>เบอร์โทร: 081-999-9999</p>
+                <p>เลขประจำตัวผู้เสียภาษี: 0105599999999</p>
+            </div>
+            <div class="box">
+                <div class="box-title">สถานที่จัดส่ง (Shipping Address)</div>
+                <p><strong>ศูนย์กระจายสินค้า โกดัง B</strong></p>
+                <p>456 ถนนบางนา-ตราด กม.10</p>
+                <p>ตำบลบางพลีใหญ่ อำเภอบางพลี</p>
+                <p>สมุทรปราการ 10540</p>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-no">ลำดับ</th>
+                    <th class="col-code">รหัสสินค้า</th>
+                    <th class="col-desc">รายละเอียดสินค้า</th>
+                    <th class="col-qty">จำนวน</th>
+                    <th class="col-unit">หน่วย</th>
+                    <th class="col-note">หมายเหตุ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="center">1</td>
+                    <td class="center">PRD-001</td>
+                    <td>จอแสดงผล Monitor 24 นิ้ว IPS</td>
+                    <td class="center">5</td>
+                    <td class="center">เครื่อง</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="center">2</td>
+                    <td class="center">PRD-045</td>
+                    <td>คีย์บอร์ดไร้สาย Mechanical</td>
+                    <td class="center">10</td>
+                    <td class="center">ชิ้น</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="center">3</td>
+                    <td class="center">PRD-088</td>
+                    <td>สาย HDMI 2.0 ความยาว 2 เมตร</td>
+                    <td class="center">10</td>
+                    <td class="center">เส้น</td>
+                    <td>แถมฟรี</td>
+                </tr>
+                <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>
+                <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>
+            </tbody>
+        </table>
+
+        <div class="footer">
+            <div class="remarks">
+                <strong>หมายเหตุ:</strong><br>
+                1. กรุณาตรวจสอบความถูกต้องของสินค้าและจำนวนก่อนเซ็นรับ<br>
+                2. หากสินค้ามีตำหนิหรือไม่ตรงตามรายการ กรุณาแจ้งกลับภายใน 7 วันทำการ
+            </div>
+
+            <div class="signatures">
+                <div class="sign-box">
+                    <div class="sign-line"></div>
+                    <p>(..................................................)</p>
+                    <p><strong>ผู้ส่งสินค้า (Delivered by)</strong></p>
+                    <p>วันที่: ______/______/______</p>
+                </div>
+
+                <div class="sign-box">
+                    <p style="text-align: left; font-size: 12px; margin-bottom: 20px;">ได้รับสินค้าตามรายการข้างต้นในสภาพเรียบร้อยแล้ว</p>
+                    <div class="sign-line"></div>
+                    <p>(..................................................)</p>
+                    <p><strong>ผู้รับสินค้า (Received by)</strong></p>
+                    <p>วันที่: ______/______/______</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

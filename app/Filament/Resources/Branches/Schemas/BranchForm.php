@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Branches\Schemas;
 
+use App\Models\Company;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -23,7 +24,7 @@ class BranchForm
                     ->icon(Heroicon::ExclamationTriangle)
                     ->description('การแก้ไขข้อมูลสาขาจะส่งผลต่อเอกสารและรายงานทั้งหมดในระบบ กรุณาตรวจสอบข้อมูลให้ถูกต้องก่อนบันทึก')
                     ->color(null)
-                    ->visible(fn($operation) => $operation === 'edit')
+                    ->visible(fn ($operation) => $operation === 'edit')
                     ->columnSpanFull(),
                 // ข้อมูลทั่วไป
                 Section::make('ข้อมูลทั่วไป')
@@ -37,6 +38,7 @@ class BranchForm
                             ->searchable()
                             ->preload()
                             ->helperText('เลือกบริษัทที่สาขานี้สังกัด')
+                            ->default(fn () => Company::first()?->id)
                             ->columnSpanFull(),
                         TextInput::make('name')
                             ->label('ชื่อสาขา')

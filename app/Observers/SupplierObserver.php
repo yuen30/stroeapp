@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Supplier;
+use Illuminate\Support\Facades\Auth;
 
 class SupplierObserver
 {
@@ -15,7 +16,7 @@ class SupplierObserver
 
         // กำหนด company_id ตาม user ที่ login ถ้ายังไม่มี
         if (empty($supplier->company_id)) {
-            $supplier->company_id = auth()->user()?->company_id;
+            $supplier->company_id = Auth::user()?->company_id;
         }
 
         // กำหนดสถานะเริ่มต้น

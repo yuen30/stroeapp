@@ -29,15 +29,6 @@ class SaleOrderItemObserver
     }
 
     /**
-     * Handle the SaleOrderItem "updating" event.
-     */
-    public function updating(SaleOrderItem $item): void
-    {
-        // เก็บ quantity เดิมไว้สำหรับ updated event
-        $item->_oldQuantity = $item->getOriginal('quantity');
-    }
-
-    /**
      * Handle the SaleOrderItem "updated" event.
      */
     public function updated(SaleOrderItem $item): void
@@ -45,10 +36,8 @@ class SaleOrderItemObserver
         // อัพเดทการจองถ้าเปลี่ยน quantity ในสถานะ draft
         if ($item->saleOrder->status === OrderStatus::Draft &&
                 $item->wasChanged('quantity')) {
-            $this->reservationService->updateReservation(
-                $item,
-                $item->_oldQuantity
-            );
+            $oldQuantity = $item->getOriginal('quantity');
+            $this->reservationService->updateReservation($item, $oldQuantity);
         }
 
         $this->recalculateSaleOrderTotals($item);
@@ -72,7 +61,7 @@ class SaleOrderItemObserver
     {
         $saleOrder = $item->saleOrder;
 
-        if (!$saleOrder) {
+        if (! $saleOrder) {
             return;
         }
 
@@ -81,7 +70,7 @@ class SaleOrderItemObserver
 
         // คำนวณยอดรวมสุทธิ = ยอดรวม - ส่วนลด + VAT
         $discountAmount = $saleOrder->discount_amount ?? 0;
-        $vatAmount = ($subtotal - $discountAmount) * 0.07;
+        $vatAmount = $saleOrder->vat_amount ?? 0;
         $totalAmount = $subtotal - $discountAmount + $vatAmount;
 
         // อัพเดทยอดเงินโดยไม่ trigger observer อีกรอบ

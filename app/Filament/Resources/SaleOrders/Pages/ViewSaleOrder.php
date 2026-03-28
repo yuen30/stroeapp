@@ -34,10 +34,10 @@ class ViewSaleOrder extends ViewRecord
                 ->label('เพิ่มสินค้า')
                 ->icon(Heroicon::Plus)
                 ->color('success')
-                ->visible(fn (): bool => $this->record->status->value === 'draft')
+                // ->visible(fn (): bool => $this->record->status->value === 'draft')
                 ->modalHeading('เพิ่มสินค้าในใบสั่งขาย')
                 ->modalWidth('4xl')
-                ->form([
+                ->schema([
                     Grid::make(3)
                         ->schema([
                             Select::make('product_id')
@@ -63,11 +63,11 @@ class ViewSaleOrder extends ViewRecord
                                 ->label('สต็อกคงเหลือ')
                                 ->content(function (callable $get) {
                                     $productId = $get('product_id');
-                                    if (! $productId) {
+                                    if (!$productId) {
                                         return '-';
                                     }
                                     $product = Product::find($productId);
-                                    if (! $product) {
+                                    if (!$product) {
                                         return '-';
                                     }
                                     $totalStock = $product->stock_quantity;
@@ -78,13 +78,13 @@ class ViewSaleOrder extends ViewRecord
                                     return new HtmlString('
                                         <div class="space-y-2">
                                             <div class="flex items-center gap-4">
-                                                <span class="text-'.$color.'-600 dark:text-'.$color.'-400 font-bold text-2xl">'
-                                        .number_format($available).' หน่วย</span>
+                                                <span class="text-' . $color . '-600 dark:text-' . $color . '-400 font-bold text-2xl">'
+                                        . number_format($available) . ' หน่วย</span>
                                                 <span class="text-sm text-gray-500 dark:text-gray-400">พร้อมใช้งาน</span>
                                             </div>
                                             <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                                                <div>สต็อกทั้งหมด: <span class="font-semibold">'.number_format($totalStock).'</span></div>
-                                                '.($reserved > 0 ? '<div class="text-warning-600 dark:text-warning-400">ถูกจอง: <span class="font-semibold">'.number_format($reserved).'</span></div>' : '').'
+                                                <div>สต็อกทั้งหมด: <span class="font-semibold">' . number_format($totalStock) . '</span></div>
+                                                ' . ($reserved > 0 ? '<div class="text-warning-600 dark:text-warning-400">ถูกจอง: <span class="font-semibold">' . number_format($reserved) . '</span></div>' : '') . '
                                             </div>
                                         </div>
                                     ');
@@ -103,11 +103,11 @@ class ViewSaleOrder extends ViewRecord
                                 ->suffix('หน่วย')
                                 ->helperText(function (callable $get) {
                                     $productId = $get('product_id');
-                                    if (! $productId) {
+                                    if (!$productId) {
                                         return null;
                                     }
                                     $product = Product::find($productId);
-                                    if (! $product) {
+                                    if (!$product) {
                                         return null;
                                     }
                                     $available = $product->available_stock;
@@ -146,7 +146,7 @@ class ViewSaleOrder extends ViewRecord
                                     $set('total_price', ($unitPrice * $quantity) - $state);
                                 }),
                             Text::make(
-                                fn (callable $get): string => '฿ '.number_format(
+                                fn(callable $get): string => '฿ ' . number_format(
                                     (($get('unit_price') ?? 0) * ($get('quantity') ?? 0)) - ($get('discount') ?? 0),
                                     2
                                 )
@@ -161,7 +161,7 @@ class ViewSaleOrder extends ViewRecord
                 ->action(function (array $data) {
                     // ตรวจสอบสต็อกก่อนเพิ่มสินค้า
                     $product = Product::find($data['product_id']);
-                    if (! $product) {
+                    if (!$product) {
                         Notification::make()
                             ->danger()
                             ->title('ไม่พบสินค้า')
@@ -252,7 +252,7 @@ class ViewSaleOrder extends ViewRecord
                 ->label('ยืนยันใบสั่งขาย')
                 ->icon(Heroicon::CheckCircle)
                 ->color('info')
-                ->visible(fn (): bool => $this->record->status->value === 'draft')
+                ->visible(fn(): bool => $this->record->status->value === 'draft')
                 ->requiresConfirmation()
                 ->modalHeading('ยืนยันใบสั่งขาย')
                 ->modalDescription(function () {
@@ -273,11 +273,11 @@ class ViewSaleOrder extends ViewRecord
                             <div class="space-y-2">
                                 <p class="text-danger-600 dark:text-danger-400 font-semibold">⚠️ วงเงินเครดิตไม่เพียงพอ!</p>
                                 <div class="text-sm space-y-1">
-                                    <p>วงเงินทั้งหมด: <span class="font-semibold">'.number_format($customer->credit_limit, 2).' ฿</span></p>
-                                    <p>ยอดค้างชำระ: <span class="font-semibold">'.number_format($outstanding, 2).' ฿</span></p>
-                                    <p>วงเงินคงเหลือ: <span class="font-semibold text-danger-600">'.number_format($remaining, 2).' ฿</span></p>
-                                    <p>ยอดใบสั่งขายนี้: <span class="font-semibold">'.number_format($orderAmount, 2).' ฿</span></p>
-                                    <p class="text-danger-600 dark:text-danger-400 font-semibold mt-2">เกินวงเงิน: '.number_format($orderAmount - $remaining, 2).' ฿</p>
+                                    <p>วงเงินทั้งหมด: <span class="font-semibold">' . number_format($customer->credit_limit, 2) . ' ฿</span></p>
+                                    <p>ยอดค้างชำระ: <span class="font-semibold">' . number_format($outstanding, 2) . ' ฿</span></p>
+                                    <p>วงเงินคงเหลือ: <span class="font-semibold text-danger-600">' . number_format($remaining, 2) . ' ฿</span></p>
+                                    <p>ยอดใบสั่งขายนี้: <span class="font-semibold">' . number_format($orderAmount, 2) . ' ฿</span></p>
+                                    <p class="text-danger-600 dark:text-danger-400 font-semibold mt-2">เกินวงเงิน: ' . number_format($orderAmount - $remaining, 2) . ' ฿</p>
                                 </div>
                                 <p class="text-warning-600 dark:text-warning-400 mt-2">คุณยังคงต้องการยืนยันใบสั่งขายนี้หรือไม่?</p>
                             </div>
@@ -293,10 +293,10 @@ class ViewSaleOrder extends ViewRecord
                             <p>คุณแน่ใจหรือไม่ว่าต้องการยืนยันใบสั่งขายนี้? หลังจากยืนยันแล้วระบบจะตัดสต็อกสินค้า</p>
                             <div class="text-sm space-y-1 mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded">
                                 <p class="font-semibold mb-2">ข้อมูลวงเงินเครดิต:</p>
-                                <p>วงเงินทั้งหมด: <span class="font-semibold">'.number_format($customer->credit_limit, 2).' ฿</span></p>
-                                <p>ยอดค้างชำระปัจจุบัน: <span class="font-semibold">'.number_format($outstanding, 2).' ฿</span> ('.number_format($percentage, 1).'%)</p>
-                                <p>ยอดใบสั่งขายนี้: <span class="font-semibold">'.number_format($orderAmount, 2).' ฿</span></p>
-                                <p class="text-success-600 dark:text-success-400">วงเงินคงเหลือหลังยืนยัน: <span class="font-semibold">'.number_format($remaining - $orderAmount, 2).' ฿</span> ('.number_format(100 - $newPercentage, 1).'%)</p>
+                                <p>วงเงินทั้งหมด: <span class="font-semibold">' . number_format($customer->credit_limit, 2) . ' ฿</span></p>
+                                <p>ยอดค้างชำระปัจจุบัน: <span class="font-semibold">' . number_format($outstanding, 2) . ' ฿</span> (' . number_format($percentage, 1) . '%)</p>
+                                <p>ยอดใบสั่งขายนี้: <span class="font-semibold">' . number_format($orderAmount, 2) . ' ฿</span></p>
+                                <p class="text-success-600 dark:text-success-400">วงเงินคงเหลือหลังยืนยัน: <span class="font-semibold">' . number_format($remaining - $orderAmount, 2) . ' ฿</span> (' . number_format(100 - $newPercentage, 1) . '%)</p>
                             </div>
                         </div>
                     ');
@@ -334,11 +334,11 @@ class ViewSaleOrder extends ViewRecord
                         }
                     }
 
-                    if (! empty($insufficientStock)) {
+                    if (!empty($insufficientStock)) {
                         Notification::make()
                             ->danger()
                             ->title('สต็อกสินค้าไม่เพียงพอ')
-                            ->body('สินค้าต่อไปนี้มีสต็อกไม่เพียงพอ: '.implode(', ', $insufficientStock))
+                            ->body('สินค้าต่อไปนี้มีสต็อกไม่เพียงพอ: ' . implode(', ', $insufficientStock))
                             ->duration(10000)
                             ->send();
 
@@ -357,7 +357,7 @@ class ViewSaleOrder extends ViewRecord
                             Notification::make()
                                 ->warning()
                                 ->title('เกินวงเงินเครดิต')
-                                ->body('ใบสั่งขายนี้เกินวงเงินเครดิตที่เหลือ '.number_format($orderAmount - $remaining, 2).' ฿')
+                                ->body('ใบสั่งขายนี้เกินวงเงินเครดิตที่เหลือ ' . number_format($orderAmount - $remaining, 2) . ' ฿')
                                 ->duration(10000)
                                 ->send();
                         }
@@ -370,7 +370,7 @@ class ViewSaleOrder extends ViewRecord
                         Notification::make()
                             ->success()
                             ->title('ยืนยันใบสั่งขายสำเร็จ')
-                            ->body('ใบสั่งขายเลขที่ '.$this->record->invoice_number.' ได้รับการยืนยันแล้ว สต็อกถูกตัดและการจองถูกปลดล็อคอัตโนมัติ')
+                            ->body('ใบสั่งขายเลขที่ ' . $this->record->invoice_number . ' ได้รับการยืนยันแล้ว สต็อกถูกตัดและการจองถูกปลดล็อคอัตโนมัติ')
                             ->send();
                     } catch (\Exception $e) {
                         Notification::make()
@@ -381,23 +381,23 @@ class ViewSaleOrder extends ViewRecord
                             ->send();
                     }
                 }),
-            Actions\Action::make('createTaxInvoice')
-                ->label('สร้างใบกำกับภาษี')
-                ->icon(Heroicon::DocumentText)
-                ->color('primary')
-                ->visible(fn (): bool => $this->record->status->value === 'confirmed')
-                ->disabled(fn (): bool => $this->record->taxInvoices()->exists())
-                ->tooltip(fn (): ?string => $this->record->taxInvoices()->exists()
-                    ? 'มีใบกำกับภาษีสำหรับใบสั่งขายนี้แล้ว'
-                    : null)
-                ->url(fn () => route('filament.store.resources.tax-invoices.create', [
-                    'sale_order_id' => $this->record->id,
-                ])),
+            // Actions\Action::make('createTaxInvoice')
+            //     ->label('สร้างใบกำกับภาษี')
+            //     ->icon(Heroicon::DocumentText)
+            //     ->color('primary')
+            //     ->visible(fn (): bool => $this->record->status->value === 'confirmed')
+            //     ->disabled(fn (): bool => $this->record->taxInvoices()->exists())
+            //     ->tooltip(fn (): ?string => $this->record->taxInvoices()->exists()
+            //         ? 'มีใบกำกับภาษีสำหรับใบสั่งขายนี้แล้ว'
+            //         : null)
+            //     ->url(fn () => route('filament.store.resources.tax-invoices.create', [
+            //         'sale_order_id' => $this->record->id,
+            //     ])),
             Actions\Action::make('printPdf')
-                ->label('พิมพ์/PDF')
-                ->icon(Heroicon::Printer)
+                ->label('พิมพ์ใบสั่งขาย')
+                ->icon(Heroicon::DocumentText)
                 ->color('gray')
-                ->visible(fn (): bool => $this->record->status->value === 'confirmed')
+                ->visible(fn(): bool => $this->record->status->value === 'confirmed')
                 ->action(function () {
                     $saleOrder = $this->record->load(['company', 'branch', 'customer', 'items.product.unit', 'creator']);
 
@@ -405,18 +405,56 @@ class ViewSaleOrder extends ViewRecord
                         'saleOrder' => $saleOrder,
                     ]);
 
-                    $tempFile = tempnam(sys_get_temp_dir(), 'pdf_').'.pdf';
+                    $tempFile = tempnam(sys_get_temp_dir(), 'pdf_') . '.pdf';
                     file_put_contents($tempFile, $pdf->output());
 
-                    return response()->download($tempFile, 'SO-'.$this->record->invoice_number.'.pdf', [
+                    return response()->download($tempFile, 'SO-' . $this->record->invoice_number . '.pdf', [
                         'Content-Type' => 'application/pdf',
                     ])->deleteFileAfterSend(true);
                 }),
+            Actions\Action::make('printDeliveryNote')
+                ->label('พิมพ์ใบส่งของ')
+                ->icon(Heroicon::Truck)
+                ->color('info')
+                ->visible(fn(): bool => $this->record->status->value === 'confirmed')
+                ->action(function () {
+                    $saleOrder = $this->record->load(['company', 'branch', 'customer', 'items.product.unit', 'creator', 'salesman', 'paymentMethod']);
+
+                    $pdf = Pdf::loadView('pdf.delivery-note', [
+                        'saleOrder' => $saleOrder,
+                    ]);
+
+                    $tempFile = tempnam(sys_get_temp_dir(), 'pdf_') . '.pdf';
+                    file_put_contents($tempFile, $pdf->output());
+
+                    return response()->download($tempFile, 'DN-' . $saleOrder->invoice_number . '.pdf', [
+                        'Content-Type' => 'application/pdf',
+                    ])->deleteFileAfterSend(true);
+                }),
+            // Actions\Action::make('printInvoice')
+            //     ->label('พิมพ์ใบแจ้งหนี้')
+            //     ->icon(Heroicon::DocumentText)
+            //     ->color('warning')
+            //     ->visible(fn (): bool => in_array($this->record->status->value, ['confirmed', 'completed']))
+            //     ->action(function () {
+            //         $saleOrder = $this->record->load(['company', 'branch', 'customer', 'items.product.unit', 'creator', 'salesman', 'paymentMethod']);
+
+            //         $pdf = Pdf::loadView('pdf.sale-invoice', [
+            //             'saleOrder' => $saleOrder,
+            //         ]);
+
+            //         $tempFile = tempnam(sys_get_temp_dir(), 'pdf_').'.pdf';
+            //         file_put_contents($tempFile, $pdf->output());
+
+            //         return response()->download($tempFile, 'INV-'.$saleOrder->invoice_number.'.pdf', [
+            //             'Content-Type' => 'application/pdf',
+            //         ])->deleteFileAfterSend(true);
+            //     }),
             Actions\Action::make('cancel')
                 ->label('ยกเลิก')
                 ->icon(Heroicon::XCircle)
                 ->color('danger')
-                ->visible(fn (): bool => in_array($this->record->status->value, ['draft', 'confirmed']))
+                ->visible(fn(): bool => in_array($this->record->status->value, ['draft', 'confirmed']))
                 ->requiresConfirmation()
                 ->modalHeading('ยกเลิกใบสั่งขาย')
                 ->modalDescription('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกใบสั่งขายนี้? ถ้ายืนยันแล้วระบบจะคืนสต็อกสินค้า')
@@ -426,18 +464,18 @@ class ViewSaleOrder extends ViewRecord
                     Notification::make()
                         ->success()
                         ->title('ยกเลิกใบสั่งขายสำเร็จ')
-                        ->body('ใบสั่งขายเลขที่ '.$this->record->invoice_number.' ถูกยกเลิกแล้ว สต็อกและการจองได้รับการคืนอัตโนมัติ')
+                        ->body('ใบสั่งขายเลขที่ ' . $this->record->invoice_number . ' ถูกยกเลิกแล้ว สต็อกและการจองได้รับการคืนอัตโนมัติ')
                         ->duration(3000)
                         ->send();
                 }),
             Actions\EditAction::make()
                 ->label('แก้ไข')
                 ->icon(Heroicon::PencilSquare)
-                ->visible(fn (): bool => $this->record->status->value === 'draft'),
+                ->visible(fn(): bool => $this->record->status->value === 'draft'),
             Actions\DeleteAction::make()
                 ->label('ลบ')
                 ->icon(Heroicon::Trash)
-                ->visible(fn (): bool => $this->record->status->value === 'draft'),
+                ->visible(fn(): bool => $this->record->status->value === 'draft'),
         ];
     }
 
@@ -447,7 +485,7 @@ class ViewSaleOrder extends ViewRecord
 
         $subtotal = $items->sum('total_price');
         $discountAmount = $this->record->discount_amount ?? 0;
-        $vatAmount = ($subtotal - $discountAmount) * 0.07;
+        $vatAmount = ($subtotal - $discountAmount) * 0.00;
         $totalAmount = $subtotal - $discountAmount + $vatAmount;
 
         $this->record->update([

@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\SaleOrders\Tables;
 
+use App\Enums\OrderStatus;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -24,15 +24,16 @@ class SaleOrdersTable
                 TextColumn::make('customer.name')->label('ลูกค้า')->searchable()->sortable()->icon('heroicon-o-user-group')->iconColor('info'),
                 TextColumn::make('order_date')->label('วันที่สั่งซื้อ')->date('d/m/Y')->sortable()->icon('heroicon-o-calendar'),
                 TextColumn::make('status')->label('สถานะ')->badge()->sortable()->alignCenter(),
-                TextColumn::make('payment_status')->label('สถานะชำระเงิน')->badge()->sortable()->alignCenter(),
+                TextColumn::make('paymentMethod.name')->label('ช่องทางชำระเงิน')->searchable()->sortable()->icon('heroicon-o-credit-card')->iconColor('primary'),
+                TextColumn::make('paymentStatus.name')->label('สถานะชำระเงิน')->searchable()->sortable()->icon('heroicon-o-banknotes')->iconColor('warning'),
                 TextColumn::make('total_amount')->label('ยอดรวมทั้งสิ้น')->money('THB')->sortable()->alignEnd()->weight('bold'),
                 TextColumn::make('creator.name')->label('ผู้สร้าง')->searchable()->toggleable(),
                 TextColumn::make('created_at')->label('วันที่สร้าง')->dateTime('d/m/Y H:i')->sortable()->toggleable()->toggledHiddenByDefault(),
             ])
             ->filters([
                 SelectFilter::make('customer_id')->label('ลูกค้า')->relationship('customer', 'name')->searchable()->preload()->native(false),
-                SelectFilter::make('status')->label('สถานะ')->options(\App\Enums\OrderStatus::class)->native(false),
-                SelectFilter::make('payment_status')->label('สถานะชำระเงิน')->options(\App\Enums\PaymentStatus::class)->native(false),
+                SelectFilter::make('status')->label('สถานะ')->options(OrderStatus::class)->native(false),
+                SelectFilter::make('payment_status_id')->label('สถานะชำระเงิน')->relationship('paymentStatus', 'name')->searchable()->preload()->native(false),
                 TrashedFilter::make()->label('รายการที่ถูกลบ')->native(false),
             ])
             ->recordActions([

@@ -21,11 +21,12 @@ return new class extends Migration {
             $table->date('order_date');
             $table->date('expected_date')->nullable();
             $table->string('status')->default(OrderStatus::Draft->value);
+            $table->foreignUlid('payment_status_id')->nullable()->constrained()->nullOnDelete()->comment('สถานะการชำระเงิน');
             $table->decimal('subtotal', 15, 2)->default(0);
             $table->decimal('discount_amount', 15, 2)->default(0);
             $table->decimal('vat_amount', 15, 2)->default(0);
             $table->decimal('total_amount', 15, 2)->default(0);
-            $table->string('payment_terms')->nullable()->comment('เงื่อนไขการชำระเงิน');
+            $table->foreignUlid('payment_method_id')->nullable()->constrained()->nullOnDelete()->comment('เงื่อนไขการชำระเงิน');
             $table->text('delivery_address')->nullable()->comment('ที่อยู่จัดส่ง');
             $table->string('contact_person')->nullable()->comment('ผู้ติดต่อ');
             $table->string('contact_phone')->nullable()->comment('เบอร์โทรผู้ติดต่อ');

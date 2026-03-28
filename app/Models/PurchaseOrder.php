@@ -32,11 +32,12 @@ class PurchaseOrder extends Model
         'order_date',
         'expected_date',
         'status',
+        'payment_status_id',
         'subtotal',
         'discount_amount',
         'vat_amount',
         'total_amount',
-        'payment_terms',
+        'payment_method_id',
         'delivery_address',
         'contact_person',
         'contact_phone',
@@ -92,6 +93,16 @@ class PurchaseOrder extends Model
     public function goodsReceipts(): HasMany
     {
         return $this->hasMany(GoodsReceipt::class);
+    }
+
+    public function paymentStatus(): BelongsTo
+    {
+        return $this->belongsTo(PaymentStatus::class);
+    }
+
+    public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class);
     }
 
     public function getActivitylogOptions(): LogOptions

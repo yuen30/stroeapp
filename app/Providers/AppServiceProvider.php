@@ -9,6 +9,8 @@ use App\Models\Company;
 use App\Models\Contact;
 use App\Models\Customer;
 use App\Models\GoodsReceipt;
+use App\Models\PaymentMethod;
+use App\Models\PaymentStatus;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
@@ -66,5 +68,9 @@ class AppServiceProvider extends ServiceProvider
         Stock::observe(StockObserver::class);
         StockReservation::observe(DocumentObserver::class);
         Contact::observe(DocumentObserver::class);
+
+        // Payment Models
+        PaymentMethod::observe(DocumentObserver::class);
+        PaymentStatus::observe(DocumentObserver::class);
     }
 }

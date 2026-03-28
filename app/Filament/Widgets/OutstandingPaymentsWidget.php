@@ -3,14 +3,11 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\OrderStatus;
-use App\Enums\PaymentStatus;
-use App\Filament\Resources\SaleOrders\SaleOrderResource;
+use App\Models\PaymentStatus;
 use App\Models\SaleOrder;
-use Filament\Actions\ViewAction;
+use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
 
 class OutstandingPaymentsWidget extends BaseWidget
 {
@@ -20,13 +17,15 @@ class OutstandingPaymentsWidget extends BaseWidget
 
     public function table(Table $table): Table
     {
+        $pendingStatusIds = PaymentStatus::whereIn('code', ['PENDING', 'PARTIAL'])->pluck('id');
+
         return $table
-            ->heading('💸 ลูกค้าค้างชำระ')
+            ->heading('ลูกค้าค้างชำระ')
             ->query(
                 SaleOrder::query()
                     ->with(['customer'])
                     ->whereIn('status', [OrderStatus::Confirmed, OrderStatus::PartiallyReceived])
-                    ->whereIn('payment_status', [PaymentStatus::Unpaid, PaymentStatus::Partial])
+                    ->whereIn('payment_status_id', $pendingStatusIds)
                     ->orderBy('created_at', 'asc')
                     ->limit(10)
             )
@@ -47,25 +46,25 @@ class OutstandingPaymentsWidget extends BaseWidget
                     ->sortable()
                     ->alignEnd()
                     ->color('danger'),
-                Tables\Columns\TextColumn::make('payment_status')
+                Tables\Columns\TextColumn::make('paymentStatus.name')
                     ->label('สถานะ')
                     ->badge(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('ค้างมาแล้ว')
                     ->since()
                     ->sortable()
-                    ->description(fn($record) => $record->created_at->format('d M Y')),
+                    ->description(fn ($record) => $record->created_at->format('d M Y')),
                 Tables\Columns\TextColumn::make('days_outstanding')
                     ->label('จำนวนวัน')
                     ->badge()
-                    ->color(fn($state) => match (true) {
+                    ->color(fn ($state) => match (true) {
                         $state > 30 => 'danger',
                         $state > 15 => 'warning',
                         default => 'info',
                     })
                     ->suffix(' วัน')
                     ->alignCenter()
-                    ->getStateUsing(fn($record) => now()->diffInDays($record->created_at)),
+                    ->getStateUsing(fn ($record) => now()->diffInDays($record->created_at)),
             ])
             ->paginated(false);
     }

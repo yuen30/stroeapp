@@ -15,6 +15,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Auth;
 
 class ListProducts extends ListRecords
 {
@@ -40,7 +41,7 @@ class ListProducts extends ListRecords
                 ->label('นำเข้า Excel')
                 ->icon('heroicon-o-arrow-up-tray')
                 ->color('success')
-                ->form([
+                ->schema([
                     FileUpload::make('file')
                         ->label('ไฟล์ Excel')
                         ->acceptedFileTypes([
@@ -123,8 +124,8 @@ class ListProducts extends ListRecords
                                     'category_id' => $categoryId,
                                     'brand_id' => $brandId,
                                     'unit_id' => $unitId,
-                                    'company_id' => auth()->user()->company_id,
-                                    'branch_id' => auth()->user()->branch_id,
+                                    'company_id' => Auth::user()->company_id,
+                                    'branch_id' => Auth::user()->branch_id,
                                     'is_active' => true,
                                 ];
 

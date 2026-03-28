@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\PurchaseOrders\Schemas;
 
-use App\Enums\OrderStatus;
+use App\Models\Branch;
+use App\Models\Company;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -22,7 +24,7 @@ class PurchaseOrderForm
                     ->description('การแก้ไขใบสั่งซื้อจะส่งผลต่อสต็อกสินค้าและรายการรับสินค้า')
                     ->warning()
                     ->icon(Heroicon::ExclamationTriangle)
-                    ->visible(fn($context) => $context === 'edit')
+                    ->visible(fn ($context) => $context === 'edit')
                     ->columnSpanFull(),
                 Section::make('ข้อมูลทั่วไป')
                     ->description('ข้อมูลพื้นฐานของใบสั่งซื้อ')
@@ -85,19 +87,18 @@ class PurchaseOrderForm
                             ->preload()
                             ->native(false)
                             ->placeholder('เลือกบริษัท')
-                            ->default(fn() => auth()->user()?->company_id)
+                            ->default(fn () => Company::first()?->id)
                             ->reactive()
                             ->columnSpan(1)
                             ->columnStart(1),
                         Select::make('branch_id')
                             ->label('สาขา')
-                            ->relationship('branch', 'name', fn($query, $get) =>
-                                $get('company_id') ? $query->where('company_id', $get('company_id')) : $query)
+                            ->relationship('branch', 'name', fn ($query, $get) => $get('company_id') ? $query->where('company_id', $get('company_id')) : $query)
                             ->searchable()
                             ->preload()
                             ->native(false)
                             ->placeholder('เลือกสาขา')
-                            ->default(fn() => auth()->user()?->branch_id)
+                            ->default(fn () => Branch::where('is_headquarter', true)->first()?->id)
                             ->columnSpan(1),
                     ])
                     ->columns(2)
@@ -107,10 +108,21 @@ class PurchaseOrderForm
                     ->icon(Heroicon::InformationCircle)
                     ->collapsible()
                     ->schema([
-                        TextInput::make('payment_terms')
+                        Select::make('payment_method_id')
                             ->label('เงื่อนไขการชำระเงิน')
-                            ->placeholder('เช่น เครดิต 30 วัน, เงินสด')
-                            ->maxLength(255)
+                            ->relationship('paymentMethod', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->native(false)
+                            ->placeholder('เลือกเงื่อนไขการชำระเงิน')
+                            ->columnSpan(1),
+                        Select::make('payment_status_id')
+                            ->label('สถานะการชำระเงิน')
+                            ->relationship('paymentStatus', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->native(false)
+                            ->placeholder('เลือกสถานะการชำระเงิน')
                             ->columnSpan(1),
                         TextInput::make('reference_number')
                             ->label('เลขที่อ้างอิง')
@@ -133,7 +145,7 @@ class PurchaseOrderForm
                             ->rows(3)
                             ->placeholder('ที่อยู่สำหรับจัดส่งสินค้า')
                             ->columnSpanFull(),
-                        \Filament\Forms\Components\FileUpload::make('attachments')
+                        FileUpload::make('attachments')
                             ->label('ไฟล์แนบ')
                             ->multiple()
                             ->disk('public')

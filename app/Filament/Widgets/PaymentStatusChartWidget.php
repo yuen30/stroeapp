@@ -3,7 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\OrderStatus;
-use App\Enums\PaymentStatus;
+use App\Models\PaymentStatus;
 use App\Models\SaleOrder;
 use Filament\Widgets\ChartWidget;
 
@@ -15,21 +15,25 @@ class PaymentStatusChartWidget extends ChartWidget
 
     public function getHeading(): ?string
     {
-        return '💰 สถานะการชำระเงิน';
+        return 'สถานะการชำระเงิน';
     }
 
     protected function getData(): array
     {
+        $paidId = PaymentStatus::where('code', 'PAID')->first()?->id;
+        $pendingId = PaymentStatus::where('code', 'PENDING')->first()?->id;
+        $partialId = PaymentStatus::where('code', 'PARTIAL')->first()?->id;
+
         $paid = SaleOrder::where('status', OrderStatus::Confirmed)
-            ->where('payment_status', PaymentStatus::Paid)
+            ->when($paidId, fn ($q) => $q->where('payment_status_id', $paidId))
             ->sum('total_amount');
 
         $unpaid = SaleOrder::where('status', OrderStatus::Confirmed)
-            ->where('payment_status', PaymentStatus::Unpaid)
+            ->when($pendingId, fn ($q) => $q->where('payment_status_id', $pendingId))
             ->sum('total_amount');
 
         $partial = SaleOrder::where('status', OrderStatus::Confirmed)
-            ->where('payment_status', PaymentStatus::Partial)
+            ->when($partialId, fn ($q) => $q->where('payment_status_id', $partialId))
             ->sum('total_amount');
 
         return [

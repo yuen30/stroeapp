@@ -2,13 +2,27 @@
 
 namespace App\Filament\Resources\SaleOrders\Schemas;
 
-use Filament\Infolists\Components\RepeatableEntry\TableColumn;
-use Filament\Infolists\Components\ImageEntry;
+use App\Models\Product;
+use App\Models\SaleOrderItem;
+use App\Models\StockReservation;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\RepeatableEntry\TableColumn;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Text;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\TextSize;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 
 class SaleOrderInfolist
 {
@@ -66,62 +80,6 @@ class SaleOrderInfolist
                         RepeatableEntry::make('items')
                             ->hiddenLabel()
                             ->columnSpanFull()
-                            ->visible(fn($record): bool => $record->status->value !== 'draft')
-                            ->schema([
-                                TextEntry::make('index')
-                                    ->label('ลำดับ')
-                                    ->weight('semibold'),
-                                TextEntry::make('product_name')
-                                    ->label('สินค้า'),
-                                TextEntry::make('description')
-                                    ->label('รายละเอียด')
-                                    ->placeholder('-')
-                                    ->limit(50),
-                                TextEntry::make('quantity')
-                                    ->label('จำนวน')
-                                    ->numeric()
-                                    ->alignRight(),
-                                TextEntry::make('unit_price')
-                                    ->label('ราคาต่อหน่วย')
-                                    ->money('THB')
-                                    ->alignRight(),
-                                TextEntry::make('discount')
-                                    ->label('ส่วนลด')
-                                    ->money('THB')
-                                    ->alignRight(),
-                                TextEntry::make('total_price')
-                                    ->label('ยอดรวม')
-                                    ->money('THB')
-                                    ->weight('bold')
-                                    ->color('success')
-                                    ->alignRight(),
-                            ])
-                            ->state(function ($record) {
-                                return $record->items->map(fn($item, $index) => [
-                                    'index' => $index + 1,
-                                    'item_id' => $item->id,
-                                    'product_name' => $item->product->name ?? '-',
-                                    'description' => $item->description,
-                                    'quantity' => $item->quantity,
-                                    'unit_price' => $item->unit_price,
-                                    'discount' => $item->discount,
-                                    'total_price' => $item->total_price,
-                                ]);
-                            })
-                            ->columns(8)
-                            ->table([
-                                TableColumn::make('ลำดับ'),
-                                TableColumn::make('สินค้า'),
-                                TableColumn::make('รายละเอียด'),
-                                TableColumn::make('จำนวน'),
-                                TableColumn::make('ราคาต่อหน่วย'),
-                                TableColumn::make('ส่วนลด'),
-                                TableColumn::make('ยอดรวม'),
-                            ]),
-                        RepeatableEntry::make('items')
-                            ->hiddenLabel()
-                            ->columnSpanFull()
-                            ->visible(fn($record): bool => $record->status->value === 'draft')
                             ->schema([
                                 TextEntry::make('index')
                                     ->label('ลำดับ')
@@ -152,41 +110,40 @@ class SaleOrderInfolist
                                     ->alignRight(),
                                 TextEntry::make('item_id')
                                     ->label('การจัดการ')
-                                    ->formatStateUsing(fn() => '')
+                                    ->formatStateUsing(fn () => '')
                                     ->suffixAction(
-                                        \Filament\Actions\Action::make('edit')
+                                        Action::make('edit')
                                             ->icon(Heroicon::PencilSquare)
                                             ->iconButton()
                                             ->tooltip('แก้ไข')
                                             ->color('warning')
-                                            ->visible(fn($record): bool => $record->status->value === 'draft')
-                                            ->form([
-                                                \Filament\Schemas\Components\Grid::make(3)
+                                            ->schema([
+                                                Grid::make(3)
                                                     ->schema([
-                                                        \Filament\Forms\Components\Select::make('product_id')
+                                                        Select::make('product_id')
                                                             ->label('สินค้า')
-                                                            ->options(\App\Models\Product::pluck('name', 'id'))
+                                                            ->options(Product::pluck('name', 'id'))
                                                             ->required()
                                                             ->searchable()
                                                             ->preload()
                                                             ->native(false)
                                                             ->disabled()
                                                             ->columnSpanFull(),
-                                                        \Filament\Forms\Components\Placeholder::make('stock_info')
+                                                        Placeholder::make('stock_info')
                                                             ->label('สต็อกคงเหลือ')
                                                             ->content(function (callable $get) {
                                                                 $itemId = $get('../../item_id');
-                                                                if (!$itemId) {
+                                                                if (! $itemId) {
                                                                     return '-';
                                                                 }
 
-                                                                $item = \App\Models\SaleOrderItem::find($itemId);
-                                                                if (!$item || !$item->product) {
+                                                                $item = SaleOrderItem::find($itemId);
+                                                                if (! $item || ! $item->product) {
                                                                     return '-';
                                                                 }
 
-                                                                $product = \App\Models\Product::find($item->product_id);
-                                                                if (!$product) {
+                                                                $product = Product::find($item->product_id);
+                                                                if (! $product) {
                                                                     return '-';
                                                                 }
 
@@ -195,7 +152,7 @@ class SaleOrderInfolist
                                                                 $available = $product->available_stock;
 
                                                                 // บวกสต็อกที่จองไว้สำหรับ item นี้กลับมา
-                                                                $currentReservation = \App\Models\StockReservation::where('sale_order_item_id', $itemId)
+                                                                $currentReservation = StockReservation::where('sale_order_item_id', $itemId)
                                                                     ->where('expires_at', '>', now())
                                                                     ->first();
                                                                 if ($currentReservation) {
@@ -204,27 +161,27 @@ class SaleOrderInfolist
 
                                                                 $color = $available > 10 ? 'success' : ($available > 0 ? 'warning' : 'danger');
 
-                                                                return new \Illuminate\Support\HtmlString('
+                                                                return new HtmlString('
                                                                     <div class="space-y-2">
                                                                         <div class="flex items-center gap-4">
-                                                                            <span class="text-' . $color . '-600 dark:text-' . $color . '-400 font-bold text-2xl">'
-                                                                    . number_format($available) . ' หน่วย</span>
+                                                                            <span class="text-'.$color.'-600 dark:text-'.$color.'-400 font-bold text-2xl">'
+                                                                    .number_format($available).' หน่วย</span>
                                                                             <span class="text-sm text-gray-500 dark:text-gray-400">พร้อมใช้งาน</span>
                                                                         </div>
                                                                         <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                                                                            <div>สต็อกทั้งหมด: <span class="font-semibold">' . number_format($totalStock) . '</span></div>
-                                                                            ' . ($reserved > 0 ? '<div class="text-warning-600 dark:text-warning-400">ถูกจองโดยใบอื่น: <span class="font-semibold">' . number_format($reserved - ($currentReservation ? $currentReservation->reserved_quantity : 0)) . '</span></div>' : '') . '
+                                                                            <div>สต็อกทั้งหมด: <span class="font-semibold">'.number_format($totalStock).'</span></div>
+                                                                            '.($reserved > 0 ? '<div class="text-warning-600 dark:text-warning-400">ถูกจองโดยใบอื่น: <span class="font-semibold">'.number_format($reserved - ($currentReservation ? $currentReservation->reserved_quantity : 0)).'</span></div>' : '').'
                                                                         </div>
                                                                     </div>
                                                                 ');
                                                             })
                                                             ->columnSpanFull(),
-                                                        \Filament\Forms\Components\Textarea::make('description')
+                                                        Textarea::make('description')
                                                             ->label('รายละเอียด')
                                                             ->rows(2)
                                                             ->columnSpanFull()
                                                             ->columnStart(1),
-                                                        \Filament\Forms\Components\TextInput::make('quantity')
+                                                        TextInput::make('quantity')
                                                             ->label('จำนวน')
                                                             ->required()
                                                             ->numeric()
@@ -232,24 +189,24 @@ class SaleOrderInfolist
                                                             ->suffix('หน่วย')
                                                             ->helperText(function (callable $get) {
                                                                 $itemId = $get('../../item_id');
-                                                                if (!$itemId) {
+                                                                if (! $itemId) {
                                                                     return null;
                                                                 }
 
-                                                                $item = \App\Models\SaleOrderItem::find($itemId);
-                                                                if (!$item || !$item->product) {
+                                                                $item = SaleOrderItem::find($itemId);
+                                                                if (! $item || ! $item->product) {
                                                                     return null;
                                                                 }
 
-                                                                $product = \App\Models\Product::find($item->product_id);
-                                                                if (!$product) {
+                                                                $product = Product::find($item->product_id);
+                                                                if (! $product) {
                                                                     return null;
                                                                 }
 
                                                                 $available = $product->available_stock;
 
                                                                 // บวกสต็อกที่จองไว้สำหรับ item นี้กลับมา
-                                                                $currentReservation = \App\Models\StockReservation::where('sale_order_item_id', $itemId)
+                                                                $currentReservation = StockReservation::where('sale_order_item_id', $itemId)
                                                                     ->where('expires_at', '>', now())
                                                                     ->first();
                                                                 if ($currentReservation) {
@@ -265,7 +222,7 @@ class SaleOrderInfolist
                                                                 $set('total_price', ($unitPrice * $state) - $discount);
                                                             })
                                                             ->columnSpan(1),
-                                                        \Filament\Forms\Components\TextInput::make('unit_price')
+                                                        TextInput::make('unit_price')
                                                             ->label('ราคาต่อหน่วย')
                                                             ->required()
                                                             ->numeric()
@@ -277,7 +234,7 @@ class SaleOrderInfolist
                                                                 $set('total_price', ($state * $quantity) - $discount);
                                                             })
                                                             ->columnSpan(1),
-                                                        \Filament\Forms\Components\TextInput::make('discount')
+                                                        TextInput::make('discount')
                                                             ->label('ส่วนลด')
                                                             ->numeric()
                                                             ->default(0)
@@ -289,48 +246,49 @@ class SaleOrderInfolist
                                                                 $set('total_price', ($unitPrice * $quantity) - $state);
                                                             })
                                                             ->columnSpan(1),
-                                                        \Filament\Schemas\Components\Text::make(
-                                                            fn(callable $get): string =>
-                                                                '฿ ' . number_format(
-                                                                    (($get('unit_price') ?? 0) * ($get('quantity') ?? 0)) - ($get('discount') ?? 0),
-                                                                    2
-                                                                )
+                                                        Text::make(
+                                                            fn (callable $get): string => '฿ '.number_format(
+                                                                (($get('unit_price') ?? 0) * ($get('quantity') ?? 0)) - ($get('discount') ?? 0),
+                                                                2
+                                                            )
                                                         )
                                                             ->color('success')
                                                             ->badge()
-                                                            ->size(\Filament\Support\Enums\TextSize::Large)
-                                                            ->weight(\Filament\Support\Enums\FontWeight::Bold)
+                                                            ->size(TextSize::Large)
+                                                            ->weight(FontWeight::Bold)
                                                             ->columnSpan(3),
                                                     ]),
                                             ])
-                                            ->mountUsing(fn($form, $state) => $form->fill([
-                                                'product_id' => \App\Models\SaleOrderItem::find($state)?->product_id,
-                                                'description' => \App\Models\SaleOrderItem::find($state)?->description,
-                                                'quantity' => \App\Models\SaleOrderItem::find($state)?->quantity,
-                                                'unit_price' => \App\Models\SaleOrderItem::find($state)?->unit_price,
-                                                'discount' => \App\Models\SaleOrderItem::find($state)?->discount,
+                                            ->mountUsing(fn ($form, $state) => $form->fill([
+                                                'product_id' => SaleOrderItem::find($state)?->product_id,
+                                                'description' => SaleOrderItem::find($state)?->description,
+                                                'quantity' => SaleOrderItem::find($state)?->quantity,
+                                                'unit_price' => SaleOrderItem::find($state)?->unit_price,
+                                                'discount' => SaleOrderItem::find($state)?->discount,
                                             ]))
                                             ->action(function (array $data, $state, $livewire) {
-                                                $item = \App\Models\SaleOrderItem::find($state);
-                                                if (!$item) {
-                                                    \Filament\Notifications\Notification::make()
+                                                $item = SaleOrderItem::find($state);
+                                                if (! $item) {
+                                                    Notification::make()
                                                         ->danger()
                                                         ->title('ไม่พบรายการสินค้า')
                                                         ->body('ไม่สามารถแก้ไขรายการสินค้าได้ เนื่องจากไม่พบข้อมูล')
                                                         ->duration(10000)
                                                         ->send();
+
                                                     return;
                                                 }
 
                                                 // ดึงข้อมูล Product ล่าสุดจากฐานข้อมูล (fresh query)
-                                                $product = \App\Models\Product::find($item->product_id);
-                                                if (!$product) {
-                                                    \Filament\Notifications\Notification::make()
+                                                $product = Product::find($item->product_id);
+                                                if (! $product) {
+                                                    Notification::make()
                                                         ->danger()
                                                         ->title('ไม่พบสินค้า')
                                                         ->body('ไม่สามารถแก้ไขรายการสินค้าได้ เนื่องจากไม่พบข้อมูลสินค้า')
                                                         ->duration(10000)
                                                         ->send();
+
                                                     return;
                                                 }
 
@@ -338,24 +296,25 @@ class SaleOrderInfolist
                                                 $availableStock = $product->available_stock;
 
                                                 // บวกสต็อกที่จองไว้สำหรับ item นี้กลับมา
-                                                $currentReservation = \App\Models\StockReservation::where('sale_order_item_id', $item->id)
+                                                $currentReservation = StockReservation::where('sale_order_item_id', $item->id)
                                                     ->where('expires_at', '>', now())
                                                     ->first();
                                                 if ($currentReservation) {
                                                     $availableStock += $currentReservation->reserved_quantity;
                                                 }
 
+                                                // แจ้งเตือนถ้าสต็อกไม่พอ แต่ยังอนุญาตให้บันทึกได้
                                                 if ($availableStock < $data['quantity']) {
                                                     $reserved = $product->reserved_quantity;
                                                     $totalStock = $product->stock_quantity;
+                                                    $shortage = $data['quantity'] - $availableStock;
 
-                                                    \Filament\Notifications\Notification::make()
-                                                        ->danger()
+                                                    Notification::make()
+                                                        ->warning()
                                                         ->title('สต็อกไม่เพียงพอ')
-                                                        ->body("สินค้า {$product->name}\n• สต็อกทั้งหมด: {$totalStock} หน่วย\n• ถูกจองแล้ว: {$reserved} หน่วย\n• พร้อมใช้: {$availableStock} หน่วย\n• ต้องการ: {$data['quantity']} หน่วย")
-                                                        ->duration(10000)
+                                                        ->body("สินค้า {$product->name}\n• สต็อกพร้อมใช้: {$availableStock} หน่วย\n• ต้องการ: {$data['quantity']} หน่วย\n• ขาด: {$shortage} หน่วย\n\n⚠️ ระบบจะบันทึกการเปลี่ยนแปลงและปรับยอดจองให้อัตโนมัติ")
+                                                        ->duration(8000)
                                                         ->send();
-                                                    return;
                                                 }
 
                                                 $totalPrice = ($data['unit_price'] * $data['quantity']) - ($data['discount'] ?? 0);
@@ -368,7 +327,7 @@ class SaleOrderInfolist
                                                     'total_price' => $totalPrice,
                                                 ]);
 
-                                                \Filament\Notifications\Notification::make()
+                                                Notification::make()
                                                     ->success()
                                                     ->title('แก้ไขสินค้าสำเร็จ')
                                                     ->body('รายการสินค้าได้รับการอัปเดตแล้ว การจองสต็อกได้รับการปรับปรุงอัตโนมัติ')
@@ -380,21 +339,20 @@ class SaleOrderInfolist
                                             })
                                     )
                                     ->suffixAction(
-                                        \Filament\Actions\Action::make('delete')
+                                        Action::make('delete')
                                             ->icon(Heroicon::Trash)
                                             ->iconButton()
                                             ->tooltip('ลบ')
                                             ->color('danger')
-                                            ->visible(fn($record): bool => $record->status->value === 'draft')
                                             ->requiresConfirmation()
                                             ->modalHeading('ลบสินค้า')
                                             ->modalDescription('คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้?')
                                             ->action(function ($state, $livewire) {
-                                                $item = \App\Models\SaleOrderItem::find($state);
+                                                $item = SaleOrderItem::find($state);
                                                 if ($item) {
                                                     $item->delete();
 
-                                                    \Filament\Notifications\Notification::make()
+                                                    Notification::make()
                                                         ->success()
                                                         ->title('ลบสินค้าสำเร็จ')
                                                         ->body('รายการสินค้าถูกลบออกจากใบสั่งขายแล้ว การจองสต็อกได้ถูกปลดล็อคอัตโนมัติ')
@@ -408,7 +366,7 @@ class SaleOrderInfolist
                                     ),
                             ])
                             ->state(function ($record) {
-                                return $record->items->map(fn($item, $index) => [
+                                return $record->items->map(fn ($item, $index) => [
                                     'index' => $index + 1,
                                     'item_id' => $item->id,
                                     'product_name' => $item->product->name ?? '-',
@@ -433,6 +391,62 @@ class SaleOrderInfolist
                     ]),
                 Section::make('ยอดเงิน')
                     ->icon(Heroicon::CurrencyDollar)
+                    ->afterHeader(Action::make('update_totals')
+                        ->label('แก้ไขยอดเงิน')
+                        ->icon(Heroicon::Pencil)
+                        ->color('primary')
+                        ->fillForm(fn ($record) => [
+                            'subtotal' => $record->subtotal,
+                            'discount_amount' => $record->discount_amount,
+                            'vat_amount' => $record->vat_amount,
+                            'total_amount' => $record->total_amount,
+                        ])
+                        ->form([
+                            TextInput::make('subtotal')
+                                ->label('มูลค่าสินค้า')
+                                ->numeric()
+                                ->prefix('฿')
+                                ->required(),
+                            TextInput::make('discount_amount')
+                                ->label('ส่วนลดท้ายบิล')
+                                ->numeric()
+                                ->prefix('฿'),
+                            TextInput::make('vat_amount')
+                                ->label('ภาษีมูลค่าเพิ่ม (VAT)')
+                                ->numeric()
+                                ->prefix('฿'),
+                            TextInput::make('total_amount')
+                                ->label('ยอดสุทธิ')
+                                ->numeric()
+                                ->prefix('฿'),
+                        ])
+                        ->action(function (array $data, $livewire) {
+                            $subtotal = (float) ($data['subtotal'] ?? 0);
+                            $discount = (float) ($data['discount_amount'] ?? 0);
+                            $vat = (float) ($data['vat_amount'] ?? 0);
+                            $total = $subtotal - $discount + $vat;
+
+                            $record = $livewire->record;
+                            $record->update([
+                                'subtotal' => $subtotal,
+                                'discount_amount' => $discount,
+                                'vat_amount' => $vat,
+                                'total_amount' => $total,
+                            ]);
+
+                            Notification::make()
+                                ->success()
+                                ->title('อัปเดตยอดเงินสำเร็จ')
+                                ->body('ยอดเงินได้รับการอัปเดตแล้ว')
+                                ->duration(3000)
+                                ->send();
+
+                            $livewire->record->refresh();
+                        })
+                        ->modalHeading('แก้ไขยอดเงิน')
+                        ->modalDescription('ปรับยอดมูลค่าสินค้า ส่วนลด และ VAT ได้')
+                        ->modalSubmitActionLabel('บันทึก')
+                        ->modalWidth('md'))
                     ->schema([
                         TextEntry::make('subtotal')
                             ->label('ยอดรวมก่อนหัก')
@@ -459,18 +473,18 @@ class SaleOrderInfolist
                 Section::make('ข้อมูลการชำระเงิน')
                     ->icon(Heroicon::CreditCard)
                     ->schema([
-                        TextEntry::make('payment_status')
+                        TextEntry::make('paymentStatus.name')
                             ->label('สถานะการชำระเงิน')
                             ->badge(),
-                        TextEntry::make('payment_method')
+                        TextEntry::make('paymentMethod.name')
                             ->label('ช่องทางการชำระเงิน')
-                            ->formatStateUsing(fn($state) => $state?->getLabel() ?? '-'),
+                            ->placeholder('-'),
                         TextEntry::make('term_of_payment')
-                            ->label('เงื่อนไขการชำระเงิน')
+                            ->label('เงื่อนไขการชำระเงิน/วันครบกำหนด')
                             ->placeholder('-'),
                         TextEntry::make('document_type')
                             ->label('ประเภทเอกสาร')
-                            ->formatStateUsing(fn($state) => $state?->getLabel() ?? '-'),
+                            ->formatStateUsing(fn ($state) => $state?->getLabel() ?? '-'),
                         TextEntry::make('reference_number')
                             ->label('เลขที่อ้างอิง')
                             ->placeholder('-')
@@ -482,8 +496,8 @@ class SaleOrderInfolist
                 Section::make('ข้อมูลการจัดส่ง')
                     ->icon(Heroicon::Truck)
                     ->collapsible()
-                    ->collapsed(fn($record) => !$record->delivery_date && !$record->shipping_method && !$record->shipping_address)
-                    ->visible(fn($record) => $record->delivery_date || $record->shipping_method || $record->shipping_address)
+                    ->collapsed(fn ($record) => ! $record->delivery_date && ! $record->shipping_method && ! $record->shipping_address)
+                    ->visible(fn ($record) => $record->delivery_date || $record->shipping_method || $record->shipping_address)
                     ->schema([
                         TextEntry::make('delivery_date')
                             ->label('วันที่จัดส่ง')
@@ -505,8 +519,8 @@ class SaleOrderInfolist
                 Section::make('ข้อมูลผู้ติดต่อ')
                     ->icon(Heroicon::Phone)
                     ->collapsible()
-                    ->collapsed(fn($record) => !$record->contact_person && !$record->contact_phone)
-                    ->visible(fn($record) => $record->contact_person || $record->contact_phone)
+                    ->collapsed(fn ($record) => ! $record->contact_person && ! $record->contact_phone)
+                    ->visible(fn ($record) => $record->contact_person || $record->contact_phone)
                     ->schema([
                         TextEntry::make('contact_person')
                             ->label('ชื่อผู้ติดต่อ')
@@ -523,7 +537,7 @@ class SaleOrderInfolist
                     ->icon(Heroicon::PaperClip)
                     ->collapsible()
                     ->collapsed()
-                    ->visible(fn($record) => !empty($record->attachments))
+                    ->visible(fn ($record) => ! empty($record->attachments))
                     ->schema([
                         TextEntry::make('attachments')
                             ->label('ไฟล์แนบ')
@@ -535,10 +549,11 @@ class SaleOrderInfolist
                                 $files = [];
                                 foreach ($state as $file) {
                                     $filename = basename($file);
-                                    $url = \Storage::url($file);
+                                    $url = Storage::url($file);
                                     $files[] = "<a href='{$url}' target='_blank' class='text-primary-600 hover:underline'>{$filename}</a>";
                                 }
-                                return new \Illuminate\Support\HtmlString(implode('<br>', $files));
+
+                                return new HtmlString(implode('<br>', $files));
                             })
                             ->columnSpanFull(),
                     ])

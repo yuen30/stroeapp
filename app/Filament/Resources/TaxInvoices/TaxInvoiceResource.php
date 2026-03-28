@@ -34,6 +34,8 @@ class TaxInvoiceResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'tax_invoice_number';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function form(Schema $schema): Schema
     {
         return TaxInvoiceForm::configure($schema);

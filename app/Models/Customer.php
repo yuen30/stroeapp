@@ -5,9 +5,9 @@ namespace App\Models;
 use App\Traits\DocumentObservable;
 use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Leek\FilamentDiceBear\Concerns\HasDiceBearAvatar;
@@ -15,7 +15,7 @@ use Leek\FilamentDiceBear\Enums\DiceBearStyle;
 
 class Customer extends Model implements HasAvatar
 {
-    use HasUlids, SoftDeletes, HasDiceBearAvatar, DocumentObservable;
+    use DocumentObservable, HasDiceBearAvatar, HasUlids, SoftDeletes;
 
     protected $documentNumberField = 'code';
 
@@ -74,10 +74,12 @@ class Customer extends Model implements HasAvatar
     // คำนวณยอดค้างชำระทั้งหมด (ใบสั่งขายที่ยังไม่ชำระเงิน)
     public function getTotalOutstandingAmount(): float
     {
+        $pendingStatusIds = PaymentStatus::whereIn('code', ['PENDING', 'PARTIAL'])->pluck('id');
+
         return $this
             ->saleOrders()
             ->whereIn('status', ['confirmed', 'partially_received'])
-            ->whereIn('payment_status', ['unpaid', 'partial'])
+            ->whereIn('payment_status_id', $pendingStatusIds)
             ->sum('total_amount');
     }
 
@@ -89,6 +91,7 @@ class Customer extends Model implements HasAvatar
         }
 
         $outstanding = $this->getTotalOutstandingAmount();
+
         return max(0, $this->credit_limit - $outstanding);
     }
 
@@ -101,6 +104,7 @@ class Customer extends Model implements HasAvatar
         }
 
         $remaining = $this->getRemainingCreditLimit();
+
         return $amount <= $remaining;
     }
 
@@ -112,6 +116,7 @@ class Customer extends Model implements HasAvatar
         }
 
         $outstanding = $this->getTotalOutstandingAmount();
+
         return min(100, ($outstanding / $this->credit_limit) * 100);
     }
 

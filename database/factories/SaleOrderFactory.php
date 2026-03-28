@@ -2,12 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Enums\DocumentType;
 use App\Enums\OrderStatus;
-use App\Enums\PaymentMethod;
-use App\Enums\PaymentStatus;
 use App\Models\Branch;
 use App\Models\Company;
+use App\Models\PaymentMethod;
+use App\Models\PaymentStatus;
 use App\Models\SaleOrder;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -28,8 +27,8 @@ class SaleOrderFactory extends Factory
             'order_date' => now(),
             'due_date' => now()->addDays(30),
             'status' => OrderStatus::Draft,
-            'payment_status' => PaymentStatus::Unpaid,
-            'payment_method' => PaymentMethod::Cash,
+            'payment_status_id' => PaymentStatus::first()?->id,
+            'payment_method_id' => PaymentMethod::first()?->id,
             'subtotal' => 0,
             'discount_amount' => 0,
             'vat_amount' => 0,

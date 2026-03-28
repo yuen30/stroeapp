@@ -5,14 +5,12 @@ namespace App\Observers;
 use App\Enums\OrderStatus;
 use App\Enums\StockMovementType;
 use App\Models\GoodsReceipt;
-use App\Models\Stock;
 use App\Models\StockMovement;
 
 class GoodsReceiptObserver
 {
     public function updated(GoodsReceipt $goodsReceipt): void
     {
-        // ตรวจสอบว่ามีการเปลี่ยนสถานะเป็น confirmed หรือไม่
         if ($goodsReceipt->isDirty('status') && $goodsReceipt->status === OrderStatus::Confirmed) {
             $this->updateStock($goodsReceipt);
             $this->updatePurchaseOrderStatus($goodsReceipt);
@@ -21,27 +19,12 @@ class GoodsReceiptObserver
 
     protected function updateStock(GoodsReceipt $goodsReceipt): void
     {
-        // วนลูปทุกรายการสินค้าในใบรับสินค้า
         foreach ($goodsReceipt->items as $item) {
-            // หา stock record หรือสร้างใหม่
-            $stock = Stock::firstOrCreate(
-                [
-                    'product_id' => $item->product_id,
-                    'branch_id' => $goodsReceipt->branch_id,
-                ],
-                [
-                    'quantity' => 0,
-                ]
-            );
+            $product = $item->product;
+            $stockBefore = $product->stock_quantity;
+            $product->increment('stock_quantity', $item->quantity);
+            $stockAfter = $product->stock_quantity;
 
-            // อัพเดทจำนวน stock
-            $stock->increment('quantity', $item->quantity);
-
-            // คำนวณ stock ก่อนและหลัง
-            $stockBefore = $stock->quantity - $item->quantity;
-            $stockAfter = $stock->quantity;
-
-            // บันทึก stock movement
             StockMovement::create([
                 'product_id' => $item->product_id,
                 'goods_receipt_id' => $goodsReceipt->id,
@@ -50,7 +33,9 @@ class GoodsReceiptObserver
                 'quantity' => $item->quantity,
                 'stock_before' => $stockBefore,
                 'stock_after' => $stockAfter,
-                'notes' => 'รับสินค้าจากใบสั่งซื้อ ' . $goodsReceipt->purchaseOrder->order_number,
+                'notes' => $goodsReceipt->is_standalone
+                    ? 'รับสินค้า (รับแยก)'
+                    : 'รับสินค้าจากใบสั่งซื้อ '.$goodsReceipt->purchaseOrder?->order_number,
             ]);
         }
     }
@@ -59,28 +44,23 @@ class GoodsReceiptObserver
     {
         $purchaseOrder = $goodsReceipt->purchaseOrder;
 
-        if (!$purchaseOrder) {
+        if (! $purchaseOrder) {
             return;
         }
 
-        // คำนวณจำนวนที่สั่งทั้งหมด
         $totalOrdered = $purchaseOrder->items->sum('quantity');
 
-        // คำนวณจำนวนที่รับแล้วทั้งหมด (จากทุกใบรับสินค้าที่ confirmed)
         $totalReceived = $purchaseOrder
             ->goodsReceipts()
             ->where('status', OrderStatus::Confirmed)
             ->with('items')
             ->get()
-            ->flatMap(fn($receipt) => $receipt->items)
+            ->flatMap(fn ($receipt) => $receipt->items)
             ->sum('quantity');
 
-        // อัพเดทสถานะตามจำนวนที่รับ
         if ($totalReceived >= $totalOrdered) {
-            // รับครบแล้ว
             $purchaseOrder->update(['status' => OrderStatus::Completed]);
         } else {
-            // รับบางส่วน
             $purchaseOrder->update(['status' => OrderStatus::PartiallyReceived]);
         }
     }

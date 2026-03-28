@@ -3,14 +3,14 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\OrderStatus;
-use App\Enums\PaymentStatus;
 use App\Models\Customer;
+use App\Models\PaymentStatus;
 use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\SaleOrder;
 use App\Models\StockReservation;
-use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Number;
 
 class StatsOverviewWidget extends BaseWidget
@@ -60,13 +60,13 @@ class StatsOverviewWidget extends BaseWidget
         ])->count();
 
         // ยอดค้างชำระทั้งหมด
+        $pendingStatusIds = PaymentStatus::whereIn('code', ['PENDING', 'PARTIAL'])->pluck('id');
+
         $outstandingAmount = SaleOrder::whereIn('status', [
             OrderStatus::Confirmed,
             OrderStatus::PartiallyReceived,
-        ])->whereIn('payment_status', [
-            PaymentStatus::Unpaid,
-            PaymentStatus::Partial,
-        ])->sum('total_amount');
+        ])->whereIn('payment_status_id', $pendingStatusIds)
+            ->sum('total_amount');
 
         // ลูกค้าใหม่เดือนนี้
         $newCustomers = Customer::whereMonth('created_at', now()->month)
@@ -75,21 +75,21 @@ class StatsOverviewWidget extends BaseWidget
 
         return [
             Stat::make('ยอดขายวันนี้', Number::currency($todaySales, 'THB', 'th'))
-                ->description('ยอดขายเดือนนี้: ' . Number::currency($thisMonthSales, 'THB', 'th'))
+                ->description('ยอดขายเดือนนี้: '.Number::currency($thisMonthSales, 'THB', 'th'))
                 ->descriptionIcon($salesChange >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($salesChange >= 0 ? 'success' : 'danger')
                 ->chart($this->getSalesChartData()),
-            Stat::make('สินค้าใกล้หมด', $lowStockCount . ' รายการ')
-                ->description('หมดสต็อก: ' . $outOfStockCount . ' รายการ')
+            Stat::make('สินค้าใกล้หมด', $lowStockCount.' รายการ')
+                ->description('หมดสต็อก: '.$outOfStockCount.' รายการ')
                 ->descriptionIcon('heroicon-m-exclamation-triangle')
                 ->color($lowStockCount > 10 ? 'warning' : 'success')
                 ->icon('heroicon-o-cube'),
-            Stat::make('สต็อกที่ถูกจอง', $reservedStock . ' หน่วย')
+            Stat::make('สต็อกที่ถูกจอง', $reservedStock.' หน่วย')
                 ->description('จากใบสั่งขาย Draft')
                 ->descriptionIcon('heroicon-m-lock-closed')
                 ->color('info')
                 ->icon('heroicon-o-clock'),
-            Stat::make('ใบสั่งซื้อรอดำเนินการ', $pendingPurchaseOrders . ' ใบ')
+            Stat::make('ใบสั่งซื้อรอดำเนินการ', $pendingPurchaseOrders.' ใบ')
                 ->description('รอยืนยัน / รอรับสินค้า')
                 ->descriptionIcon('heroicon-m-shopping-cart')
                 ->color($pendingPurchaseOrders > 5 ? 'warning' : 'success')
@@ -99,7 +99,7 @@ class StatsOverviewWidget extends BaseWidget
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color($outstandingAmount > 100000 ? 'danger' : 'warning')
                 ->icon('heroicon-o-currency-dollar'),
-            Stat::make('ลูกค้าใหม่', $newCustomers . ' ราย')
+            Stat::make('ลูกค้าใหม่', $newCustomers.' ราย')
                 ->description('เดือนนี้')
                 ->descriptionIcon('heroicon-m-user-plus')
                 ->color('success')
@@ -117,6 +117,7 @@ class StatsOverviewWidget extends BaseWidget
                 ->sum('total_amount');
             $data[] = $amount / 1000;  // แสดงเป็นพัน
         }
+
         return $data;
     }
 }

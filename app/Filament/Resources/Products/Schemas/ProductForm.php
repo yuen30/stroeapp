@@ -2,12 +2,13 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
+use App\Models\Branch;
+use App\Models\Company;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Get;
 use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -23,7 +24,7 @@ class ProductForm
                     ->description('การแก้ไขข้อมูลสินค้าจะส่งผลต่อใบสั่งซื้อ ใบสั่งขาย และคลังสินค้าทั้งหมด')
                     ->warning()
                     ->icon(Heroicon::ExclamationTriangle)
-                    ->visible(fn($context) => $context === 'edit')
+                    ->visible(fn ($context) => $context === 'edit')
                     ->columnSpanFull(),
                 Section::make('ข้อมูลทั่วไป')
                     ->description('ข้อมูลพื้นฐานของสินค้า')
@@ -49,6 +50,12 @@ class ProductForm
                             ->label('บาร์โค้ด')
                             ->maxLength(50)
                             ->placeholder('บาร์โค้ดสินค้า')
+                            ->columnSpan(1),
+                        TextInput::make('sku')
+                            ->label('SKU')
+                            ->maxLength(50)
+                            ->placeholder('ถ้าไม่ระบุจะสร้างอัตโนมัติ')
+                            ->helperText('ถ้าไม่ระบุ ระบบจะสร้าง SKU อัตโนมัติให้')
                             ->columnSpan(1),
                         Textarea::make('description')
                             ->label('รายละเอียด')
@@ -94,6 +101,22 @@ class ProductForm
                                     ->minValue(0)
                                     ->placeholder('0')
                                     ->helperText('จำนวนสินค้าคงเหลือในคลัง')
+                                    ->columnSpan(1),
+                                TextInput::make('min_stock')
+                                    ->label('ขั้นต่ำ')
+                                    ->numeric()
+                                    ->default(0)
+                                    ->minValue(0)
+                                    ->placeholder('0')
+                                    ->helperText('เตือนเมื่อสต๊อกต่ำกว่าค่านี้')
+                                    ->columnSpan(1),
+                                TextInput::make('max_stock')
+                                    ->label('ขั้นสูง')
+                                    ->numeric()
+                                    ->default(1000)
+                                    ->minValue(0)
+                                    ->placeholder('1000')
+                                    ->helperText('เตือนเมื่อสต๊อกเกินค่านี้')
                                     ->columnSpan(1),
                             ])
                             ->columns(3)
@@ -197,16 +220,17 @@ class ProductForm
                             ->native(false)
                             ->placeholder('เลือกบริษัท')
                             ->reactive()
+                            ->default(fn () => Company::first()?->id)
                             ->columnSpan(1),
                         Select::make('branch_id')
                             ->label('สาขา')
-                            ->relationship('branch', 'name', fn($query, $get) =>
-                                $get('company_id') ? $query->where('company_id', $get('company_id')) : $query)
+                            ->relationship('branch', 'name', fn ($query, $get) => $get('company_id') ? $query->where('company_id', $get('company_id')) : $query)
                             ->required()
                             ->searchable()
                             ->preload()
                             ->native(false)
                             ->placeholder('เลือกสาขา')
+                            ->default(fn () => Branch::where('is_headquarter', true)->first()?->id)
                             ->columnSpan(1),
                     ])
                     ->columns(2)

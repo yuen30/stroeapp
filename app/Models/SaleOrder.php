@@ -4,21 +4,19 @@ namespace App\Models;
 
 use App\Enums\DocumentType;
 use App\Enums\OrderStatus;
-use App\Enums\PaymentMethod;
-use App\Enums\PaymentStatus;
 use App\Traits\DocumentObservable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class SaleOrder extends Model
 {
-    use HasFactory, HasUlids, SoftDeletes, LogsActivity, DocumentObservable;
+    use DocumentObservable, HasFactory, HasUlids, LogsActivity, SoftDeletes;
 
     protected $documentNumberField = 'invoice_number';
 
@@ -40,8 +38,8 @@ class SaleOrder extends Model
         'term_of_payment',
         'reference_number',
         'status',
-        'payment_status',
-        'payment_method',
+        'payment_status_id',
+        'payment_method_id',
         'subtotal',
         'discount_amount',
         'vat_amount',
@@ -63,8 +61,6 @@ class SaleOrder extends Model
             'delivery_date' => 'date',
             'document_type' => DocumentType::class,
             'status' => OrderStatus::class,
-            'payment_status' => PaymentStatus::class,
-            'payment_method' => PaymentMethod::class,
             'subtotal' => 'decimal:2',
             'discount_amount' => 'decimal:2',
             'vat_amount' => 'decimal:2',
@@ -76,15 +72,23 @@ class SaleOrder extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['status', 'payment_status', 'total_amount', 'notes'])
+            ->logOnly([
+                'status',
+                'subtotal',
+                'discount_amount',
+                'vat_amount',
+                'total_amount',
+                'notes',
+            ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => match ($eventName) {
+            ->setDescriptionForEvent(fn (string $eventName) => match ($eventName) {
                 'created' => 'สร้างใบสั่งขาย',
                 'updated' => 'แก้ไขใบสั่งขาย',
                 'deleted' => 'ลบใบสั่งขาย',
                 default => $eventName,
-            });
+            })
+            ->useLogName('sale_order');
     }
 
     public function company(): BelongsTo
@@ -125,5 +129,15 @@ class SaleOrder extends Model
     public function taxInvoices(): HasMany
     {
         return $this->hasMany(TaxInvoice::class);
+    }
+
+    public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class);
+    }
+
+    public function paymentStatus(): BelongsTo
+    {
+        return $this->belongsTo(PaymentStatus::class);
     }
 }

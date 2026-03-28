@@ -28,8 +28,8 @@ return new class extends Migration {
             $table->string('term_of_payment')->nullable();
             $table->string('reference_number')->nullable();  // เลขที่อ้างอิง (PO ลูกค้า)
             $table->string('status')->default(OrderStatus::Draft->value);
-            $table->string('payment_status')->default(PaymentStatus::Unpaid->value);
-            $table->string('payment_method')->nullable();
+            $table->foreignUlid('payment_status_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignUlid('payment_method_id')->nullable()->constrained()->nullOnDelete();
             $table->decimal('subtotal', 15, 2)->default(0);
             $table->decimal('discount_amount', 15, 2)->default(0);
             $table->decimal('vat_amount', 15, 2)->default(0);

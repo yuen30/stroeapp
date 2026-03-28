@@ -5,14 +5,16 @@ namespace App\Models;
 use App\Traits\DocumentObservable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Product extends Model
 {
-    use HasFactory, HasUlids, SoftDeletes, DocumentObservable;
+    use DocumentObservable, HasFactory, HasUlids, LogsActivity, SoftDeletes;
 
     protected $documentNumberField = 'code';
 
@@ -21,10 +23,40 @@ class Product extends Model
         return 'product';
     }
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'name',
+                'code',
+                'sku',
+                'barcode',
+                'category_id',
+                'brand_id',
+                'unit_id',
+                'cost_price',
+                'selling_price',
+                'stock_quantity',
+                'min_stock',
+                'max_stock',
+                'is_active',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn (string $eventName) => match ($eventName) {
+                'created' => 'สร้างสินค้าใหม่',
+                'updated' => 'แก้ไขสินค้า',
+                'deleted' => 'ลบสินค้า',
+                default => $eventName,
+            })
+            ->useLogName('product');
+    }
+
     protected $fillable = [
         'name',
         'code',
         'sku',
+        'barcode',
         'category_id',
         'description',
         'company_id',
@@ -118,7 +150,6 @@ class Product extends Model
         return $this->hasMany(StockReservation::class);
     }
 
-    // Accessor สำหรับ reserved quantity
     public function getReservedQuantityAttribute(): int
     {
         return $this
@@ -127,19 +158,16 @@ class Product extends Model
             ->sum('reserved_quantity');
     }
 
-    // Accessor สำหรับ available stock
     public function getAvailableStockAttribute(): int
     {
         return max(0, $this->stock_quantity - $this->reserved_quantity);
     }
 
-    // ตรวจสอบว่า stock ต่ำกว่าขั้นต่ำหรือไม่
     public function isLowStock(): bool
     {
         return $this->min_stock > 0 && $this->stock_quantity <= $this->min_stock;
     }
 
-    // ตรวจสอบว่า stock เกินขั้นสูงสุดหรือไม่
     public function isOverStock(): bool
     {
         return $this->max_stock > 0 && $this->stock_quantity >= $this->max_stock;

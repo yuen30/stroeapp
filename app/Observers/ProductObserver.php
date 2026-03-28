@@ -3,55 +3,35 @@
 namespace App\Observers;
 
 use App\Models\Product;
-use App\Models\Stock;
 
 class ProductObserver
 {
+    public function creating(Product $product): void
+    {
+        if (blank($product->sku)) {
+            $product->sku = 'SKU-'.strtoupper(uniqid());
+        }
+
+        if (blank($product->barcode)) {
+            $product->barcode = 'BC'.date('ymd').str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
+        }
+    }
+
     /**
      * Handle the Product "created" event.
-     * สร้าง Stock record อัตโนมัติเมื่อสร้างสินค้าใหม่
+     * (ไม่ต้องสร้าง Stock record แล้ว - ยอดอยู่ที่ Product.stock_quantity โดยตรง)
      */
     public function created(Product $product): void
     {
-        // สร้าง Stock record สำหรับสินค้าใหม่
-        Stock::create([
-            'product_id' => $product->id,
-            'quantity' => $product->stock_quantity ?? 0,
-            'cost_price' => $product->cost_price ?? 0,
-            'selling_price' => $product->selling_price ?? 0,
-        ]);
+        // Stock อยู่ที่ Product.stock_quantity โดยตรง
     }
 
     /**
      * Handle the Product "updated" event.
-     * อัปเดต Stock record เมื่อแก้ไขข้อมูลสินค้า
      */
     public function updated(Product $product): void
     {
-        // ตรวจสอบว่ามีการเปลี่ยนแปลงราคาหรือจำนวนสต็อกหรือไม่
-        if ($product->isDirty(['cost_price', 'selling_price', 'stock_quantity'])) {
-            $stock = $product->stocks()->first();
-
-            if ($stock) {
-                $updateData = [];
-
-                if ($product->isDirty('cost_price')) {
-                    $updateData['cost_price'] = $product->cost_price;
-                }
-
-                if ($product->isDirty('selling_price')) {
-                    $updateData['selling_price'] = $product->selling_price;
-                }
-
-                if ($product->isDirty('stock_quantity')) {
-                    $updateData['quantity'] = $product->stock_quantity;
-                }
-
-                if (!empty($updateData)) {
-                    $stock->updateQuietly($updateData);
-                }
-            }
-        }
+        // Stock อยู่ที่ Product.stock_quantity โดยตรง ไม่ต้อง sync กับ Stock table
     }
 
     /**
@@ -59,21 +39,16 @@ class ProductObserver
      */
     public function deleting(Product $product): void
     {
-        // ป้องกันการลบสินค้าที่มีสต็อกคงเหลือ
         if ($product->stock_quantity > 0) {
             throw new \Exception(
                 "ไม่สามารถลบสินค้า '{$product->name}' ได้ เนื่องจากมีสต็อกคงเหลือ {$product->stock_quantity} ชิ้น"
             );
         }
 
-        // ป้องกันการลบสินค้าที่มีประวัติการเคลื่อนไหวสต็อก
         if ($product->stockMovements()->exists()) {
             throw new \Exception(
                 "ไม่สามารถลบสินค้า '{$product->name}' ได้ เนื่องจากมีประวัติการเคลื่อนไหวสต็อก"
             );
         }
-
-        // ลบ Stock record ที่เกี่ยวข้อง
-        $product->stocks()->delete();
     }
 }
