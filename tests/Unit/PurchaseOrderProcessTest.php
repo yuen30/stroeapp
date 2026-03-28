@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\Supplier;
+use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -111,8 +112,10 @@ class PurchaseOrderProcessTest extends TestCase
         $company = Company::factory()->create();
         $branch = Branch::factory()->for($company)->create();
         $supplier = Supplier::factory()->for($company)->create();
-        $product1 = Product::factory()->for($company)->for($branch)->create();
-        $product2 = Product::factory()->for($company)->for($branch)->create();
+        $unit1 = Unit::factory()->create();
+        $unit2 = Unit::factory()->create();
+        $product1 = Product::factory()->for($company)->for($branch)->for($unit1)->create();
+        $product2 = Product::factory()->for($company)->for($branch)->for($unit2)->create();
         $user = User::factory()->for($company)->for($branch)->create();
 
         $purchaseOrder = PurchaseOrder::create([

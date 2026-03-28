@@ -11,8 +11,11 @@ class UnitFactory extends Factory
 
     public function definition(): array
     {
+        static $counter = 0;
+        $counter++;
+
         return [
-            'name' => fake()->randomElement(['ชิ้น', 'กล่อง', 'แพ็ค', 'โหล']),
+            'name' => fake()->unique()->randomElement(['ชิ้น', 'กล่อง', 'แพ็ค', 'โหล']).'-'.$counter,
             'code' => fake()->unique()->numerify('UNIT-####'),
             'is_active' => true,
         ];
