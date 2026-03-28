@@ -4,12 +4,16 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "test:e2e": "playwright test --ui"
     },
     "devDependencies": {
+        "@playwright/test": "^1.58.2",
         "@tailwindcss/vite": "^4.2.2",
+        "@types/node": "^25.5.0",
         "axios": "^1.14.0",
         "concurrently": "^9.2.1",
+        "dotenv": "^17.3.1",
         "laravel-vite-plugin": "^2.1.0",
         "tailwindcss": "^4.2.2",
         "vite": "^8.0.3"

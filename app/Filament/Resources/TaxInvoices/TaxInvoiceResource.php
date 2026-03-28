@@ -10,13 +10,13 @@ use App\Filament\Resources\TaxInvoices\Schemas\TaxInvoiceForm;
 use App\Filament\Resources\TaxInvoices\Schemas\TaxInvoiceInfolist;
 use App\Filament\Resources\TaxInvoices\Tables\TaxInvoicesTable;
 use App\Models\TaxInvoice;
+use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use BackedEnum;
 
 class TaxInvoiceResource extends Resource
 {
@@ -35,6 +35,26 @@ class TaxInvoiceResource extends Resource
     protected static ?string $recordTitleAttribute = 'tax_invoice_number';
 
     protected static bool $shouldRegisterNavigation = false;
+
+    protected static int $globalSearchResultsLimit = 10;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['tax_invoice_number', 'customer.name'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'ลูกค้า' => $record->customer?->name ?? '-',
+            'ยอดรวม' => number_format($record->total_amount ?? 0, 2).' บาท',
+        ];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with(['customer']);
+    }
 
     public static function form(Schema $schema): Schema
     {

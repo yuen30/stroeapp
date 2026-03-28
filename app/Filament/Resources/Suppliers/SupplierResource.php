@@ -32,6 +32,22 @@ class SupplierResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static int $globalSearchResultsLimit = 10;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['code', 'name', 'tax_id', 'tel', 'email'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'รหัส' => $record->code ?? '-',
+            'โทรศัพท์' => $record->tel ?? '-',
+            'เลขผู้เสียภาษี' => $record->tax_id ?? '-',
+        ];
+    }
+
     public static function form(Schema $schema): Schema
     {
         return SupplierForm::configure($schema);

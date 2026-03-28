@@ -32,6 +32,21 @@ class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static int $globalSearchResultsLimit = 5;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'email', 'tel'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'อีเมล' => $record->email ?? '-',
+            'สิทธิ์' => $record->roles?->first()?->name ?? '-',
+        ];
+    }
+
     public static function form(Schema $schema): Schema
     {
         return UserForm::configure($schema);

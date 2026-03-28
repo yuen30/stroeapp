@@ -32,6 +32,21 @@ class CompanyResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static int $globalSearchResultsLimit = 5;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['code', 'name', 'tax_id', 'tel'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'รหัส' => $record->code ?? '-',
+            'เลขผู้เสียภาษี' => $record->tax_id ?? '-',
+        ];
+    }
+
     public static function form(Schema $schema): Schema
     {
         return CompanyForm::configure($schema);

@@ -32,6 +32,21 @@ class BranchResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static int $globalSearchResultsLimit = 5;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['code', 'name', 'tel'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'รหัส' => $record->code ?? '-',
+            'โทรศัพท์' => $record->tel ?? '-',
+        ];
+    }
+
     public static function form(Schema $schema): Schema
     {
         return BranchForm::configure($schema);

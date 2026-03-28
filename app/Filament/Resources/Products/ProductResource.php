@@ -33,6 +33,28 @@ class ProductResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    protected static int $globalSearchResultsLimit = 10;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['code', 'sku', 'name', 'barcode', 'category.name', 'brand.name'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'รหัสสินค้า' => $record->code ?? '-',
+            'SKU' => $record->sku ?? '-',
+            'หมวดหมู่' => $record->category?->name ?? '-',
+            'ยอดคงเหลือ' => number_format($record->stock_quantity ?? 0),
+        ];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with(['category', 'brand']);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return ProductForm::configure($schema);

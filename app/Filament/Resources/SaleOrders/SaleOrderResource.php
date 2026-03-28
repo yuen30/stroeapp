@@ -10,13 +10,14 @@ use App\Filament\Resources\SaleOrders\Schemas\SaleOrderForm;
 use App\Filament\Resources\SaleOrders\Schemas\SaleOrderInfolist;
 use App\Filament\Resources\SaleOrders\Tables\SaleOrdersTable;
 use App\Models\SaleOrder;
+use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use BackedEnum;
 
 class SaleOrderResource extends Resource
 {
@@ -32,7 +33,28 @@ class SaleOrderResource extends Resource
 
     protected static ?string $pluralModelLabel = 'ใบสั่งขาย';
 
-    protected static ?string $recordTitleAttribute = 'document_no';
+    protected static ?string $recordTitleAttribute = 'invoice_number';
+
+    protected static int $globalSearchResultsLimit = 10;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['invoice_number', 'reference_number', 'customer.name'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return [
+            'ลูกค้า' => $record->customer?->name ?? '-',
+            'สถานะ' => $record->status?->getLabel() ?? '-',
+            'ยอดรวม' => number_format($record->total_amount ?? 0, 2).' บาท',
+        ];
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->with(['customer', 'status']);
+    }
 
     public static function form(Schema $schema): Schema
     {
