@@ -346,10 +346,11 @@
                 <tr class="bg-primary text-white">
                     <th width="5%" class="text-center">ลำดับ<br>Item</th>
                     <th width="12%" class="text-center">รหัสสินค้า<br>Code</th>
-                    <th width="41%" class="text-left">รายละเอียดสินค้า<br>Description</th>
-                    <th width="10%" class="text-center">จำนวน<br>Qty</th>
+                    <th width="33%" class="text-left">รายละเอียดสินค้า<br>Description</th>
+                    <th width="8%" class="text-center">จำนวน<br>Qty</th>
                     <th width="8%" class="text-center">หน่วย<br>Unit</th>
-                    <th width="12%" class="text-right">ราคา/หน่วย<br>Unit Price</th>
+                    <th width="10%" class="text-right">ราคา/หน่วย<br>Unit Price</th>
+                    <th width="12%" class="text-right">ส่วนลด/หน่วย<br>Discount</th>
                     <th width="12%" class="text-right">จำนวนเงิน<br>Amount</th>
                 </tr>
             </thead>
@@ -367,13 +368,14 @@
                         <td class="text-center font-bold">{{ number_format($item->quantity) }}</td>
                         <td class="text-center">{{ $item->product->unit->name ?? 'ชิ้น' }}</td>
                         <td class="text-right">{{ number_format($item->unit_price, 2) }}</td>
+                        <td class="text-right" style="color: #b91c1c;">{{ ($item->discount ?? 0) > 0 ? number_format($item->discount, 2) : '-' }}</td>
                         <td class="text-right font-bold">
-                            {{ number_format($item->total_price ?? ($item->quantity * $item->unit_price), 2) }}
+                            {{ number_format($item->total_price ?? (($item->unit_price - ($item->discount ?? 0)) * $item->quantity), 2) }}
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center py-2">ไม่มีรายการสินค้า</td>
+                        <td colspan="8" class="text-center py-2">ไม่มีรายการสินค้า</td>
                     </tr>
                 @endforelse
 
@@ -381,6 +383,7 @@
                 @for($i = $saleOrder->items->count(); $i < 6; $i++)
                     <tr class="{{ $i % 2 == 1 ? 'striped' : '' }}">
                         <td style="color: transparent;">-</td>
+                        <td></td>
                         <td></td>
                         <td></td>
                         <td></td>

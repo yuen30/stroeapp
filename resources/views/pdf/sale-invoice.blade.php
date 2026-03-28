@@ -339,9 +339,10 @@
             <thead>
                 <tr class="bg-primary text-white">
                     <th width="8%" class="text-center">ลำดับ<br>Item</th>
-                    <th width="10%" class="text-center">จำนวน<br>Qty</th>
-                    <th width="45%" class="text-left">รายละเอียดสินค้า<br>Description</th>
+                    <th width="8%" class="text-center">จำนวน<br>Qty</th>
+                    <th width="35%" class="text-left">รายละเอียดสินค้า<br>Description</th>
                     <th width="15%" class="text-right">ราคา/หน่วย<br>Unit Price</th>
+                    <th width="12%" class="text-right">ส่วนลด/หน่วย<br>Discount</th>
                     <th width="22%" class="text-right">จำนวนเงิน<br>Amount</th>
                 </tr>
             </thead>
@@ -357,11 +358,12 @@
                         @endif
                     </td>
                     <td class="text-right">{{ number_format($item->unit_price, 2) }}</td>
-                    <td class="text-right font-bold">{{ number_format($item->quantity * $item->unit_price, 2) }}</td>
+                    <td class="text-right" style="color: #b91c1c;">{{ ($item->discount ?? 0) > 0 ? number_format($item->discount, 2) : '-' }}</td>
+                    <td class="text-right font-bold">{{ number_format($item->total_price ?? (($item->unit_price - ($item->discount ?? 0)) * $item->quantity), 2) }}</td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="5" class="text-center py-2">ไม่มีรายการสินค้า</td>
+                    <td colspan="6" class="text-center py-2">ไม่มีรายการสินค้า</td>
                 </tr>
                 @endforelse
                 
@@ -369,7 +371,7 @@
                 @php $totalRows = 8; @endphp
                 @for($i = $saleOrder->items->count(); $i < $totalRows; $i++)
                 <tr class="{{ $i % 2 == 1 ? 'striped' : '' }} {{ $i == $totalRows - 1 ? 'last-item-row' : '' }}">
-                    <td style="color: transparent;">-</td><td></td><td></td><td></td><td></td>
+                    <td style="color: transparent;">-</td><td></td><td></td><td></td><td></td><td></td>
                 </tr>
                 @endfor
             </tbody>
