@@ -16,6 +16,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TaxInvoiceResource extends Resource
@@ -43,7 +44,7 @@ class TaxInvoiceResource extends Resource
         return ['tax_invoice_number', 'customer.name'];
     }
 
-    public static function getGlobalSearchResultDetails(Model $record): array
+    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
     {
         return [
             'ลูกค้า' => $record->customer?->name ?? '-',

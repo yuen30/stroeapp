@@ -15,6 +15,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class GoodsReceiptResource extends Resource
@@ -40,7 +41,7 @@ class GoodsReceiptResource extends Resource
         return ['receipt_number', 'supplier.name', 'purchase_order.order_number'];
     }
 
-    public static function getGlobalSearchResultDetails(Model $record): array
+    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
     {
         return [
             'ผู้จัดจำหน่าย' => $record->supplier?->name ?? '-',

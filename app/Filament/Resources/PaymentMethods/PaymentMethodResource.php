@@ -14,6 +14,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PaymentMethodResource extends Resource
@@ -39,7 +40,7 @@ class PaymentMethodResource extends Resource
         return ['code', 'name'];
     }
 
-    public static function getGlobalSearchResultDetails(Model $record): array
+    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
     {
         return [
             'รหัส' => $record->code ?? '-',

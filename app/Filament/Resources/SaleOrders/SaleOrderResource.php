@@ -42,7 +42,7 @@ class SaleOrderResource extends Resource
         return ['invoice_number', 'reference_number', 'customer.name'];
     }
 
-    public static function getGlobalSearchResultDetails(Model $record): array
+    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
     {
         return [
             'ลูกค้า' => $record->customer?->name ?? '-',
