@@ -5,15 +5,16 @@ namespace App\Models;
 use App\Enums\PaymentStatus;
 use App\Traits\DocumentObservable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class TaxInvoice extends Model
 {
-    use HasUlids, SoftDeletes, LogsActivity, DocumentObservable;
+    use DocumentObservable, HasFactory, HasUlids, LogsActivity, SoftDeletes;
 
     protected $documentNumberField = 'tax_invoice_number';
 
@@ -74,7 +75,7 @@ class TaxInvoice extends Model
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn(string $eventName) => match ($eventName) {
+            ->setDescriptionForEvent(fn (string $eventName) => match ($eventName) {
                 'created' => 'สร้างใบกำกับภาษี',
                 'updated' => 'แก้ไขใบกำกับภาษี',
                 'deleted' => 'ลบใบกำกับภาษี',

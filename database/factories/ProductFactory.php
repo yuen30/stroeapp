@@ -18,6 +18,7 @@ class ProductFactory extends Factory
         return [
             'name' => fake()->words(3, true),
             'code' => fake()->unique()->numerify('PROD-####'),
+            'sku' => fake()->unique()->numerify('SKU-########'),
             'company_id' => Company::factory(),
             'branch_id' => Branch::factory(),
             'category_id' => null,

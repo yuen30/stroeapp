@@ -54,7 +54,6 @@ class BranchesTable
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
-                    ->wrap()
                     ->description(fn($record) => $record->tax_id ? "เลขประจำตัวผู้เสียภาษี: {$record->tax_id}" : null),
                 IconColumn::make('is_headquarter')
                     ->label('สำนักงานใหญ่')
@@ -79,7 +78,6 @@ class BranchesTable
                         ]);
                         return implode(' ', $parts) ?: 'ไม่ระบุ';
                     })
-                    ->wrap()
                     ->limit(50)
                     ->tooltip(function ($record) {
                         $parts = array_filter([

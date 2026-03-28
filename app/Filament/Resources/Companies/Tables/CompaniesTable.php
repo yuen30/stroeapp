@@ -46,7 +46,6 @@ class CompaniesTable
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
-                    ->wrap()
                     ->description(fn($record) => $record->tax_id ? "เลขประจำตัวผู้เสียภาษี: {$record->tax_id}" : null),
                 TextColumn::make('address')
                     ->label('ที่อยู่')
@@ -60,7 +59,6 @@ class CompaniesTable
                         ]);
                         return implode(' ', $parts) ?: 'ไม่ระบุ';
                     })
-                    ->wrap()
                     ->limit(50)
                     ->tooltip(function ($record) {
                         $parts = array_filter([

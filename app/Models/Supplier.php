@@ -5,9 +5,10 @@ namespace App\Models;
 use App\Traits\DocumentObservable;
 use Filament\Models\Contracts\HasAvatar;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Leek\FilamentDiceBear\Concerns\HasDiceBearAvatar;
@@ -15,7 +16,7 @@ use Leek\FilamentDiceBear\Enums\DiceBearStyle;
 
 class Supplier extends Model implements HasAvatar
 {
-    use HasUlids, SoftDeletes, HasDiceBearAvatar, DocumentObservable;
+    use DocumentObservable, HasDiceBearAvatar, HasFactory, HasUlids, SoftDeletes;
 
     protected $documentNumberField = 'code';
 

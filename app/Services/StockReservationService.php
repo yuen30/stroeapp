@@ -6,17 +6,15 @@ use App\Models\Product;
 use App\Models\SaleOrder;
 use App\Models\SaleOrderItem;
 use App\Models\StockReservation;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Exception;
 
 class StockReservationService
 {
     /**
      * สร้างการจองสต็อกสำหรับ SaleOrderItem
      *
-     * @param SaleOrderItem $item
-     * @return StockReservation
      * @throws InsufficientStockException
      * @throws Exception
      */
@@ -28,7 +26,7 @@ class StockReservationService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$product) {
+            if (! $product) {
                 throw new Exception("Product not found: {$item->product_id}");
             }
 
@@ -52,6 +50,7 @@ class StockReservationService
 
             // สร้างการจอง
             $reservation = StockReservation::create([
+                'code' => 'RSV-'.now()->format('YmdHis').'-'.str_pad($item->id, 6, '0', STR_PAD_LEFT),
                 'product_id' => $item->product_id,
                 'sale_order_id' => $item->sale_order_id,
                 'sale_order_item_id' => $item->id,
@@ -75,9 +74,6 @@ class StockReservationService
     /**
      * อัพเดทการจองเมื่อเปลี่ยนจำนวน
      *
-     * @param SaleOrderItem $item
-     * @param int $oldQuantity
-     * @return void
      * @throws InsufficientStockException
      * @throws Exception
      */
@@ -89,7 +85,7 @@ class StockReservationService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$product) {
+            if (! $product) {
                 throw new Exception("Product not found: {$item->product_id}");
             }
 
@@ -97,11 +93,12 @@ class StockReservationService
             $reservation = StockReservation::where('sale_order_item_id', $item->id)
                 ->first();
 
-            if (!$reservation) {
+            if (! $reservation) {
                 Log::warning('Reservation not found for update', [
                     'sale_order_item_id' => $item->id,
                     'product_id' => $item->product_id,
                 ]);
+
                 return;
             }
 
@@ -146,9 +143,6 @@ class StockReservationService
 
     /**
      * ลบการจองสำหรับ SaleOrderItem
-     *
-     * @param SaleOrderItem $item
-     * @return void
      */
     public function deleteReservation(SaleOrderItem $item): void
     {
@@ -174,9 +168,6 @@ class StockReservationService
 
     /**
      * ปลดล็อคการจองทั้งหมดของ SaleOrder
-     *
-     * @param SaleOrder $saleOrder
-     * @return void
      */
     public function releaseReservations(SaleOrder $saleOrder): void
     {
@@ -207,9 +198,7 @@ class StockReservationService
     /**
      * คำนวณ available stock สำหรับ Product
      *
-     * @param Product $product
-     * @param string|null $excludeItemId SaleOrderItem ID ที่จะไม่นับรวมในการคำนวณ (สำหรับ update)
-     * @return int
+     * @param  string|null  $excludeItemId  SaleOrderItem ID ที่จะไม่นับรวมในการคำนวณ (สำหรับ update)
      */
     public function getAvailableStock(Product $product, ?string $excludeItemId = null): int
     {

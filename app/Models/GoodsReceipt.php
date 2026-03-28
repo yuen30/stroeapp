@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\OrderStatus;
 use App\Traits\DocumentObservable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,7 +15,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class GoodsReceipt extends Model
 {
-    use DocumentObservable, HasUlids, LogsActivity, SoftDeletes;
+    use DocumentObservable, HasFactory, HasUlids, LogsActivity, SoftDeletes;
 
     protected $documentNumberField = 'receipt_number';
 

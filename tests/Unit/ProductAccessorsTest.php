@@ -3,204 +3,123 @@
 namespace Tests\Unit;
 
 use App\Enums\OrderStatus;
-use App\Models\Branch;
-use App\Models\Category;
-use App\Models\Company;
 use App\Models\Product;
 use App\Models\SaleOrder;
 use App\Models\SaleOrderItem;
 use App\Models\StockReservation;
-use App\Models\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ProductAccessorsTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_calculates_reserved_quantity_from_active_reservations(): void
     {
-        // Arrange
-        $product = Product::factory()->create(['stock_quantity' => 100]);
-        $saleOrder = SaleOrder::factory()->create(['status' => OrderStatus::Draft]);
-        $item = SaleOrderItem::factory()->create([
-            'sale_order_id' => $saleOrder->id,
-            'product_id' => $product->id,
-            'quantity' => 10,
-        ]);
+        $product = $this->createProductWithStock(100);
+        $saleOrder = $this->createSaleOrder();
 
-        // Create active reservation
-        StockReservation::create([
-            'product_id' => $product->id,
-            'sale_order_id' => $saleOrder->id,
-            'sale_order_item_id' => $item->id,
-            'reserved_quantity' => 10,
-            'expires_at' => now()->addHours(24),
-        ]);
+        // Observer will create reservation automatically when SaleOrderItem is created
+        $item = $this->createSaleOrderItem($saleOrder, $product, 10);
 
-        // Act
-        $reservedQuantity = $product->reserved_quantity;
+        $reservedQuantity = $product->fresh()->reserved_quantity;
 
-        // Assert
         $this->assertEquals(10, $reservedQuantity);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_ignores_expired_reservations_in_reserved_quantity(): void
     {
-        // Arrange
-        $product = Product::factory()->create(['stock_quantity' => 100]);
-        $saleOrder = SaleOrder::factory()->create(['status' => OrderStatus::Draft]);
-        $item = SaleOrderItem::factory()->create([
-            'sale_order_id' => $saleOrder->id,
-            'product_id' => $product->id,
-            'quantity' => 10,
-        ]);
+        $product = $this->createProductWithStock(100);
+        $saleOrder = $this->createSaleOrder();
+        $item = $this->createSaleOrderItem($saleOrder, $product, 10);
 
-        // Create expired reservation
-        StockReservation::create([
-            'product_id' => $product->id,
-            'sale_order_id' => $saleOrder->id,
-            'sale_order_item_id' => $item->id,
-            'reserved_quantity' => 10,
-            'expires_at' => now()->subHour(),
-        ]);
+        // Manually update reservation to be expired (Observer creates active one)
+        StockReservation::where('sale_order_item_id', $item->id)
+            ->update(['expires_at' => now()->subHour()]);
 
-        // Act
-        $reservedQuantity = $product->reserved_quantity;
+        $reservedQuantity = $product->fresh()->reserved_quantity;
 
-        // Assert
         $this->assertEquals(0, $reservedQuantity);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_calculates_available_stock_correctly(): void
     {
-        // Arrange
-        $product = Product::factory()->create(['stock_quantity' => 100]);
-        $saleOrder = SaleOrder::factory()->create(['status' => OrderStatus::Draft]);
-        $item = SaleOrderItem::factory()->create([
-            'sale_order_id' => $saleOrder->id,
-            'product_id' => $product->id,
-            'quantity' => 30,
-        ]);
+        $product = $this->createProductWithStock(100);
+        $saleOrder = $this->createSaleOrder();
+        $item = $this->createSaleOrderItem($saleOrder, $product, 30);
 
-        // Create active reservation
-        StockReservation::create([
-            'product_id' => $product->id,
-            'sale_order_id' => $saleOrder->id,
-            'sale_order_item_id' => $item->id,
-            'reserved_quantity' => 30,
-            'expires_at' => now()->addHours(24),
-        ]);
+        $availableStock = $product->fresh()->available_stock;
 
-        // Act
-        $availableStock = $product->available_stock;
-
-        // Assert
         $this->assertEquals(70, $availableStock);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_returns_zero_for_available_stock_when_fully_reserved(): void
     {
-        // Arrange
-        $product = Product::factory()->create(['stock_quantity' => 50]);
-        $saleOrder = SaleOrder::factory()->create(['status' => OrderStatus::Draft]);
-        $item = SaleOrderItem::factory()->create([
-            'sale_order_id' => $saleOrder->id,
-            'product_id' => $product->id,
-            'quantity' => 50,
-        ]);
+        $product = $this->createProductWithStock(50);
+        $saleOrder = $this->createSaleOrder();
+        $item = $this->createSaleOrderItem($saleOrder, $product, 50);
 
-        // Create reservation for all stock
-        StockReservation::create([
-            'product_id' => $product->id,
-            'sale_order_id' => $saleOrder->id,
-            'sale_order_item_id' => $item->id,
-            'reserved_quantity' => 50,
-            'expires_at' => now()->addHours(24),
-        ]);
+        $availableStock = $product->fresh()->available_stock;
 
-        // Act
-        $availableStock = $product->available_stock;
-
-        // Assert
         $this->assertEquals(0, $availableStock);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_sums_multiple_reservations_correctly(): void
     {
-        // Arrange
-        $product = Product::factory()->create(['stock_quantity' => 100]);
-        $saleOrder1 = SaleOrder::factory()->create(['status' => OrderStatus::Draft]);
-        $saleOrder2 = SaleOrder::factory()->create(['status' => OrderStatus::Draft]);
+        $product = $this->createProductWithStock(100);
+        $saleOrder1 = $this->createSaleOrder();
+        $saleOrder2 = $this->createSaleOrder();
 
-        $item1 = SaleOrderItem::factory()->create([
-            'sale_order_id' => $saleOrder1->id,
-            'product_id' => $product->id,
-            'quantity' => 20,
-        ]);
+        // Observer will create reservations automatically
+        $this->createSaleOrderItem($saleOrder1, $product, 20);
+        $this->createSaleOrderItem($saleOrder2, $product, 15);
 
-        $item2 = SaleOrderItem::factory()->create([
-            'sale_order_id' => $saleOrder2->id,
-            'product_id' => $product->id,
-            'quantity' => 15,
-        ]);
+        $reservedQuantity = $product->fresh()->reserved_quantity;
+        $availableStock = $product->fresh()->available_stock;
 
-        // Create multiple reservations
-        StockReservation::create([
-            'product_id' => $product->id,
-            'sale_order_id' => $saleOrder1->id,
-            'sale_order_item_id' => $item1->id,
-            'reserved_quantity' => 20,
-            'expires_at' => now()->addHours(24),
-        ]);
-
-        StockReservation::create([
-            'product_id' => $product->id,
-            'sale_order_id' => $saleOrder2->id,
-            'sale_order_item_id' => $item2->id,
-            'reserved_quantity' => 15,
-            'expires_at' => now()->addHours(24),
-        ]);
-
-        // Act
-        $reservedQuantity = $product->reserved_quantity;
-        $availableStock = $product->available_stock;
-
-        // Assert
         $this->assertEquals(35, $reservedQuantity);
         $this->assertEquals(65, $availableStock);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_has_stock_reservations_relationship(): void
     {
-        // Arrange
-        $product = Product::factory()->create(['stock_quantity' => 100]);
-        $saleOrder = SaleOrder::factory()->create(['status' => OrderStatus::Draft]);
-        $item = SaleOrderItem::factory()->create([
-            'sale_order_id' => $saleOrder->id,
-            'product_id' => $product->id,
-            'quantity' => 10,
-        ]);
+        $product = $this->createProductWithStock(100);
+        $saleOrder = $this->createSaleOrder();
+        $item = $this->createSaleOrderItem($saleOrder, $product, 10);
 
-        StockReservation::create([
-            'product_id' => $product->id,
-            'sale_order_id' => $saleOrder->id,
-            'sale_order_item_id' => $item->id,
-            'reserved_quantity' => 10,
-            'expires_at' => now()->addHours(24),
-        ]);
+        $reservations = $product->fresh()->stockReservations;
 
-        // Act
-        $reservations = $product->stockReservations;
-
-        // Assert
         $this->assertCount(1, $reservations);
         $this->assertEquals(10, $reservations->first()->reserved_quantity);
+    }
+
+    private function createProductWithStock(int $stock): Product
+    {
+        return Product::factory()->create([
+            'stock_quantity' => $stock,
+        ]);
+    }
+
+    private function createSaleOrder(): SaleOrder
+    {
+        return SaleOrder::factory()->create([
+            'status' => OrderStatus::Draft,
+        ]);
+    }
+
+    private function createSaleOrderItem(SaleOrder $saleOrder, Product $product, int $quantity): SaleOrderItem
+    {
+        return SaleOrderItem::factory()->create([
+            'sale_order_id' => $saleOrder->id,
+            'product_id' => $product->id,
+            'quantity' => $quantity,
+        ]);
     }
 }
