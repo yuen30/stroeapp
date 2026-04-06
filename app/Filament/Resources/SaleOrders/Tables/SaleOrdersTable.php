@@ -22,7 +22,7 @@ class SaleOrdersTable
                 TextColumn::make('row_id')->label('#')->rowIndex()->alignCenter(),
                 TextColumn::make('invoice_number')->label('เลขที่ใบกำกับภาษี')->searchable()->sortable()->weight('medium'),
                 TextColumn::make('customer.name')->label('ลูกค้า')->searchable()->sortable()->icon('heroicon-o-user-group')->iconColor('info'),
-                TextColumn::make('order_date')->label('วันที่สั่งซื้อ')->date('d/m/Y')->sortable()->icon('heroicon-o-calendar'),
+                TextColumn::make('order_date')->label('วันที่ขาย')->date('d/m/Y')->sortable()->icon('heroicon-o-calendar'),
                 TextColumn::make('status')->label('สถานะ')->badge()->sortable()->alignCenter(),
                 TextColumn::make('paymentMethod.name')->label('ช่องทางชำระเงิน')->searchable()->sortable()->icon('heroicon-o-credit-card')->iconColor('primary'),
                 TextColumn::make('paymentStatus.name')->label('สถานะชำระเงิน')->searchable()->sortable()->icon('heroicon-o-banknotes')->iconColor('warning'),

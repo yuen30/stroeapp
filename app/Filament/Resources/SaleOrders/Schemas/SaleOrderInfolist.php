@@ -39,7 +39,7 @@ class SaleOrderInfolist
                             ->color('primary')
                             ->columnSpan(1),
                         TextEntry::make('order_date')
-                            ->label('วันที่สั่งซื้อ')
+                            ->label('วันที่ขาย')
                             ->date('d/m/Y')
                             ->columnSpan(1),
                         TextEntry::make('due_date')
@@ -110,7 +110,7 @@ class SaleOrderInfolist
                                     ->alignRight(),
                                 TextEntry::make('item_id')
                                     ->label('การจัดการ')
-                                    ->formatStateUsing(fn () => '')
+                                    ->formatStateUsing(fn() => '')
                                     ->suffixAction(
                                         Action::make('edit')
                                             ->icon(Heroicon::PencilSquare)
@@ -133,17 +133,17 @@ class SaleOrderInfolist
                                                             ->label('สต็อกคงเหลือ')
                                                             ->content(function (callable $get) {
                                                                 $itemId = $get('../../item_id');
-                                                                if (! $itemId) {
+                                                                if (!$itemId) {
                                                                     return '-';
                                                                 }
 
                                                                 $item = SaleOrderItem::find($itemId);
-                                                                if (! $item || ! $item->product) {
+                                                                if (!$item || !$item->product) {
                                                                     return '-';
                                                                 }
 
                                                                 $product = Product::find($item->product_id);
-                                                                if (! $product) {
+                                                                if (!$product) {
                                                                     return '-';
                                                                 }
 
@@ -164,13 +164,13 @@ class SaleOrderInfolist
                                                                 return new HtmlString('
                                                                     <div class="space-y-2">
                                                                         <div class="flex items-center gap-4">
-                                                                            <span class="text-'.$color.'-600 dark:text-'.$color.'-400 font-bold text-2xl">'
-                                                                    .number_format($available).' หน่วย</span>
+                                                                            <span class="text-' . $color . '-600 dark:text-' . $color . '-400 font-bold text-2xl">'
+                                                                    . number_format($available) . ' หน่วย</span>
                                                                             <span class="text-sm text-gray-500 dark:text-gray-400">พร้อมใช้งาน</span>
                                                                         </div>
                                                                         <div class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
-                                                                            <div>สต็อกทั้งหมด: <span class="font-semibold">'.number_format($totalStock).'</span></div>
-                                                                            '.($reserved > 0 ? '<div class="text-warning-600 dark:text-warning-400">ถูกจองโดยใบอื่น: <span class="font-semibold">'.number_format($reserved - ($currentReservation ? $currentReservation->reserved_quantity : 0)).'</span></div>' : '').'
+                                                                            <div>สต็อกทั้งหมด: <span class="font-semibold">' . number_format($totalStock) . '</span></div>
+                                                                            ' . ($reserved > 0 ? '<div class="text-warning-600 dark:text-warning-400">ถูกจองโดยใบอื่น: <span class="font-semibold">' . number_format($reserved - ($currentReservation ? $currentReservation->reserved_quantity : 0)) . '</span></div>' : '') . '
                                                                         </div>
                                                                     </div>
                                                                 ');
@@ -189,17 +189,17 @@ class SaleOrderInfolist
                                                             ->suffix('หน่วย')
                                                             ->helperText(function (callable $get) {
                                                                 $itemId = $get('../../item_id');
-                                                                if (! $itemId) {
+                                                                if (!$itemId) {
                                                                     return null;
                                                                 }
 
                                                                 $item = SaleOrderItem::find($itemId);
-                                                                if (! $item || ! $item->product) {
+                                                                if (!$item || !$item->product) {
                                                                     return null;
                                                                 }
 
                                                                 $product = Product::find($item->product_id);
-                                                                if (! $product) {
+                                                                if (!$product) {
                                                                     return null;
                                                                 }
 
@@ -247,7 +247,7 @@ class SaleOrderInfolist
                                                             })
                                                             ->columnSpan(1),
                                                         Text::make(
-                                                            fn (callable $get): string => '฿ '.number_format(
+                                                            fn(callable $get): string => '฿ ' . number_format(
                                                                 (($get('unit_price') ?? 0) * ($get('quantity') ?? 0)) - ($get('discount') ?? 0),
                                                                 2
                                                             )
@@ -259,7 +259,7 @@ class SaleOrderInfolist
                                                             ->columnSpan(3),
                                                     ]),
                                             ])
-                                            ->mountUsing(fn ($form, $state) => $form->fill([
+                                            ->mountUsing(fn($form, $state) => $form->fill([
                                                 'product_id' => SaleOrderItem::find($state)?->product_id,
                                                 'description' => SaleOrderItem::find($state)?->description,
                                                 'quantity' => SaleOrderItem::find($state)?->quantity,
@@ -268,7 +268,7 @@ class SaleOrderInfolist
                                             ]))
                                             ->action(function (array $data, $state, $livewire) {
                                                 $item = SaleOrderItem::find($state);
-                                                if (! $item) {
+                                                if (!$item) {
                                                     Notification::make()
                                                         ->danger()
                                                         ->title('ไม่พบรายการสินค้า')
@@ -281,7 +281,7 @@ class SaleOrderInfolist
 
                                                 // ดึงข้อมูล Product ล่าสุดจากฐานข้อมูล (fresh query)
                                                 $product = Product::find($item->product_id);
-                                                if (! $product) {
+                                                if (!$product) {
                                                     Notification::make()
                                                         ->danger()
                                                         ->title('ไม่พบสินค้า')
@@ -366,7 +366,7 @@ class SaleOrderInfolist
                                     ),
                             ])
                             ->state(function ($record) {
-                                return $record->items->map(fn ($item, $index) => [
+                                return $record->items->map(fn($item, $index) => [
                                     'index' => $index + 1,
                                     'item_id' => $item->id,
                                     'product_name' => $item->product->name ?? '-',
@@ -395,7 +395,7 @@ class SaleOrderInfolist
                         ->label('แก้ไขยอดเงิน')
                         ->icon(Heroicon::Pencil)
                         ->color('primary')
-                        ->fillForm(fn ($record) => [
+                        ->fillForm(fn($record) => [
                             'subtotal' => $record->subtotal,
                             'discount_amount' => $record->discount_amount,
                             'vat_amount' => $record->vat_amount,
@@ -484,7 +484,7 @@ class SaleOrderInfolist
                             ->placeholder('-'),
                         TextEntry::make('document_type')
                             ->label('ประเภทเอกสาร')
-                            ->formatStateUsing(fn ($state) => $state?->getLabel() ?? '-'),
+                            ->formatStateUsing(fn($state) => $state?->getLabel() ?? '-'),
                         TextEntry::make('reference_number')
                             ->label('เลขที่อ้างอิง')
                             ->placeholder('-')
@@ -496,8 +496,8 @@ class SaleOrderInfolist
                 Section::make('ข้อมูลการจัดส่ง')
                     ->icon(Heroicon::Truck)
                     ->collapsible()
-                    ->collapsed(fn ($record) => ! $record->delivery_date && ! $record->shipping_method && ! $record->shipping_address)
-                    ->visible(fn ($record) => $record->delivery_date || $record->shipping_method || $record->shipping_address)
+                    ->collapsed(fn($record) => !$record->delivery_date && !$record->shipping_method && !$record->shipping_address)
+                    ->visible(fn($record) => $record->delivery_date || $record->shipping_method || $record->shipping_address)
                     ->schema([
                         TextEntry::make('delivery_date')
                             ->label('วันที่จัดส่ง')
@@ -519,8 +519,8 @@ class SaleOrderInfolist
                 Section::make('ข้อมูลผู้ติดต่อ')
                     ->icon(Heroicon::Phone)
                     ->collapsible()
-                    ->collapsed(fn ($record) => ! $record->contact_person && ! $record->contact_phone)
-                    ->visible(fn ($record) => $record->contact_person || $record->contact_phone)
+                    ->collapsed(fn($record) => !$record->contact_person && !$record->contact_phone)
+                    ->visible(fn($record) => $record->contact_person || $record->contact_phone)
                     ->schema([
                         TextEntry::make('contact_person')
                             ->label('ชื่อผู้ติดต่อ')
@@ -537,7 +537,7 @@ class SaleOrderInfolist
                     ->icon(Heroicon::PaperClip)
                     ->collapsible()
                     ->collapsed()
-                    ->visible(fn ($record) => ! empty($record->attachments))
+                    ->visible(fn($record) => !empty($record->attachments))
                     ->schema([
                         TextEntry::make('attachments')
                             ->label('ไฟล์แนบ')

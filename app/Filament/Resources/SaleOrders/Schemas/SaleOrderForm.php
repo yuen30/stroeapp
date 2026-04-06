@@ -35,7 +35,7 @@ class SaleOrderForm
                     ->description('การแก้ไขใบสั่งขายจะส่งผลต่อสต็อกสินค้าและรายการเอกสารที่เกี่ยวข้อง')
                     ->warning()
                     ->icon(Heroicon::ExclamationTriangle)
-                    ->visible(fn ($context) => $context === 'edit')
+                    ->visible(fn($context) => $context === 'edit')
                     ->columnSpanFull(),
                 // Layout หลัก: Flex แบบ 2 คอลัมน์
                 Flex::make([
@@ -49,7 +49,7 @@ class SaleOrderForm
                                 ->columns(2)
                                 ->schema([
                                     DatePicker::make('order_date')
-                                        ->label('วันที่สั่งซื้อ')
+                                        ->label('วันที่ขาย')
                                         ->required()
                                         ->default(now())
                                         ->native(false)
@@ -76,7 +76,7 @@ class SaleOrderForm
                                                 $customer = Customer::find($state);
                                                 if ($customer) {
                                                     if ($customer->credit_days > 0) {
-                                                        $set('term_of_payment', 'เครดิต '.$customer->credit_days.' วัน');
+                                                        $set('term_of_payment', 'เครดิต ' . $customer->credit_days . ' วัน');
                                                         $set('due_date', now()->addDays($customer->credit_days)->format('Y-m-d'));
                                                     } else {
                                                         $set('term_of_payment', 'เงินสด');
@@ -101,7 +101,7 @@ class SaleOrderForm
                                         ->preload()
                                         ->native(false)
                                         ->placeholder('เลือกพนักงานขาย')
-                                        ->default(fn () => Auth::user()?->id)
+                                        ->default(fn() => Auth::user()?->id)
                                         ->columnSpan(1),
                                     TextInput::make('reference_number')
                                         ->label('เลขที่อ้างอิง')
@@ -116,17 +116,17 @@ class SaleOrderForm
                                         ->preload()
                                         ->native(false)
                                         ->placeholder('เลือกบริษัท')
-                                        ->default(fn () => Company::first()?->id)
+                                        ->default(fn() => Company::first()?->id)
                                         ->reactive()
                                         ->columnSpan(1),
                                     Select::make('branch_id')
                                         ->label('สาขา')
-                                        ->relationship('branch', 'name', fn ($query, $get) => $get('company_id') ? $query->where('company_id', $get('company_id')) : $query)
+                                        ->relationship('branch', 'name', fn($query, $get) => $get('company_id') ? $query->where('company_id', $get('company_id')) : $query)
                                         ->searchable()
                                         ->preload()
                                         ->native(false)
                                         ->placeholder('เลือกสาขา')
-                                        ->default(fn () => Branch::where('is_headquarter', true)->first()?->id)
+                                        ->default(fn() => Branch::where('is_headquarter', true)->first()?->id)
                                         ->columnSpan(1),
                                 ]),
                             // // รายการสินค้า
@@ -278,18 +278,18 @@ class SaleOrderForm
                             // ข้อมูลวงเงินเครดิต
                             Section::make('วงเงินเครดิต')
                                 ->icon(Heroicon::CreditCard)
-                                ->visible(fn (callable $get) => $get('customer_id') !== null)
+                                ->visible(fn(callable $get) => $get('customer_id') !== null)
                                 ->schema([
                                     Placeholder::make('credit_info')
                                         ->hiddenLabel()
                                         ->content(function (callable $get) {
                                             $customerId = $get('customer_id');
-                                            if (! $customerId) {
+                                            if (!$customerId) {
                                                 return 'กรุณาเลือกลูกค้า';
                                             }
 
                                             $customer = Customer::find($customerId);
-                                            if (! $customer) {
+                                            if (!$customer) {
                                                 return '-';
                                             }
 
@@ -314,23 +314,23 @@ class SaleOrderForm
                                                     <div class="grid grid-cols-2 gap-2 text-sm">
                                                         <div>
                                                             <div class="text-gray-500 dark:text-gray-400">วงเงินทั้งหมด</div>
-                                                            <div class="font-semibold">'.number_format($customer->credit_limit, 2).' ฿</div>
+                                                            <div class="font-semibold">' . number_format($customer->credit_limit, 2) . ' ฿</div>
                                                         </div>
                                                         <div>
                                                             <div class="text-gray-500 dark:text-gray-400">ยอดค้างชำระ</div>
-                                                            <div class="font-semibold">'.number_format($outstanding, 2).' ฿</div>
+                                                            <div class="font-semibold">' . number_format($outstanding, 2) . ' ฿</div>
                                                         </div>
                                                     </div>
                                                     <div>
                                                         <div class="flex justify-between items-center mb-1">
                                                             <span class="text-sm text-gray-500 dark:text-gray-400">วงเงินคงเหลือ</span>
-                                                            <span class="font-bold text-'.$statusColor.'-600 dark:text-'.$statusColor.'-400">'.number_format($remaining, 2).' ฿</span>
+                                                            <span class="font-bold text-' . $statusColor . '-600 dark:text-' . $statusColor . '-400">' . number_format($remaining, 2) . ' ฿</span>
                                                         </div>
                                                         <div class="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                                                            <div class="bg-'.$statusColor.'-600 h-2 rounded-full" style="width: '.$percentage.'%"></div>
+                                                            <div class="bg-' . $statusColor . '-600 h-2 rounded-full" style="width: ' . $percentage . '%"></div>
                                                         </div>
                                                         <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                                            ใช้ไปแล้ว '.number_format($percentage, 1).'%
+                                                            ใช้ไปแล้ว ' . number_format($percentage, 1) . '%
                                                         </div>
                                                     </div>
                                                 </div>

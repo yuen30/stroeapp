@@ -35,7 +35,7 @@ class DocumentRunningNumberInfolist
                             ]),
                     ]),
                 Section::make('การตั้งค่าตัวเลข')
-                    ->icon(Heroicon::Numbers)
+                    ->icon(Heroicon::NumberedList)
                     ->schema([
                         Grid::make(3)
                             ->schema([
