@@ -75,31 +75,31 @@ class StatsOverviewWidget extends BaseWidget
 
         return [
             Stat::make('ยอดขายวันนี้', Number::currency($todaySales, 'THB', 'th'))
-                ->description('ยอดขายเดือนนี้: '.Number::currency($thisMonthSales, 'THB', 'th'))
+                ->description('ยอดขายเดือนนี้: ' . Number::currency($thisMonthSales, 'THB', 'th'))
                 ->descriptionIcon($salesChange >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($salesChange >= 0 ? 'success' : 'danger')
                 ->chart($this->getSalesChartData()),
-            Stat::make('สินค้าใกล้หมด', $lowStockCount.' รายการ')
-                ->description('หมดสต็อก: '.$outOfStockCount.' รายการ')
+            Stat::make('สินค้าใกล้หมด', $lowStockCount . ' รายการ')
+                ->description('หมดสต็อก: ' . $outOfStockCount . ' รายการ')
                 ->descriptionIcon('heroicon-m-exclamation-triangle')
                 ->color($lowStockCount > 10 ? 'warning' : 'success')
                 ->icon('heroicon-o-cube'),
-            Stat::make('สต็อกที่ถูกจอง', $reservedStock.' หน่วย')
-                ->description('จากใบสั่งขาย Draft')
+            Stat::make('สต็อกที่ถูกจอง', $reservedStock . ' หน่วย')
+                ->description('จากใบส่งสินค้า Draft')
                 ->descriptionIcon('heroicon-m-lock-closed')
                 ->color('info')
                 ->icon('heroicon-o-clock'),
-            Stat::make('ใบสั่งซื้อรอดำเนินการ', $pendingPurchaseOrders.' ใบ')
+            Stat::make('ใบสั่งซื้อรอดำเนินการ', $pendingPurchaseOrders . ' ใบ')
                 ->description('รอยืนยัน / รอรับสินค้า')
                 ->descriptionIcon('heroicon-m-shopping-cart')
                 ->color($pendingPurchaseOrders > 5 ? 'warning' : 'success')
                 ->icon('heroicon-o-document-text'),
             Stat::make('ยอดค้างชำระ', Number::currency($outstandingAmount, 'THB', 'th'))
-                ->description('จากใบสั่งขายที่ยืนยันแล้ว')
+                ->description('จากใบส่งสินค้าที่ยืนยันแล้ว')
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color($outstandingAmount > 100000 ? 'danger' : 'warning')
                 ->icon('heroicon-o-currency-dollar'),
-            Stat::make('ลูกค้าใหม่', $newCustomers.' ราย')
+            Stat::make('ลูกค้าใหม่', $newCustomers . ' ราย')
                 ->description('เดือนนี้')
                 ->descriptionIcon('heroicon-m-user-plus')
                 ->color('success')

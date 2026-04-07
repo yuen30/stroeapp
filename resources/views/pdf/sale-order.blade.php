@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>ใบสั่งขาย - Sale Order - {{ $saleOrder->invoice_number }}</title>
+    <title>ใบส่งสินค้า - Sale Order - {{ $saleOrder->invoice_number }}</title>
     <style>
         @font-face {
             font-family: 'TH Sarabun';
@@ -277,7 +277,7 @@
                     <div>เลขประจำตัวผู้เสียภาษี: {{ $saleOrder->company->tax_id ?? '-' }}</div>
                 </td>
                 <td width="40%" class="text-right">
-                    <div class="doc-title">ใบสั่งขาย<br><span style="font-size: 20px;">SALE ORDER</span></div>
+                    <div class="doc-title">ใบส่งสินค้า<br><span style="font-size: 20px;">Delivery Order</span></div>
                     <div style="margin-top: 10px;">
                         <table class="meta-box">
                             <tr>
@@ -368,7 +368,8 @@
                         <td class="text-center font-bold">{{ number_format($item->quantity) }}</td>
                         <td class="text-center">{{ $item->product->unit->name ?? 'ชิ้น' }}</td>
                         <td class="text-right">{{ number_format($item->unit_price, 2) }}</td>
-                        <td class="text-right" style="color: #b91c1c;">{{ ($item->discount ?? 0) > 0 ? number_format($item->discount, 2) : '-' }}</td>
+                        <td class="text-right" style="color: #b91c1c;">
+                            {{ ($item->discount ?? 0) > 0 ? number_format($item->discount, 2) : '-' }}</td>
                         <td class="text-right font-bold">
                             {{ number_format($item->total_price ?? (($item->unit_price - ($item->discount ?? 0)) * $item->quantity), 2) }}
                         </td>
@@ -428,7 +429,7 @@
                 <td width="40%" class="signature-box">
                     <div class="signature-line"></div>
                     <div>(.......................................................)</div>
-                    <div class="font-bold" style="margin-top: 5px;">ผู้รับใบสั่งขาย</div>
+                    <div class="font-bold" style="margin-top: 5px;">ผู้รับใบส่งสินค้า</div>
                     <div>Customer Authorized Signature</div>
                     <div style="margin-top: 5px;">วันที่ ....... / ....... / ...........</div>
                 </td>
@@ -436,7 +437,7 @@
                 <td width="40%" class="signature-box">
                     <div class="signature-line"></div>
                     <div>(.......................................................)</div>
-                    <div class="font-bold" style="margin-top: 5px;">ผู้อนุมัติใบสั่งขาย</div>
+                    <div class="font-bold" style="margin-top: 5px;">ผู้อนุมัติใบส่งสินค้า</div>
                     <div>Authorized Signature</div>
                     <div style="margin-top: 5px;">วันที่ ....... / ....... / ...........</div>
                 </td>

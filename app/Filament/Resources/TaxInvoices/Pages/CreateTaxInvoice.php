@@ -26,7 +26,7 @@ class CreateTaxInvoice extends CreateRecord
                     Notification::make()
                         ->warning()
                         ->title('ไม่สามารถสร้างใบกำกับภาษีได้')
-                        ->body('ใบสั่งขายต้องอยู่ในสถานะ "ยืนยันแล้ว" เท่านั้น')
+                        ->body('ใบส่งสินค้าต้องอยู่ในสถานะ "ยืนยันแล้ว" เท่านั้น')
                         ->persistent()
                         ->send();
 
@@ -41,7 +41,7 @@ class CreateTaxInvoice extends CreateRecord
                     Notification::make()
                         ->warning()
                         ->title('มีใบกำกับภาษีอยู่แล้ว')
-                        ->body("ใบสั่งขายนี้มีใบกำกับภาษีเลขที่ {$existingInvoice->tax_invoice_number} อยู่แล้ว")
+                        ->body("ใบส่งสินค้านี้มีใบกำกับภาษีเลขที่ {$existingInvoice->tax_invoice_number} อยู่แล้ว")
                         ->persistent()
                         ->send();
 

@@ -59,7 +59,7 @@ class TaxInvoiceInfolist
                                         ->placeholder('สำนักงานใหญ่')
                                         ->default('-'),
                                     TextEntry::make('saleOrder.invoice_number')
-                                        ->label('ใบสั่งขายอ้างอิง')
+                                        ->label('ใบส่งสินค้าอ้างอิง')
                                         ->icon('heroicon-o-shopping-bag')
                                         ->badge()
                                         ->color('info')
@@ -127,7 +127,7 @@ class TaxInvoiceInfolist
                             // รายการสินค้า (ถ้ามี Sale Order)
                             Section::make('รายการสินค้า')
                                 ->icon('heroicon-o-shopping-cart')
-                                ->description('รายการสินค้าจากใบสั่งขาย')
+                                ->description('รายการสินค้าจากใบส่งสินค้า')
                                 ->visible(fn($record) => $record->sale_order_id !== null)
                                 ->schema([
                                     RepeatableEntry::make('saleOrder.items')

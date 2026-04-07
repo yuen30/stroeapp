@@ -90,14 +90,14 @@ class CustomersTable
                     ->alignCenter()
                     ->toggleable(),
                 TextColumn::make('saleOrders_count')
-                    ->label('ใบสั่งขาย')
+                    ->label('ใบส่งสินค้า')
                     ->counts('saleOrders')
                     ->badge()
                     ->color('success')
                     ->icon('heroicon-o-document-text')
                     ->alignCenter()
                     ->sortable()
-                    ->tooltip('จำนวนใบสั่งขาย')
+                    ->tooltip('จำนวนใบส่งสินค้า')
                     ->toggleable(isToggledHiddenByDefault: false),
                 IconColumn::make('is_active')
                     ->label('สถานะ')

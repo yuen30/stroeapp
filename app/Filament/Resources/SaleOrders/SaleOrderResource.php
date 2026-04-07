@@ -29,9 +29,9 @@ class SaleOrderResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $modelLabel = 'ใบสั่งขาย';
+    protected static ?string $modelLabel = 'ใบส่งสินค้า';
 
-    protected static ?string $pluralModelLabel = 'ใบสั่งขาย';
+    protected static ?string $pluralModelLabel = 'ใบส่งสินค้า';
 
     protected static ?string $recordTitleAttribute = 'invoice_number';
 
@@ -47,7 +47,7 @@ class SaleOrderResource extends Resource
         return [
             'ลูกค้า' => $record->customer?->name ?? '-',
             'สถานะ' => $record->status?->getLabel() ?? '-',
-            'ยอดรวม' => number_format($record->total_amount ?? 0, 2).' บาท',
+            'ยอดรวม' => number_format($record->total_amount ?? 0, 2) . ' บาท',
         ];
     }
 

@@ -32,7 +32,7 @@ class SaleOrderForm
         return $schema
             ->components([
                 Callout::make('คำเตือน')
-                    ->description('การแก้ไขใบสั่งขายจะส่งผลต่อสต็อกสินค้าและรายการเอกสารที่เกี่ยวข้อง')
+                    ->description('การแก้ไขใบส่งสินค้าจะส่งผลต่อสต็อกสินค้าและรายการเอกสารที่เกี่ยวข้อง')
                     ->warning()
                     ->icon(Heroicon::ExclamationTriangle)
                     ->visible(fn($context) => $context === 'edit')
@@ -44,12 +44,12 @@ class SaleOrderForm
                         ->schema([
                             // ข้อมูลทั่วไป
                             Section::make('ข้อมูลทั่วไป')
-                                ->description('ข้อมูลพื้นฐานของใบสั่งขาย')
+                                ->description('ข้อมูลพื้นฐานของใบส่งสินค้า')
                                 ->icon(Heroicon::DocumentText)
                                 ->columns(2)
                                 ->schema([
                                     DatePicker::make('order_date')
-                                        ->label('วันที่ขาย')
+                                        ->label('วันที่')
                                         ->required()
                                         ->default(now())
                                         ->native(false)
@@ -131,7 +131,7 @@ class SaleOrderForm
                                 ]),
                             // // รายการสินค้า
                             // Section::make('รายการสินค้า')
-                            //     ->description('เพิ่มรายการสินค้าลงในใบสั่งขาย')
+                            //     ->description('เพิ่มรายการสินค้าลงในใบส่งสินค้า')
                             //     ->icon(Heroicon::ShoppingCart)
                             //     ->collapsible()
                             //     ->collapsed(false)

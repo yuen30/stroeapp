@@ -20,7 +20,7 @@ class CreateSaleOrder extends CreateRecord
     protected function getHeaderActions(): array
     {
         return [
-            $this->getCreateFormAction()->formId('form')->label('สร้างใบสั่งขาย')->icon(Heroicon::Check)->color('success'),
+            $this->getCreateFormAction()->formId('form')->label('สร้างใบส่งสินค้า')->icon(Heroicon::Check)->color('success'),
             $this->getCancelFormAction()->label('ยกเลิก')->icon(Heroicon::XMark)->color('gray'),
         ];
     }

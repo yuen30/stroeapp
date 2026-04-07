@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>ใบกำกับภาษี {{ $taxInvoice->tax_invoice_number }}</title>
     <style>
         @font-face {
@@ -11,84 +12,103 @@
             font-weight: normal;
             src: url("{{ storage_path('fonts/THSarabunNew.ttf') }}") format('truetype');
         }
+
         @font-face {
             font-family: 'THSarabunNew';
             font-style: normal;
             font-weight: bold;
             src: url("{{ storage_path('fonts/THSarabunNew Bold.ttf') }}") format('truetype');
         }
+
         body {
             font-family: 'THSarabunNew', sans-serif;
             font-size: 16pt;
             margin: 0;
             padding: 20px;
         }
+
         .header {
             text-align: center;
             margin-bottom: 20px;
         }
+
         .header h1 {
             font-size: 24pt;
             font-weight: bold;
             margin: 0;
         }
+
         .company-info {
             text-align: center;
             margin-bottom: 20px;
         }
+
         .invoice-info {
             margin-bottom: 20px;
         }
+
         .customer-info {
             border: 1px solid #000;
             padding: 10px;
             margin-bottom: 20px;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
-        table th, table td {
+
+        table th,
+        table td {
             border: 1px solid #000;
             padding: 8px;
             text-align: left;
         }
+
         table th {
             background-color: #f0f0f0;
             font-weight: bold;
             text-align: center;
         }
+
         .text-right {
             text-align: right;
         }
+
         .text-center {
             text-align: center;
         }
+
         .total-section {
             width: 50%;
             margin-left: auto;
         }
+
         .total-row {
             display: flex;
             justify-content: space-between;
             padding: 5px 0;
         }
+
         .total-row.grand-total {
             font-weight: bold;
             font-size: 18pt;
             border-top: 2px solid #000;
             padding-top: 10px;
         }
+
         .signature-section {
             margin-top: 40px;
             display: flex;
             justify-content: space-between;
         }
+
         .signature-box {
             width: 45%;
             text-align: center;
         }
+
         .signature-line {
             border-top: 1px solid #000;
             margin-top: 60px;
@@ -96,6 +116,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Header -->
     <div class="header">
@@ -128,11 +149,11 @@
                 </td>
             </tr>
             @if($taxInvoice->saleOrder)
-            <tr style="border: none;">
-                <td style="border: none;" colspan="2">
-                    <strong>อ้างอิงใบสั่งขาย:</strong> {{ $taxInvoice->saleOrder->invoice_number }}
-                </td>
-            </tr>
+                <tr style="border: none;">
+                    <td style="border: none;" colspan="2">
+                        <strong>อ้างอิงใบส่งสินค้า:</strong> {{ $taxInvoice->saleOrder->invoice_number }}
+                    </td>
+                </tr>
             @endif
         </table>
     </div>
@@ -167,30 +188,30 @@
 
     <!-- Items Table -->
     @if($taxInvoice->saleOrder && $taxInvoice->saleOrder->items->count() > 0)
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 5%;">ลำดับ</th>
-                <th style="width: 45%;">รายการสินค้า</th>
-                <th style="width: 10%;">จำนวน</th>
-                <th style="width: 10%;">หน่วย</th>
-                <th style="width: 15%;">ราคา/หน่วย</th>
-                <th style="width: 15%;">จำนวนเงิน</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($taxInvoice->saleOrder->items as $index => $item)
-            <tr>
-                <td class="text-center">{{ $index + 1 }}</td>
-                <td>{{ $item->product->name }}</td>
-                <td class="text-right">{{ number_format($item->quantity, 0) }}</td>
-                <td class="text-center">{{ $item->product->unit->name ?? 'หน่วย' }}</td>
-                <td class="text-right">{{ number_format($item->unit_price, 2) }}</td>
-                <td class="text-right">{{ number_format($item->total_price, 2) }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 5%;">ลำดับ</th>
+                    <th style="width: 45%;">รายการสินค้า</th>
+                    <th style="width: 10%;">จำนวน</th>
+                    <th style="width: 10%;">หน่วย</th>
+                    <th style="width: 15%;">ราคา/หน่วย</th>
+                    <th style="width: 15%;">จำนวนเงิน</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($taxInvoice->saleOrder->items as $index => $item)
+                    <tr>
+                        <td class="text-center">{{ $index + 1 }}</td>
+                        <td>{{ $item->product->name }}</td>
+                        <td class="text-right">{{ number_format($item->quantity, 0) }}</td>
+                        <td class="text-center">{{ $item->product->unit->name ?? 'หน่วย' }}</td>
+                        <td class="text-right">{{ number_format($item->unit_price, 2) }}</td>
+                        <td class="text-right">{{ number_format($item->total_price, 2) }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
     @endif
 
     <!-- Total Section -->
@@ -200,10 +221,10 @@
             <span>{{ number_format($taxInvoice->subtotal, 2) }} ฿</span>
         </div>
         @if($taxInvoice->discount_amount > 0)
-        <div class="total-row">
-            <span>ส่วนลด:</span>
-            <span>{{ number_format($taxInvoice->discount_amount, 2) }} ฿</span>
-        </div>
+            <div class="total-row">
+                <span>ส่วนลด:</span>
+                <span>{{ number_format($taxInvoice->discount_amount, 2) }} ฿</span>
+            </div>
         @endif
         <div class="total-row">
             <span>ยอดหลังหักส่วนลด:</span>
@@ -220,9 +241,9 @@
     </div>
 
     @if($taxInvoice->notes)
-    <div style="margin-top: 20px;">
-        <strong>หมายเหตุ:</strong> {{ $taxInvoice->notes }}
-    </div>
+        <div style="margin-top: 20px;">
+            <strong>หมายเหตุ:</strong> {{ $taxInvoice->notes }}
+        </div>
     @endif
 
     <!-- Signature Section -->
@@ -245,4 +266,5 @@
         พิมพ์เมื่อ: {{ now()->format('d/m/Y H:i:s') }}
     </div>
 </body>
+
 </html>

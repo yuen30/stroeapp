@@ -26,7 +26,7 @@ class TaxInvoiceForm
             ->components([
                 // Callout คำเตือนสำหรับหน้า Edit
                 Callout::make('edit_warning')
-                    ->visible(fn ($livewire) => $livewire instanceof EditRecord)
+                    ->visible(fn($livewire) => $livewire instanceof EditRecord)
                     ->warning()
                     ->icon('heroicon-o-exclamation-triangle')
                     ->heading('⚠️ คำเตือน')
@@ -34,22 +34,22 @@ class TaxInvoiceForm
                     ->columnSpanFull(),
                 // Callout แสดงข้อมูล Sale Order (ถ้ามี)
                 Callout::make('sale_order_info')
-                    ->visible(fn ($get) => ! empty($get('sale_order_id')))
+                    ->visible(fn($get) => !empty($get('sale_order_id')))
                     ->success()
                     ->icon('heroicon-o-check-circle')
-                    ->heading('✅ เชื่อมโยงกับใบสั่งขาย')
+                    ->heading('✅ เชื่อมโยงกับใบส่งสินค้า')
                     ->description(function ($get) {
                         $saleOrderId = $get('sale_order_id');
-                        if (! $saleOrderId) {
+                        if (!$saleOrderId) {
                             return '';
                         }
 
                         $saleOrder = SaleOrder::find($saleOrderId);
-                        if (! $saleOrder) {
+                        if (!$saleOrder) {
                             return '';
                         }
 
-                        return "ใบสั่งขายเลขที่: {$saleOrder->invoice_number} | ลูกค้า: {$saleOrder->customer->name} | ยอดรวม: ".number_format($saleOrder->total_amount, 2).' ฿';
+                        return "ใบส่งสินค้าเลขที่: {$saleOrder->invoice_number} | ลูกค้า: {$saleOrder->customer->name} | ยอดรวม: " . number_format($saleOrder->total_amount, 2) . ' ฿';
                     })
                     ->columnSpanFull(),
                 // Layout หลัก: Flex แบบ 2 คอลัมน์
@@ -79,8 +79,8 @@ class TaxInvoiceForm
                             // ข้อมูลองค์กรและลูกค้า
                             Section::make('ข้อมูลองค์กรและลูกค้า')
                                 ->icon('heroicon-o-building-office-2')
-                                ->description(fn ($get) => ! empty($get('sale_order_id'))
-                                    ? '✅ ดึงข้อมูลจากใบสั่งขายอัตโนมัติ'
+                                ->description(fn($get) => !empty($get('sale_order_id'))
+                                    ? '✅ ดึงข้อมูลจากใบส่งสินค้าอัตโนมัติ'
                                     : 'เลือกบริษัท สาขา และลูกค้า')
                                 ->columns(2)
                                 ->schema([
@@ -90,20 +90,20 @@ class TaxInvoiceForm
                                         ->searchable()
                                         ->preload()
                                         ->required()
-                                        ->disabled(fn ($get) => ! empty($get('sale_order_id')))
+                                        ->disabled(fn($get) => !empty($get('sale_order_id')))
                                         ->dehydrated()
                                         ->placeholder('เลือกบริษัท')
-                                        ->default(fn () => Company::first()?->id)
+                                        ->default(fn() => Company::first()?->id)
                                         ->columnSpan(1),
                                     Select::make('branch_id')
                                         ->label('สาขา')
                                         ->relationship('branch', 'name')
                                         ->searchable()
                                         ->preload()
-                                        ->disabled(fn ($get) => ! empty($get('sale_order_id')))
+                                        ->disabled(fn($get) => !empty($get('sale_order_id')))
                                         ->dehydrated()
                                         ->placeholder('เลือกสาขา')
-                                        ->default(fn () => Branch::where('is_headquarter', true)->first()?->id)
+                                        ->default(fn() => Branch::where('is_headquarter', true)->first()?->id)
                                         ->columnSpan(1),
                                     Select::make('customer_id')
                                         ->label('ลูกค้า')
@@ -111,18 +111,18 @@ class TaxInvoiceForm
                                         ->searchable()
                                         ->preload()
                                         ->required()
-                                        ->disabled(fn ($get) => ! empty($get('sale_order_id')))
+                                        ->disabled(fn($get) => !empty($get('sale_order_id')))
                                         ->dehydrated()
                                         ->placeholder('เลือกลูกค้า')
                                         ->columnSpan(1),
                                     Select::make('sale_order_id')
-                                        ->label('ใบสั่งขายอ้างอิง')
+                                        ->label('ใบส่งสินค้าอ้างอิง')
                                         ->relationship('saleOrder', 'invoice_number')
                                         ->searchable()
                                         ->preload()
-                                        ->disabled(fn ($get) => ! empty($get('sale_order_id')))
+                                        ->disabled(fn($get) => !empty($get('sale_order_id')))
                                         ->dehydrated()
-                                        ->placeholder('เลือกใบสั่งขาย')
+                                        ->placeholder('เลือกใบส่งสินค้า')
                                         ->columnSpan(1),
                                 ]),
                             // ข้อมูลลูกค้าในใบกำกับภาษี
@@ -200,8 +200,8 @@ class TaxInvoiceForm
                             // ข้อมูลการคำนวณ
                             Section::make('ยอดเงิน')
                                 ->icon('heroicon-o-calculator')
-                                ->description(fn ($get) => ! empty($get('sale_order_id'))
-                                    ? '✅ ดึงจากใบสั่งขาย (สามารถแก้ไขได้)'
+                                ->description(fn($get) => !empty($get('sale_order_id'))
+                                    ? '✅ ดึงจากใบส่งสินค้า (สามารถแก้ไขได้)'
                                     : 'กรอกยอดเงิน')
                                 ->schema([
                                     TextInput::make('subtotal')
@@ -213,7 +213,7 @@ class TaxInvoiceForm
                                         ->prefix('฿')
                                         ->placeholder('0.00')
                                         ->reactive()
-                                        ->afterStateUpdated(fn ($state, callable $set, callable $get) => self::calculateTotals($set, $get))
+                                        ->afterStateUpdated(fn($state, callable $set, callable $get) => self::calculateTotals($set, $get))
                                         ->extraInputAttributes(['class' => 'text-right']),
                                     TextInput::make('discount_amount')
                                         ->label('ส่วนลด')
@@ -224,7 +224,7 @@ class TaxInvoiceForm
                                         ->prefix('฿')
                                         ->placeholder('0.00')
                                         ->reactive()
-                                        ->afterStateUpdated(fn (callable $set, callable $get) => self::calculateTotals($set, $get))
+                                        ->afterStateUpdated(fn(callable $set, callable $get) => self::calculateTotals($set, $get))
                                         ->extraInputAttributes(['class' => 'text-right']),
                                     TextInput::make('vat_rate')
                                         ->label('อัตราภาษีมูลค่าเพิ่ม')
@@ -235,7 +235,7 @@ class TaxInvoiceForm
                                         ->suffix('%')
                                         ->placeholder('7')
                                         ->reactive()
-                                        ->afterStateUpdated(fn (callable $set, callable $get) => self::calculateTotals($set, $get))
+                                        ->afterStateUpdated(fn(callable $set, callable $get) => self::calculateTotals($set, $get))
                                         ->extraInputAttributes(['class' => 'text-right']),
                                     TextInput::make('vat_amount')
                                         ->label('ภาษีมูลค่าเพิ่ม')

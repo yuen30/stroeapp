@@ -26,9 +26,11 @@ class SaleOrderObserver
     public function updated(SaleOrder $saleOrder): void
     {
         // ถ้าเปลี่ยนสถานะจาก Draft เป็น Confirmed
-        if ($saleOrder->wasChanged('status') &&
-                $saleOrder->status === OrderStatus::Confirmed &&
-                $saleOrder->getOriginal('status') === OrderStatus::Draft) {
+        if (
+            $saleOrder->wasChanged('status') &&
+            $saleOrder->status === OrderStatus::Confirmed &&
+            $saleOrder->getOriginal('status') === OrderStatus::Draft
+        ) {
             // ปลดล็อคการจองสต็อก (เพราะจะตัดสต็อกจริงแล้ว)
             $this->releaseReservations($saleOrder);
 
@@ -37,8 +39,10 @@ class SaleOrderObserver
         }
 
         // ถ้ายกเลิก ให้คืนสต็อก
-        if ($saleOrder->wasChanged('status') &&
-                $saleOrder->status === OrderStatus::Cancelled) {
+        if (
+            $saleOrder->wasChanged('status') &&
+            $saleOrder->status === OrderStatus::Cancelled
+        ) {
             $originalStatus = $saleOrder->getOriginal('status');
 
             // ถ้ายกเลิกจาก Confirmed ให้คืนสต็อก
@@ -77,7 +81,7 @@ class SaleOrderObserver
                 'quantity' => $item->quantity,
                 'stock_before' => $stockBefore,
                 'stock_after' => $stockBefore - $item->quantity,
-                'notes' => "ตัดสต็อกจากใบสั่งขายเลขที่ {$saleOrder->invoice_number}",
+                'notes' => "ตัดสต็อกจากใบส่งสินค้าเลขที่ {$saleOrder->invoice_number}",
             ]);
 
             // ตัดสต็อกสินค้า

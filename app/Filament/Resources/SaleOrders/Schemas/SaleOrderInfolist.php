@@ -39,7 +39,7 @@ class SaleOrderInfolist
                             ->color('primary')
                             ->columnSpan(1),
                         TextEntry::make('order_date')
-                            ->label('วันที่ขาย')
+                            ->label('วันที่')
                             ->date('d/m/Y')
                             ->columnSpan(1),
                         TextEntry::make('due_date')
@@ -355,7 +355,7 @@ class SaleOrderInfolist
                                                     Notification::make()
                                                         ->success()
                                                         ->title('ลบสินค้าสำเร็จ')
-                                                        ->body('รายการสินค้าถูกลบออกจากใบสั่งขายแล้ว การจองสต็อกได้ถูกปลดล็อคอัตโนมัติ')
+                                                        ->body('รายการสินค้าถูกลบออกจากใบส่งสินค้าแล้ว การจองสต็อกได้ถูกปลดล็อคอัตโนมัติ')
                                                         ->duration(3000)
                                                         ->send();
 

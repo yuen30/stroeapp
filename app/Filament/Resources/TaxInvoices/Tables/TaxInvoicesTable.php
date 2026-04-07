@@ -40,13 +40,13 @@ class TaxInvoicesTable
                         : null)
                     ->wrap(),
                 TextColumn::make('saleOrder.invoice_number')
-                    ->label('ใบสั่งขาย')
+                    ->label('ใบส่งสินค้า')
                     ->badge()
                     ->color('info')
                     ->icon('heroicon-o-shopping-bag')
                     ->searchable()
                     ->placeholder('-')
-                    ->tooltip('ใบสั่งขายอ้างอิง'),
+                    ->tooltip('ใบส่งสินค้าอ้างอิง'),
                 TextColumn::make('total_amount')
                     ->label('ยอดเงินรวม')
                     ->numeric(decimalPlaces: 2)
@@ -96,10 +96,10 @@ class TaxInvoicesTable
                     ->multiple()
                     ->native(false),
                 SelectFilter::make('has_sale_order')
-                    ->label('ใบสั่งขาย')
+                    ->label('ใบส่งสินค้า')
                     ->options([
-                        'with' => 'มีใบสั่งขายอ้างอิง',
-                        'without' => 'ไม่มีใบสั่งขายอ้างอิง',
+                        'with' => 'มีใบส่งสินค้าอ้างอิง',
+                        'without' => 'ไม่มีใบส่งสินค้าอ้างอิง',
                     ])
                     ->query(function ($query, $data) {
                         if ($data['value'] === 'with') {

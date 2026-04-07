@@ -2,13 +2,13 @@
 
 ## 📌 ภาพรวม
 
-ระบบจองสต็อกถูกออกแบบมาเพื่อป้องกันปัญหาการขายสินค้าเกินสต็อกจริง โดยเฉพาะในกรณีที่มีหลายคนสร้างใบสั่งขาย (Draft) พร้อมกันในเวลาเดียวกัน
+ระบบจองสต็อกถูกออกแบบมาเพื่อป้องกันปัญหาการขายสินค้าเกินสต็อกจริง โดยเฉพาะในกรณีที่มีหลายคนสร้างใบส่งสินค้า (Draft) พร้อมกันในเวลาเดียวกัน
 
 ## 🎯 วัตถุประสงค์
 
 1. **ป้องกัน Overselling**: ป้องกันการขายสินค้าเกินจำนวนที่มีในสต็อก
-2. **จัดการ Concurrent Orders**: รองรับการสร้างใบสั่งขายหลายใบพร้อมกัน
-3. **Temporary Hold**: จองสต็อกชั่วคราวสำหรับใบสั่งขายที่ยังเป็น Draft
+2. **จัดการ Concurrent Orders**: รองรับการสร้างใบส่งสินค้าหลายใบพร้อมกัน
+3. **Temporary Hold**: จองสต็อกชั่วคราวสำหรับใบส่งสินค้าที่ยังเป็น Draft
 4. **Auto Release**: ปลดล็อคการจองอัตโนมัติเมื่อหมดอายุหรือยกเลิก
 
 ## 🔄 การทำงานของระบบ
@@ -55,7 +55,7 @@ User ลบสินค้า → SaleOrderItem deleted
        ลบ StockReservation (ปลดล็อค)
 ```
 
-### 4. เมื่อยืนยันใบสั่งขาย (Draft → Confirmed)
+### 4. เมื่อยืนยันใบส่งสินค้า (Draft → Confirmed)
 
 ```
 User ยืนยัน → SaleOrder status = Confirmed
@@ -69,7 +69,7 @@ User ยืนยัน → SaleOrder status = Confirmed
      สร้าง StockMovement (type: Out)
 ```
 
-### 5. เมื่อยกเลิกใบสั่งขาย
+### 5. เมื่อยกเลิกใบส่งสินค้า
 
 **จาก Draft:**
 
@@ -220,7 +220,7 @@ try {
 }
 ```
 
-### ปลดล็อคการจองทั้งหมดของใบสั่งขาย
+### ปลดล็อคการจองทั้งหมดของใบส่งสินค้า
 
 ```php
 $service->releaseReservations($saleOrder);
@@ -272,7 +272,7 @@ php artisan test --filter=StockReservationServiceTest
 ### ตรวจสอบการจองที่ค้างอยู่
 
 ```sql
-SELECT 
+SELECT
     p.name,
     sr.reserved_quantity,
     sr.expires_at,
@@ -287,13 +287,13 @@ ORDER BY sr.expires_at;
 ### ตรวจสอบสินค้าที่ถูกจองมาก
 
 ```sql
-SELECT 
+SELECT
     p.name,
     p.stock_quantity,
     SUM(sr.reserved_quantity) as total_reserved,
     p.stock_quantity - SUM(sr.reserved_quantity) as available
 FROM products p
-LEFT JOIN stock_reservations sr ON p.id = sr.product_id 
+LEFT JOIN stock_reservations sr ON p.id = sr.product_id
     AND sr.expires_at > NOW()
 GROUP BY p.id
 HAVING total_reserved > 0

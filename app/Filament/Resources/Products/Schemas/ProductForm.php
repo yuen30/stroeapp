@@ -21,10 +21,10 @@ class ProductForm
         return $schema
             ->components([
                 Callout::make('คำเตือน')
-                    ->description('การแก้ไขข้อมูลสินค้าจะส่งผลต่อใบสั่งซื้อ ใบสั่งขาย และคลังสินค้าทั้งหมด')
+                    ->description('การแก้ไขข้อมูลสินค้าจะส่งผลต่อใบสั่งซื้อ ใบส่งสินค้า และคลังสินค้าทั้งหมด')
                     ->warning()
                     ->icon(Heroicon::ExclamationTriangle)
-                    ->visible(fn ($context) => $context === 'edit')
+                    ->visible(fn($context) => $context === 'edit')
                     ->columnSpanFull(),
                 Section::make('ข้อมูลทั่วไป')
                     ->description('ข้อมูลพื้นฐานของสินค้า')
@@ -220,17 +220,17 @@ class ProductForm
                             ->native(false)
                             ->placeholder('เลือกบริษัท')
                             ->reactive()
-                            ->default(fn () => Company::first()?->id)
+                            ->default(fn() => Company::first()?->id)
                             ->columnSpan(1),
                         Select::make('branch_id')
                             ->label('สาขา')
-                            ->relationship('branch', 'name', fn ($query, $get) => $get('company_id') ? $query->where('company_id', $get('company_id')) : $query)
+                            ->relationship('branch', 'name', fn($query, $get) => $get('company_id') ? $query->where('company_id', $get('company_id')) : $query)
                             ->required()
                             ->searchable()
                             ->preload()
                             ->native(false)
                             ->placeholder('เลือกสาขา')
-                            ->default(fn () => Branch::where('is_headquarter', true)->first()?->id)
+                            ->default(fn() => Branch::where('is_headquarter', true)->first()?->id)
                             ->columnSpan(1),
                     ])
                     ->columns(2)

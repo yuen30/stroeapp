@@ -82,10 +82,10 @@ class SaleOrder extends Model
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn (string $eventName) => match ($eventName) {
-                'created' => 'สร้างใบสั่งขาย',
-                'updated' => 'แก้ไขใบสั่งขาย',
-                'deleted' => 'ลบใบสั่งขาย',
+            ->setDescriptionForEvent(fn(string $eventName) => match ($eventName) {
+                'created' => 'สร้างใบส่งสินค้า',
+                'updated' => 'แก้ไขใบส่งสินค้า',
+                'deleted' => 'ลบใบส่งสินค้า',
                 default => $eventName,
             })
             ->useLogName('sale_order');

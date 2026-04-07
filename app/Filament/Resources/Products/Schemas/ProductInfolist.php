@@ -48,7 +48,7 @@ class ProductInfolist
                         TextEntry::make('stock_quantity')
                             ->label('สต็อกคงเหลือ')
                             ->badge()
-                            ->color(fn (int $state): string => $state <= 10 ? 'danger' : ($state <= 30 ? 'warning' : 'success')),
+                            ->color(fn(int $state): string => $state <= 10 ? 'danger' : ($state <= 30 ? 'warning' : 'success')),
                         TextEntry::make('reserved_quantity')
                             ->label('ถูกจอง')
                             ->badge()
@@ -86,31 +86,31 @@ class ProductInfolist
                                 TextEntry::make('type')
                                     ->label('ประเภท')
                                     ->badge()
-                                    ->color(fn (StockMovementType $state): string => match ($state) {
+                                    ->color(fn(StockMovementType $state): string => match ($state) {
                                         StockMovementType::In => 'success',
                                         StockMovementType::Out => 'danger',
                                     })
-                                    ->formatStateUsing(fn (StockMovementType $state): string => match ($state) {
+                                    ->formatStateUsing(fn(StockMovementType $state): string => match ($state) {
                                         StockMovementType::In => 'รับเข้า',
                                         StockMovementType::Out => 'จ่ายออก',
                                     }),
                                 TextEntry::make('goodsReceipt.receipt_number')
                                     ->label('ใบรับสินค้า')
                                     ->color('primary')
-                                    ->url(fn ($record) => $record->goods_receipt_id
+                                    ->url(fn($record) => $record->goods_receipt_id
                                         ? GoodsReceiptResource::getUrl('view', ['record' => $record->goods_receipt_id])
                                         : null),
                                 TextEntry::make('saleOrder.invoice_number')
-                                    ->label('ใบสั่งขาย')
+                                    ->label('ใบส่งสินค้า')
                                     ->color('primary')
-                                    ->url(fn ($record) => $record->sale_order_id
+                                    ->url(fn($record) => $record->sale_order_id
                                         ? SaleOrderResource::getUrl('view', ['record' => $record->sale_order_id])
                                         : null),
                                 TextEntry::make('quantity')
                                     ->label('จำนวน')
                                     ->numeric()
                                     ->alignRight()
-                                    ->suffix(fn ($record) => $record->type === StockMovementType::In ? '+' : '-'),
+                                    ->suffix(fn($record) => $record->type === StockMovementType::In ? '+' : '-'),
                                 TextEntry::make('stock_before')
                                     ->label('ยอดก่อน')
                                     ->numeric()
@@ -137,7 +137,7 @@ class ProductInfolist
                                 TableColumn::make('วันที่'),
                                 TableColumn::make('ประเภท'),
                                 TableColumn::make('ใบรับสินค้า'),
-                                TableColumn::make('ใบสั่งขาย'),
+                                TableColumn::make('ใบส่งสินค้า'),
                                 TableColumn::make('จำนวน'),
                                 TableColumn::make('ยอดก่อน'),
                                 TableColumn::make('ยอดหลัง'),
@@ -165,7 +165,7 @@ class ProductInfolist
                                 TextEntry::make('description')
                                     ->label('การกระทำ')
                                     ->badge()
-                                    ->color(fn ($state) => match ($state) {
+                                    ->color(fn($state) => match ($state) {
                                         'สร้างสินค้าใหม่' => 'success',
                                         'แก้ไขสินค้า' => 'warning',
                                         'ลบสินค้า' => 'danger',
@@ -188,8 +188,8 @@ class ProductInfolist
 
                                         return collect($attributes)
                                             ->keys()
-                                            ->reject(fn ($key) => in_array($key, ['id', 'created_at', 'updated_at', 'deleted_at']))
-                                            ->map(fn ($key) => str($key)->headline())
+                                            ->reject(fn($key) => in_array($key, ['id', 'created_at', 'updated_at', 'deleted_at']))
+                                            ->map(fn($key) => str($key)->headline())
                                             ->filter()
                                             ->implode(', ');
                                     }),

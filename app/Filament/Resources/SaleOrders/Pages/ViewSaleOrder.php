@@ -35,7 +35,7 @@ class ViewSaleOrder extends ViewRecord
                 ->icon(Heroicon::Plus)
                 ->color('success')
                 // ->visible(fn (): bool => $this->record->status->value === 'draft')
-                ->modalHeading('เพิ่มสินค้าในใบสั่งขาย')
+                ->modalHeading('เพิ่มสินค้าในใบส่งสินค้า')
                 ->modalWidth('4xl')
                 ->schema([
                     Grid::make(3)
@@ -249,19 +249,19 @@ class ViewSaleOrder extends ViewRecord
                     $this->recalculateTotals();
                 }),
             Actions\Action::make('confirm')
-                ->label('ยืนยันใบสั่งขาย')
+                ->label('ยืนยันใบส่งสินค้า')
                 ->icon(Heroicon::CheckCircle)
                 ->color('info')
                 ->visible(fn(): bool => $this->record->status->value === 'draft')
                 ->requiresConfirmation()
-                ->modalHeading('ยืนยันใบสั่งขาย')
+                ->modalHeading('ยืนยันใบส่งสินค้า')
                 ->modalDescription(function () {
                     $customer = $this->record->customer;
                     $orderAmount = $this->record->total_amount;
 
                     // ถ้าเป็นลูกค้าเงินสด
                     if ($customer->credit_limit <= 0) {
-                        return 'คุณแน่ใจหรือไม่ว่าต้องการยืนยันใบสั่งขายนี้? หลังจากยืนยันแล้วระบบจะตัดสต็อกสินค้า';
+                        return 'คุณแน่ใจหรือไม่ว่าต้องการยืนยันใบส่งสินค้านี้? หลังจากยืนยันแล้วระบบจะตัดสต็อกสินค้า';
                     }
 
                     // ตรวจสอบวงเงินเครดิต
@@ -276,10 +276,10 @@ class ViewSaleOrder extends ViewRecord
                                     <p>วงเงินทั้งหมด: <span class="font-semibold">' . number_format($customer->credit_limit, 2) . ' ฿</span></p>
                                     <p>ยอดค้างชำระ: <span class="font-semibold">' . number_format($outstanding, 2) . ' ฿</span></p>
                                     <p>วงเงินคงเหลือ: <span class="font-semibold text-danger-600">' . number_format($remaining, 2) . ' ฿</span></p>
-                                    <p>ยอดใบสั่งขายนี้: <span class="font-semibold">' . number_format($orderAmount, 2) . ' ฿</span></p>
+                                    <p>ยอดใบส่งสินค้านี้: <span class="font-semibold">' . number_format($orderAmount, 2) . ' ฿</span></p>
                                     <p class="text-danger-600 dark:text-danger-400 font-semibold mt-2">เกินวงเงิน: ' . number_format($orderAmount - $remaining, 2) . ' ฿</p>
                                 </div>
-                                <p class="text-warning-600 dark:text-warning-400 mt-2">คุณยังคงต้องการยืนยันใบสั่งขายนี้หรือไม่?</p>
+                                <p class="text-warning-600 dark:text-warning-400 mt-2">คุณยังคงต้องการยืนยันใบส่งสินค้านี้หรือไม่?</p>
                             </div>
                         ');
                     }
@@ -290,12 +290,12 @@ class ViewSaleOrder extends ViewRecord
 
                     return new HtmlString('
                         <div class="space-y-2">
-                            <p>คุณแน่ใจหรือไม่ว่าต้องการยืนยันใบสั่งขายนี้? หลังจากยืนยันแล้วระบบจะตัดสต็อกสินค้า</p>
+                            <p>คุณแน่ใจหรือไม่ว่าต้องการยืนยันใบส่งสินค้านี้? หลังจากยืนยันแล้วระบบจะตัดสต็อกสินค้า</p>
                             <div class="text-sm space-y-1 mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded">
                                 <p class="font-semibold mb-2">ข้อมูลวงเงินเครดิต:</p>
                                 <p>วงเงินทั้งหมด: <span class="font-semibold">' . number_format($customer->credit_limit, 2) . ' ฿</span></p>
                                 <p>ยอดค้างชำระปัจจุบัน: <span class="font-semibold">' . number_format($outstanding, 2) . ' ฿</span> (' . number_format($percentage, 1) . '%)</p>
-                                <p>ยอดใบสั่งขายนี้: <span class="font-semibold">' . number_format($orderAmount, 2) . ' ฿</span></p>
+                                <p>ยอดใบส่งสินค้านี้: <span class="font-semibold">' . number_format($orderAmount, 2) . ' ฿</span></p>
                                 <p class="text-success-600 dark:text-success-400">วงเงินคงเหลือหลังยืนยัน: <span class="font-semibold">' . number_format($remaining - $orderAmount, 2) . ' ฿</span> (' . number_format(100 - $newPercentage, 1) . '%)</p>
                             </div>
                         </div>
@@ -307,7 +307,7 @@ class ViewSaleOrder extends ViewRecord
                         Notification::make()
                             ->warning()
                             ->title('ไม่สามารถยืนยันได้')
-                            ->body('กรุณาเพิ่มสินค้าอย่างน้อย 1 รายการก่อนยืนยันใบสั่งขาย')
+                            ->body('กรุณาเพิ่มสินค้าอย่างน้อย 1 รายการก่อนยืนยันใบส่งสินค้า')
                             ->duration(5000)
                             ->send();
 
@@ -357,25 +357,25 @@ class ViewSaleOrder extends ViewRecord
                             Notification::make()
                                 ->warning()
                                 ->title('เกินวงเงินเครดิต')
-                                ->body('ใบสั่งขายนี้เกินวงเงินเครดิตที่เหลือ ' . number_format($orderAmount - $remaining, 2) . ' ฿')
+                                ->body('ใบส่งสินค้านี้เกินวงเงินเครดิตที่เหลือ ' . number_format($orderAmount - $remaining, 2) . ' ฿')
                                 ->duration(10000)
                                 ->send();
                         }
                     }
 
-                    // ยืนยันใบสั่งขาย
+                    // ยืนยันใบส่งสินค้า
                     try {
                         $this->record->update(['status' => OrderStatus::Confirmed]);
 
                         Notification::make()
                             ->success()
-                            ->title('ยืนยันใบสั่งขายสำเร็จ')
-                            ->body('ใบสั่งขายเลขที่ ' . $this->record->invoice_number . ' ได้รับการยืนยันแล้ว สต็อกถูกตัดและการจองถูกปลดล็อคอัตโนมัติ')
+                            ->title('ยืนยันใบส่งสินค้าสำเร็จ')
+                            ->body('ใบส่งสินค้าเลขที่ ' . $this->record->invoice_number . ' ได้รับการยืนยันแล้ว สต็อกถูกตัดและการจองถูกปลดล็อคอัตโนมัติ')
                             ->send();
                     } catch (\Exception $e) {
                         Notification::make()
                             ->danger()
-                            ->title('ไม่สามารถยืนยันใบสั่งขายได้')
+                            ->title('ไม่สามารถยืนยันใบส่งสินค้าได้')
                             ->body($e->getMessage())
                             ->duration(10000)
                             ->send();
@@ -388,13 +388,13 @@ class ViewSaleOrder extends ViewRecord
             //     ->visible(fn (): bool => $this->record->status->value === 'confirmed')
             //     ->disabled(fn (): bool => $this->record->taxInvoices()->exists())
             //     ->tooltip(fn (): ?string => $this->record->taxInvoices()->exists()
-            //         ? 'มีใบกำกับภาษีสำหรับใบสั่งขายนี้แล้ว'
+            //         ? 'มีใบกำกับภาษีสำหรับใบส่งสินค้านี้แล้ว'
             //         : null)
             //     ->url(fn () => route('filament.store.resources.tax-invoices.create', [
             //         'sale_order_id' => $this->record->id,
             //     ])),
             Actions\Action::make('printPdf')
-                ->label('พิมพ์ใบสั่งขาย')
+                ->label('พิมพ์ใบส่งสินค้า')
                 ->icon(Heroicon::DocumentText)
                 ->color('gray')
                 ->visible(fn(): bool => $this->record->status->value === 'confirmed')
@@ -456,15 +456,15 @@ class ViewSaleOrder extends ViewRecord
                 ->color('danger')
                 ->visible(fn(): bool => in_array($this->record->status->value, ['draft', 'confirmed']))
                 ->requiresConfirmation()
-                ->modalHeading('ยกเลิกใบสั่งขาย')
-                ->modalDescription('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกใบสั่งขายนี้? ถ้ายืนยันแล้วระบบจะคืนสต็อกสินค้า')
+                ->modalHeading('ยกเลิกใบส่งสินค้า')
+                ->modalDescription('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกใบส่งสินค้านี้? ถ้ายืนยันแล้วระบบจะคืนสต็อกสินค้า')
                 ->action(function () {
                     $this->record->update(['status' => OrderStatus::Cancelled]);
 
                     Notification::make()
                         ->success()
-                        ->title('ยกเลิกใบสั่งขายสำเร็จ')
-                        ->body('ใบสั่งขายเลขที่ ' . $this->record->invoice_number . ' ถูกยกเลิกแล้ว สต็อกและการจองได้รับการคืนอัตโนมัติ')
+                        ->title('ยกเลิกใบส่งสินค้าสำเร็จ')
+                        ->body('ใบส่งสินค้าเลขที่ ' . $this->record->invoice_number . ' ถูกยกเลิกแล้ว สต็อกและการจองได้รับการคืนอัตโนมัติ')
                         ->duration(3000)
                         ->send();
                 }),

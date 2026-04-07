@@ -27,7 +27,7 @@ test('🤖 บอททดสอบ E2E: สร้างและยืนยั
     await test.step('2. นำทางเข้าสู่หน้า Sale Orders และสร้างออเดอร์ใหม่', async () => {
         await page.goto('/store/sale-orders/create');
         await page.waitForLoadState('networkidle');
-        await expect(page.getByRole('heading', { name: /สร้าง ใบสั่งขาย|Create Sale order/i })).toBeVisible();
+        await expect(page.getByRole('heading', { name: /สร้าง ใบส่งสินค้า|Create Sale order/i })).toBeVisible();
     });
 
     await test.step('3. เลือกลูกค้าและเพิ่มสินค้าลงตะกร้า', async () => {

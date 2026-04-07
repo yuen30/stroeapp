@@ -19,10 +19,10 @@ class CustomerForm
         return $schema
             ->components([
                 Callout::make('คำเตือน')
-                    ->description('การแก้ไขข้อมูลลูกค้าจะส่งผลต่อใบสั่งขายและเอกสารที่เกี่ยวข้องทั้งหมด')
+                    ->description('การแก้ไขข้อมูลลูกค้าจะส่งผลต่อใบส่งสินค้าและเอกสารที่เกี่ยวข้องทั้งหมด')
                     ->warning()
                     ->icon(Heroicon::ExclamationTriangle)
-                    ->visible(fn ($context) => $context === 'edit')
+                    ->visible(fn($context) => $context === 'edit')
                     ->columnSpanFull(),
                 Section::make('ข้อมูลทั่วไป')
                     ->description('ข้อมูลพื้นฐานของลูกค้า')
@@ -37,7 +37,7 @@ class CustomerForm
                             ->preload()
                             ->native(false)
                             ->placeholder('เลือกบริษัท')
-                            ->default(fn () => Company::first()?->id)
+                            ->default(fn() => Company::first()?->id)
                             ->columnSpanFull(),
                         TextInput::make('name')
                             ->label('ชื่อลูกค้า')
@@ -128,7 +128,7 @@ class CustomerForm
                             ->maxLength(10)
                             ->placeholder('00001')
                             ->helperText('ระบุรหัสสาขา (ถ้าไม่ใช่สำนักงานใหญ่)')
-                            ->hidden(fn ($get) => $get('is_head_office'))
+                            ->hidden(fn($get) => $get('is_head_office'))
                             ->columnSpan(1),
                     ])
                     ->columns(3),

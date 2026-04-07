@@ -72,7 +72,7 @@ class Customer extends Model implements HasAvatar
         return $this->hasMany(SaleOrder::class);
     }
 
-    // คำนวณยอดค้างชำระทั้งหมด (ใบสั่งขายที่ยังไม่ชำระเงิน)
+    // คำนวณยอดค้างชำระทั้งหมด (ใบส่งสินค้าที่ยังไม่ชำระเงิน)
     public function getTotalOutstandingAmount(): float
     {
         $pendingStatusIds = PaymentStatus::whereIn('code', ['PENDING', 'PARTIAL'])->pluck('id');
@@ -96,7 +96,7 @@ class Customer extends Model implements HasAvatar
         return max(0, $this->credit_limit - $outstanding);
     }
 
-    // ตรวจสอบว่าสามารถสร้างใบสั่งขายได้หรือไม่
+    // ตรวจสอบว่าสามารถสร้างใบส่งสินค้าได้หรือไม่
     public function canCreateSaleOrder(float $amount): bool
     {
         // ถ้าไม่มีวงเงินเครดิต (เงินสด) ให้สร้างได้เสมอ

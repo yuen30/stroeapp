@@ -30,10 +30,10 @@
 
 - **Multi-Branch & Company:** รองรับการขยายสาขาในองค์กรรูปแบบ Multi-Tenant / Branch
 - **Automated Stock Management:** ระบบจัดการสต็อกอัตโนมัติผ่าน Laravel Observers
-  - รับสินค้า (GR) เพิ่มสต็อกและสร้าง StockMovement อัตโนมัติ
-  - สร้าง Draft Sale Order แล้วจองสต็อกทันทีผ่าน `stock_reservations`
-  - ยืนยัน Sale Order แล้วปลดการจองก่อนตัดสต็อกจริง
-  - ยกเลิกเอกสาร คืนสต็อกหรือปลดการจองอัตโนมัติ
+    - รับสินค้า (GR) เพิ่มสต็อกและสร้าง StockMovement อัตโนมัติ
+    - สร้าง Draft Sale Order แล้วจองสต็อกทันทีผ่าน `stock_reservations`
+    - ยืนยัน Sale Order แล้วปลดการจองก่อนตัดสต็อกจริง
+    - ยกเลิกเอกสาร คืนสต็อกหรือปลดการจองอัตโนมัติ
 - **Stock Movement Tracking:** บันทึกการเคลื่อนไหวสต็อกทุกครั้งพร้อม stock_before และ stock_after เพื่อ audit trail
 - **Comprehensive Relations:** ระบบจัดเก็บคู่ค้าซัพพลายเออร์ (Suppliers) และลูกค้า (Customers) ที่เชื่อมโยงไปหาเอกสารซื้อ-ขายได้อย่างง่ายดาย
 - **Dashboard & Reports:** มี dashboard widgets 9 ตัว และหน้ารายงาน low stock / goods receipt ภายใน Filament
@@ -41,12 +41,12 @@
 ### 📄 4. การจัดการเอกสาร (Document Lifecycles)
 
 - **Automated Document Numbering:** ออกเลขที่เอกสารผ่าน `document_running_numbers` ร่วมกับ `DocumentObserver`
-  - รองรับ Multi-Company และ Multi-Branch
-  - ป้องกัน Race Condition ด้วย Database Lock
-  - รูปแบบ: `PO2026-0001`, `SO2026-0002`, `GR2026-0003`, `INV2026-0004`
+    - รองรับ Multi-Company และ Multi-Branch
+    - ป้องกัน Race Condition ด้วย Database Lock
+    - รูปแบบ: `PO2026-0001`, `SO2026-0002`, `GR2026-0003`, `INV2026-0004`
 - **Purchase Order (PO):** สร้างเอกสารสั่งซื้อไปยังซัพพลายเออร์พร้อมเลขที่เอกสารอัตโนมัติ
 - **Goods Receipt (GR):** รองรับรูปแบบเมื่อโรงงานส่งสินค้าไม่ครบตาม PO (Partial Receive) ด้วยระบบการเปิดบิลรับสินค้า
-- **Sale Order (SO):** ใบสั่งขายที่แยกสถานะ `draft` และ `confirmed` ชัดเจน พร้อมระบบจอง/ตัดสต็อก
+- **Sale Order (SO):** ใบส่งสินค้าที่แยกสถานะ `draft` และ `confirmed` ชัดเจน พร้อมระบบจอง/ตัดสต็อก
 - **Tax Invoice (INV):** แยกเอกสารใบกำกับภาษีออกจาก Sale Order และรองรับ auto-fill จาก Sale Order ที่ยืนยันแล้ว
 
 ---
@@ -84,17 +84,17 @@ Filament เป็น **Server-Driven UI (SDUI) Framework** ที่ใช้ L
 ### Design Patterns & Best Practices
 
 - **Observer Pattern:** ใช้ Laravel Observers สำหรับ business logic อัตโนมัติ
-  - DocumentObserver - จัดการเลขที่เอกสาร/รหัสสำหรับ model ที่ใช้ `DocumentObservable`
-  - GoodsReceiptObserver - อัปเดตสต็อกและสถานะใบสั่งซื้อเมื่อรับสินค้า
-  - SaleOrderObserver - ยืนยัน, ตัดสต็อก, ยกเลิก, และคืนสต็อก
-  - SaleOrderItemObserver - จองสต็อกและคำนวณยอดขายใหม่
-  - PurchaseOrderItemObserver - คำนวณยอดใบสั่งซื้อใหม่
-  - ProductObserver / StockObserver - sync สต็อกระหว่าง `products` และ `stocks`
+    - DocumentObserver - จัดการเลขที่เอกสาร/รหัสสำหรับ model ที่ใช้ `DocumentObservable`
+    - GoodsReceiptObserver - อัปเดตสต็อกและสถานะใบสั่งซื้อเมื่อรับสินค้า
+    - SaleOrderObserver - ยืนยัน, ตัดสต็อก, ยกเลิก, และคืนสต็อก
+    - SaleOrderItemObserver - จองสต็อกและคำนวณยอดขายใหม่
+    - PurchaseOrderItemObserver - คำนวณยอดใบสั่งซื้อใหม่
+    - ProductObserver / StockObserver - sync สต็อกระหว่าง `products` และ `stocks`
 - **Service Layer:** มี service สำคัญ เช่น `StockReservationService` และ `DocumentNumberService`
 - **Modular Architecture:** แยก Form/Table Schema ออกจาก Resource เพื่อความเป็นระเบียบ
-  - ทุก Resource มี Pages, Schemas, และ Tables แยกกัน
-  - Component Classes สำหรับ reusable components
-  - Action Classes สำหรับ complex actions
+    - ทุก Resource มี Pages, Schemas, และ Tables แยกกัน
+    - Component Classes สำหรับ reusable components
+    - Action Classes สำหรับ complex actions
 - **Enum Classes:** ใช้ PHP Enums สำหรับค่าคงที่ (OrderStatus, StockMovementType, DocumentType, PaymentStatus)
 - **Panel Provider:** ตั้งค่า Filament panel, widgets, theme, middleware และ route ที่ `app/Providers/Filament/StorePanelProvider.php`
 
@@ -392,7 +392,7 @@ Companies/
 - `purchase_order_items` - รายการสั่งซื้อ
 - `goods_receipts` - ใบรับสินค้า
 - `goods_receipt_items` - รายการรับสินค้า
-- `sale_orders` - ใบสั่งขาย
+- `sale_orders` - ใบส่งสินค้า
 - `sale_order_items` - รายการขาย
 - `tax_invoices` - ใบกำกับภาษี
 

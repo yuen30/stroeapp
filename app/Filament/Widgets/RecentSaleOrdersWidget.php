@@ -19,7 +19,7 @@ class RecentSaleOrdersWidget extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
-            ->heading('📋 ใบสั่งขายล่าสุด')
+            ->heading('📋 ใบส่งสินค้าล่าสุด')
             ->query(
                 SaleOrder::query()
                     ->with(['customer', 'creator'])

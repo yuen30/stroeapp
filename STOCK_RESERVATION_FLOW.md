@@ -2,7 +2,7 @@
 
 ## 📊 Flow Diagram แบบละเอียด
 
-### 1️⃣ สร้างใบสั่งขาย (Draft)
+### 1️⃣ สร้างใบส่งสินค้า (Draft)
 
 ```
 User สร้าง Sale Order (Draft)
@@ -21,7 +21,7 @@ SaleOrderObserver::creating()
 
 ---
 
-### 2️⃣ เพิ่มสินค้าในใบสั่งขาย (Draft)
+### 2️⃣ เพิ่มสินค้าในใบส่งสินค้า (Draft)
 
 ```
 User เพิ่มสินค้า A จำนวน 10
@@ -122,10 +122,10 @@ StockReservationService::updateReservation($item, 10)
 
 ---
 
-### 4️⃣ ยืนยันใบสั่งขาย (Draft → Confirmed) ⭐ สำคัญ
+### 4️⃣ ยืนยันใบส่งสินค้า (Draft → Confirmed) ⭐ สำคัญ
 
 ```
-User กดปุ่ม "ยืนยันใบสั่งขาย"
+User กดปุ่ม "ยืนยันใบส่งสินค้า"
          ↓
 ViewSaleOrder::confirm Action
          ↓
@@ -140,8 +140,8 @@ SaleOrder::update(['status' => 'confirmed'])
          ↓
 SaleOrderObserver::updated()
          ↓
-ตรวจสอบ: wasChanged('status') && 
-         status = Confirmed && 
+ตรวจสอบ: wasChanged('status') &&
+         status = Confirmed &&
          original = Draft
          ↓
     ✅ เงื่อนไขตรง!
@@ -154,7 +154,7 @@ SaleOrderObserver::updated()
 │ DELETE FROM stock_reservations           │
 │ WHERE sale_order_id = xxx                │
 │   ↓                                      │
-│ ✅ ลบการจองทั้งหมดของใบสั่งขายนี้        │
+│ ✅ ลบการจองทั้งหมดของใบส่งสินค้านี้        │
 └──────────────────────────────────────────┘
          ↓
 ┌──────────────────────────────────────────┐
@@ -170,7 +170,7 @@ SaleOrderObserver::updated()
 │ ✅ สต็อกถูกตัดจริงแล้ว                    │
 └──────────────────────────────────────────┘
          ↓
-✅ ยืนยันใบสั่งขายสำเร็จ!
+✅ ยืนยันใบส่งสินค้าสำเร็จ!
 ```
 
 **ผลลัพธ์:**
@@ -205,12 +205,12 @@ StockMovement:
   quantity = 15
   stock_before = 100
   stock_after = 85
-  notes = "ตัดสต็อกจากใบสั่งขายเลขที่ SO2026-0001"
+  notes = "ตัดสต็อกจากใบส่งสินค้าเลขที่ SO2026-0001"
 ```
 
 ---
 
-### 5️⃣ ยกเลิกใบสั่งขาย
+### 5️⃣ ยกเลิกใบส่งสินค้า
 
 #### 5.1 ยกเลิกจาก Draft
 
@@ -223,7 +223,7 @@ SaleOrder::update(['status' => 'cancelled'])
          ↓
 SaleOrderObserver::updated()
          ↓
-ตรวจสอบ: wasChanged('status') && 
+ตรวจสอบ: wasChanged('status') &&
          status = Cancelled &&
          original = Draft
          ↓
@@ -255,7 +255,7 @@ SaleOrder::update(['status' => 'cancelled'])
          ↓
 SaleOrderObserver::updated()
          ↓
-ตรวจสอบ: wasChanged('status') && 
+ตรวจสอบ: wasChanged('status') &&
          status = Cancelled &&
          original = Confirmed
          ↓
@@ -279,7 +279,7 @@ For each StockMovement:
 
 ---
 
-### 6️⃣ ลบสินค้าออกจากใบสั่งขาย (Draft)
+### 6️⃣ ลบสินค้าออกจากใบส่งสินค้า (Draft)
 
 ```
 User กดปุ่ม "ลบ" รายการสินค้า
@@ -312,14 +312,14 @@ WHERE sale_order_item_id = xxx
 
 ```sql
 -- ดูการจองทั้งหมด
-SELECT 
+SELECT
     sr.id,
     p.name as product_name,
     sr.reserved_quantity,
     so.invoice_number,
     so.status,
     sr.expires_at,
-    CASE 
+    CASE
         WHEN sr.expires_at > NOW() THEN 'Active'
         ELSE 'Expired'
     END as reservation_status
@@ -333,13 +333,13 @@ ORDER BY sr.created_at DESC;
 
 ```sql
 -- ดูสต็อกและการจอง
-SELECT 
+SELECT
     p.name,
     p.stock_quantity,
     COALESCE(SUM(sr.reserved_quantity), 0) as reserved,
     p.stock_quantity - COALESCE(SUM(sr.reserved_quantity), 0) as available
 FROM products p
-LEFT JOIN stock_reservations sr ON p.id = sr.product_id 
+LEFT JOIN stock_reservations sr ON p.id = sr.product_id
     AND sr.expires_at > NOW()
 GROUP BY p.id
 ORDER BY p.name;
@@ -349,7 +349,7 @@ ORDER BY p.name;
 
 ```sql
 -- ดูประวัติการเคลื่อนไหวสต็อก
-SELECT 
+SELECT
     sm.id,
     p.name as product_name,
     sm.type,
@@ -372,17 +372,17 @@ LIMIT 20;
 
 ### คำตอบ: ✅ ใช่! ระบบเคลียร์การจองอัตโนมัติ
 
-**เมื่อยืนยันใบสั่งขาย (Draft → Confirmed):**
+**เมื่อยืนยันใบส่งสินค้า (Draft → Confirmed):**
 
 1. ✅ **ปลดล็อคการจอง** (`releaseReservations()`)
-   - ลบ StockReservation ทั้งหมดของใบสั่งขายนี้
-   - Product.reserved_quantity กลับเป็น 0
-   - Product.available_stock เพิ่มขึ้น
+    - ลบ StockReservation ทั้งหมดของใบส่งสินค้านี้
+    - Product.reserved_quantity กลับเป็น 0
+    - Product.available_stock เพิ่มขึ้น
 
 2. ✅ **ตัดสต็อกจริง** (`createStockMovements()`)
-   - ลด Product.stock_quantity
-   - สร้าง StockMovement บันทึกการตัดสต็อก
-   - Product.available_stock ลดลง (เพราะสต็อกจริงลด)
+    - ลด Product.stock_quantity
+    - สร้าง StockMovement บันทึกการตัดสต็อก
+    - Product.available_stock ลดลง (เพราะสต็อกจริงลด)
 
 **ผลลัพธ์สุดท้าย:**
 
@@ -396,7 +396,7 @@ LIMIT 20;
 
 ## 🧪 วิธีทดสอบ
 
-### Test Case 1: ยืนยันใบสั่งขาย
+### Test Case 1: ยืนยันใบส่งสินค้า
 
 ```
 1. สร้าง Draft Sale Order
@@ -405,14 +405,14 @@ LIMIT 20;
    SELECT * FROM stock_reservations WHERE sale_order_id = 'xxx';
    → ✅ ต้องมี 1 record (reserved_quantity = 10)
 
-4. ยืนยันใบสั่งขาย
+4. ยืนยันใบส่งสินค้า
 5. ตรวจสอบ:
    SELECT * FROM stock_reservations WHERE sale_order_id = 'xxx';
    → ✅ ต้องไม่มี record (ถูกลบหมด)
-   
+
    SELECT * FROM stock_movements WHERE sale_order_id = 'xxx';
    → ✅ ต้องมี 1 record (type = Out, quantity = 10)
-   
+
    SELECT stock_quantity FROM products WHERE id = 'yyy';
    → ✅ ต้องลดลง 10
 ```
@@ -423,19 +423,19 @@ LIMIT 20;
 1. สร้าง Draft Sale Order A (เพิ่มสินค้า X จำนวน 10)
 2. สร้าง Draft Sale Order B (เพิ่มสินค้า X จำนวน 10)
 3. ตรวจสอบ:
-   SELECT SUM(reserved_quantity) FROM stock_reservations 
+   SELECT SUM(reserved_quantity) FROM stock_reservations
    WHERE product_id = 'xxx';
    → ✅ ต้องได้ 20
 
 4. ยืนยัน Sale Order A
 5. ตรวจสอบ:
-   SELECT SUM(reserved_quantity) FROM stock_reservations 
+   SELECT SUM(reserved_quantity) FROM stock_reservations
    WHERE product_id = 'xxx';
    → ✅ ต้องได้ 10 (เหลือแค่ของ Order B)
-   
+
 6. ยืนยัน Sale Order B
 7. ตรวจสอบ:
-   SELECT SUM(reserved_quantity) FROM stock_reservations 
+   SELECT SUM(reserved_quantity) FROM stock_reservations
    WHERE product_id = 'xxx';
    → ✅ ต้องได้ 0 (ไม่มีการจองแล้ว)
 ```
@@ -446,7 +446,7 @@ LIMIT 20;
 
 **ระบบทำงานถูกต้อง 100%!**
 
-✅ เมื่อยืนยันใบสั่งขาย → ปลดล็อคการจองอัตโนมัติ
+✅ เมื่อยืนยันใบส่งสินค้า → ปลดล็อคการจองอัตโนมัติ
 ✅ เมื่อยกเลิกจาก Draft → ปลดล็อคการจองอัตโนมัติ
 ✅ เมื่อยกเลิกจาก Confirmed → คืนสต็อกอัตโนมัติ
 ✅ เมื่อลบสินค้า → ปลดล็อคการจองอัตโนมัติ
