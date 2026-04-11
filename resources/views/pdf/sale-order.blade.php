@@ -21,7 +21,24 @@
 
         @page {
             size: A4;
-            margin: 10mm 15mm;
+            margin: 97mm 15mm 15mm 15mm; /* ปรับมาที่ 97mm ตามที่แจ้งครับ */
+        }
+
+        header {
+            position: fixed;
+            top: -87mm; /* ขยับหัวกระดาษลงมาตามสัดส่วน */
+            left: 0;
+            right: 0;
+            height: 80mm;
+        }
+
+        footer {
+            position: fixed;
+            bottom: -5mm;
+            left: 0;
+            right: 0;
+            height: 10mm;
+            text-align: right;
         }
 
         body {
@@ -133,9 +150,9 @@
 
         .info-box {
             border: 1px solid #cbd5e1;
-            padding: 10px;
+            padding: 8px 10px;
             border-radius: 4px;
-            height: 110px;
+            height: 110px; /* ใช้ height คงที่เพื่อให้กรอบเท่ากันเสมอ */
         }
 
         .info-title {
@@ -149,7 +166,7 @@
 
         /* Items Section */
         .items-table {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .items-table th {
@@ -165,6 +182,10 @@
             border-bottom: 1px dashed #e2e8f0;
             font-size: 15px;
             vertical-align: top;
+        }
+
+        thead {
+            display: table-header-group; /* ทำให้หัวตารางพิมพ์ซ้ำทุกหน้า */
         }
 
         .items-table tbody tr:last-child td {
@@ -264,21 +285,39 @@
         $discount_amount = $saleOrder->discount_amount ?? 0;
         $vat_amount = $saleOrder->vat_amount ?? 0;
         $total_amount = $saleOrder->total_amount ?? 0;
+
+        // ตรรกะการจัดหน้า:
+        // 1. หน้าที่มีรายการอย่างเดียว (ไม่รวมสรุป/ลายเซ็น) จุได้ประมาณ 18 รายการ
+        // 2. หน้าที่มีสรุปและลายเซ็นด้วย จะเหลือพื้นที่ใส่รายการสินค้าได้ประมาณ 10 รายการ
+        $maxItemsPerPage = 17;
+        $maxItemsWithSignatures = 8;
+
+        $currentItemsCount = $saleOrder->items->count();
+        $itemsOnLastPage = $currentItemsCount % $maxItemsPerPage;
+
+        // คำนวณหาจำนวนแถวว่างที่ต้องเติม เพื่อให้ผลรวม (รายการจริง + รายการว่าง) = 8 แถวเสมอในหน้าสุดท้าย
+        if ($itemsOnLastPage > $maxItemsWithSignatures) {
+            // กรณีที่รายการในหน้าปัจจุบันเกิน 8 -> เติมให้เต็มหน้าปัจจุบัน แล้วไปเติมแผ่นใหม่ให้ได้ 8 แถว
+            $emptyRowsNeeded = ($maxItemsPerPage - $itemsOnLastPage) + $maxItemsWithSignatures;
+        } else {
+            // กรณีที่รายการในหน้าปัจจุบันยังไม่เกิน 8 -> เติมให้ครบ 8 แถวพอดี
+            $emptyRowsNeeded = $maxItemsWithSignatures - $itemsOnLastPage;
+        }
+
     @endphp
 
-    <div class="container">
+    <header>
         <!-- Header -->
         <table class="header-table">
             <tr>
                 <td width="60%">
                     <div class="company-name">{{ $saleOrder->company->name ?? 'บริษัท คลาวด์ เทค จำกัด' }}</div>
-                    <div>{!! nl2br(e($companyAddress ?: '-')) !!}</div>
-                    <div style="margin-top: 4px;">โทรศัพท์: {{ $saleOrder->branch->tel ?? '-' }}</div>
-                    <div>เลขประจำตัวผู้เสียภาษี: {{ $saleOrder->company->tax_id ?? '-' }}</div>
+                    <div style="font-size: 14px; line-height: 1.1;">{!! nl2br(e($companyAddress ?: '-')) !!}</div>
+                    <div style="margin-top: 4px; font-size: 14px;">โทรศัพท์: {{ $saleOrder->branch->tel ?? '-' }} | เลขประจำตัวผู้เสียภาษี: {{ $saleOrder->company->tax_id ?? '-' }}</div>
                 </td>
                 <td width="40%" class="text-right">
                     <div class="doc-title">ใบส่งสินค้า<br><span style="font-size: 20px;">Delivery Order</span></div>
-                    <div style="margin-top: 10px;">
+                    <div style="margin-top: 5px;">
                         <table class="meta-box">
                             <tr>
                                 <th class="text-left" width="40%" style="background-color: #e2e8f0; color: #1e293b;">
@@ -306,14 +345,14 @@
                 <td width="55%" style="padding-right: 10px;">
                     <div class="info-box">
                         <div class="info-title">รายละเอียดลูกค้า (Customer)</div>
-                        <div class="font-bold pb-1">{{ $saleOrder->customer->name ?? '-' }}</div>
-                        <div style="font-size: 15px;">{{ $customerAddress ?: '-' }}</div>
-                        <div style="font-size: 15px; margin-top: 4px;">เลขประจำตัวผู้เสียภาษี:
-                            {{ $saleOrder->customer->tax_id ?? '-' }}
+                        <div class="font-bold" style="font-size: 15px; margin-bottom: 2px;">{{ $saleOrder->customer->name ?? '-' }}</div>
+                        <div style="font-size: 14px; line-height: 1.2;">
+                            {{ $customerAddress ?: '-' }}<br>
+                            <b>เลขประจำตัวผู้เสียภาษี :</b> {{ $saleOrder->customer->tax_id ?? '-' }}
                             @if($saleOrder->customer->is_head_office)
-                                <span style="margin-left: 10px;">(สำนักงานใหญ่)</span>
+                                <span style="margin-left: 5px;">(สำนักงานใหญ่)</span>
                             @else
-                                <span style="margin-left: 10px;">(สาขา: {{ $saleOrder->customer->branch_no }})</span>
+                                <span style="margin-left: 5px;">(สาขา: {{ $saleOrder->customer->branch_no }})</span>
                             @endif
                         </div>
                     </div>
@@ -332,13 +371,16 @@
                             </tr>
                             <tr>
                                 <td class="font-bold py-1" style="vertical-align: top;">หมายเหตุ:</td>
-                                <td>{{ $saleOrder->notes ?: '-' }}</td>
+                                <td style="line-height: 1.1; max-height: 35px; overflow: hidden;">{{ $saleOrder->notes ?: '-' }}</td>
                             </tr>
                         </table>
                     </div>
                 </td>
             </tr>
         </table>
+    </header>
+
+    <div class="container">
 
         <!-- Items -->
         <table class="items-table">
@@ -361,9 +403,6 @@
                         <td class="text-center">{{ $item->product->code ?? $item->product->sku ?? '-' }}</td>
                         <td class="text-left">
                             <div class="font-bold">{{ $item->product->name ?? '-' }}</div>
-                            @if($item->description)
-                                <div style="font-size: 13px; color: #64748b;">{{ $item->description }}</div>
-                            @endif
                         </td>
                         <td class="text-center font-bold">{{ number_format($item->quantity) }}</td>
                         <td class="text-center">{{ $item->product->unit->name ?? 'ชิ้น' }}</td>
@@ -380,9 +419,9 @@
                     </tr>
                 @endforelse
 
-                <!-- Fill empty rows if needed to make it look uniform -->
-                @for($i = $saleOrder->items->count(); $i < 6; $i++)
-                    <tr class="{{ $i % 2 == 1 ? 'striped' : '' }}">
+                <!-- Fill empty rows to push summary/signatures to the bottom -->
+                @for($i = 0; $i < $emptyRowsNeeded; $i++)
+                    <tr class="{{ ($currentItemsCount + $i) % 2 == 1 ? 'striped' : '' }}">
                         <td style="color: transparent;">-</td>
                         <td></td>
                         <td></td>
@@ -396,54 +435,65 @@
             </tbody>
         </table>
 
-        <!-- Summary -->
-        <table class="summary-table">
-            <tr>
-                <td rowspan="4" width="60%" class="text-box" style="vertical-align: top;">
-                    <br>
-                    <div style="text-align: center; font-size: 18px; color: #1e40af; margin-top: 10px;">
-                        <b>จำนวนเงินตัวอักษร:</b><br>
-                        ( {{ \App\Helpers\ThaiNumberHelper::toThaiText($total_amount) }} )
-                    </div>
-                </td>
-                <td width="25%" class="text-right font-bold bg-light">รวมเงิน (Sub Total)</td>
-                <td width="15%" class="text-right">{{ number_format($subtotal, 2) }}</td>
-            </tr>
-            <tr>
-                <td class="text-right font-bold bg-light">ส่วนลด (Discount)</td>
-                <td class="text-right">{{ number_format($discount_amount, 2) }}</td>
-            </tr>
-            <tr>
-                <td class="text-right font-bold bg-light">ภาษีมูลค่าเพิ่ม 7% (VAT)</td>
-                <td class="text-right">{{ number_format($vat_amount, 2) }}</td>
-            </tr>
-            <tr>
-                <td class="text-right grand-total">ยอดเงินสุทธิ (Net Total)</td>
-                <td class="text-right grand-total">{{ number_format($total_amount, 2) }}</td>
-            </tr>
-        </table>
+        <div style="page-break-inside: avoid;">
+            <!-- Summary -->
+            <table class="summary-table">
+                <tr>
+                    <td rowspan="4" width="60%" class="text-box" style="vertical-align: top;">
+                        <br>
+                        <div style="text-align: center; font-size: 18px; color: #1e40af; margin-top: 10px;">
+                            <b>จำนวนเงินตัวอักษร:</b><br>
+                            ( {{ \App\Helpers\ThaiNumberHelper::toThaiText($total_amount) }} )
+                        </div>
+                    </td>
+                    <td width="25%" class="text-right font-bold bg-light">รวมเงิน (Sub Total)</td>
+                    <td width="15%" class="text-right">{{ number_format($subtotal, 2) }}</td>
+                </tr>
+                <tr>
+                    <td class="text-right font-bold bg-light">ส่วนลด (Discount)</td>
+                    <td class="text-right">{{ number_format($discount_amount, 2) }}</td>
+                </tr>
+                <tr>
+                    <td class="text-right font-bold bg-light">ภาษีมูลค่าเพิ่ม 7% (VAT)</td>
+                    <td class="text-right">{{ number_format($vat_amount, 2) }}</td>
+                </tr>
+                <tr>
+                    <td class="text-right grand-total">ยอดเงินสุทธิ (Net Total)</td>
+                    <td class="text-right grand-total">{{ number_format($total_amount, 2) }}</td>
+                </tr>
+            </table>
 
-        <!-- Signatures -->
-        <table class="signature-table">
-            <tr>
-                <td width="40%" class="signature-box">
-                    <div class="signature-line"></div>
-                    <div>(.......................................................)</div>
-                    <div class="font-bold" style="margin-top: 5px;">ผู้รับใบส่งสินค้า</div>
-                    <div>Customer Authorized Signature</div>
-                    <div style="margin-top: 5px;">วันที่ ....... / ....... / ...........</div>
-                </td>
-                <td width="20%"></td>
-                <td width="40%" class="signature-box">
-                    <div class="signature-line"></div>
-                    <div>(.......................................................)</div>
-                    <div class="font-bold" style="margin-top: 5px;">ผู้อนุมัติใบส่งสินค้า</div>
-                    <div>Authorized Signature</div>
-                    <div style="margin-top: 5px;">วันที่ ....... / ....... / ...........</div>
-                </td>
-            </tr>
-        </table>
+            <!-- Signatures -->
+            <table class="signature-table">
+                <tr>
+                    <td width="40%" class="signature-box">
+                        <div class="signature-line"></div>
+                        <div>(.......................................................)</div>
+                        <div class="font-bold" style="margin-top: 5px;">ผู้รับสินค้า</div>
+                        <div>Customer Authorized Signature</div>
+                        <div style="margin-top: 5px;">วันที่ ....... / ....... / ...........</div>
+                    </td>
+                    <td width="20%"></td>
+                    <td width="40%" class="signature-box">
+                        <div class="signature-line"></div>
+                        <div>(.......................................................)</div>
+                        <div class="font-bold" style="margin-top: 5px;">ผู้ส่งสินค้า</div>
+                        <div>Authorized Signature</div>
+                        <div style="margin-top: 5px;">วันที่ ....... / ....... / ...........</div>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
+    <footer>
+        <div class="page-number text-primary font-bold"></div>
+    </footer>
+    <script type="text/php">
+        if (isset($pdf)) {
+            $font = $fontMetrics->get_font("TH Sarabun", "bold");
+            $pdf->page_text(480, 810, "หน้า {PAGE_NUM} / {PAGE_COUNT}", $font, 13, array(0.12, 0.25, 0.69));
+        }
+    </script>
 </body>
 
 </html>

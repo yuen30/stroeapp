@@ -47,7 +47,7 @@
         .text-white { color: #ffffff; }
         .bg-primary { background-color: #1e40af; }
         .bg-light { background-color: #f8fafc; }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -72,7 +72,7 @@
             color: #1e40af;
             text-transform: uppercase;
         }
-        
+
         .meta-box {
             border: 1px solid #cbd5e1;
             background-color: #f8fafc;
@@ -97,9 +97,9 @@
         }
         .info-box {
             border: 1px solid #cbd5e1;
-            padding: 10px;
+            padding: 8px 10px;
             border-radius: 4px;
-            height: 110px;
+            height: 120px; /* ใช้ height คงที่เพื่อให้กรอบเท่ากันเสมอ */
         }
         .info-title {
             font-weight: 700;
@@ -169,7 +169,7 @@
             .bg-light { background-color: #f8fafc !important; }
             th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
-        
+
     </style>
 </head>
 <body>
@@ -233,9 +233,11 @@
                     <div class="info-box">
                         <div class="info-title">ส่งถึง (Customer)</div>
                         <div class="font-bold pb-1">{{ $saleOrder->customer->name ?? '-' }}</div>
-                        <div style="font-size: 15px; margin-top: 2px;">ผู้ติดต่อ: {{ $saleOrder->contact_person ?? '-' }}</div>
-                        <div style="font-size: 15px;">เบอร์โทร: {{ $saleOrder->contact_phone ?? ($saleOrder->customer->tel ?? '-') }}</div>
-                        <div style="font-size: 15px;">เลขประจำตัวผู้เสียภาษี: {{ $saleOrder->customer->tax_id ?? '-' }}</div>
+                        <div style="font-size: 14px; line-height: 1.2;">
+                            ผู้ติดต่อ: {{ $saleOrder->contact_person ?? '-' }}<br>
+                            เบอร์โทร: {{ $saleOrder->contact_phone ?? ($saleOrder->customer->tel ?? '-') }}<br>
+                            เลขประจำตัวผู้เสียภาษี : {{ $saleOrder->customer->tax_id ?? '-' }}
+                        </div>
                     </div>
                 </td>
                 <td width="45%" style="padding-left: 10px;">
@@ -285,7 +287,7 @@
                     <td colspan="6" class="text-center py-2">ไม่มีรายการสินค้า</td>
                 </tr>
                 @endforelse
-                
+
                 <!-- Fill empty rows if needed to make it look uniform -->
                 @for($i = $saleOrder->items->count(); $i < 6; $i++)
                 <tr class="{{ $i % 2 == 1 ? 'striped' : '' }}">
