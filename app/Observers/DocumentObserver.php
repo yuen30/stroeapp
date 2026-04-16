@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\DocumentRunningNumber;
 use App\Traits\DocumentObservable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class DocumentObserver
@@ -16,10 +17,13 @@ class DocumentObserver
      */
     public function creating(Model $model): void
     {
+        // Auto-fill company_id and branch_id from authenticated user if not set
+        $this->autoFillCompanyContext($model);
+
         // Only process models using the DocumentObservable trait and missing a number
         $numberField = $model->getDocumentNumberAttribute();
 
-        if (! empty($model->{$numberField})) {
+        if (!empty($model->{$numberField})) {
             return;
         }
 
@@ -31,12 +35,12 @@ class DocumentObserver
         DB::transaction(function () use ($model, $type, $companyId, $branchId, $numberField) {
             $runningNumber = DocumentRunningNumber::where('document_type', $type)
                 ->where('is_active', true)
-                ->when($companyId, fn ($q) => $q->where('company_id', $companyId), fn ($q) => $q->whereNull('company_id'))
-                ->when($branchId, fn ($q) => $q->where('branch_id', $branchId), fn ($q) => $q->whereNull('branch_id'))
+                ->when($companyId, fn($q) => $q->where('company_id', $companyId), fn($q) => $q->whereNull('company_id'))
+                ->when($branchId, fn($q) => $q->where('branch_id', $branchId), fn($q) => $q->whereNull('branch_id'))
                 ->lockForUpdate()
                 ->first();
 
-            if (! $runningNumber && $branchId) {
+            if (!$runningNumber && $branchId) {
                 // Fallback to company level if branch level not found and we were looking for a branch
                 $runningNumber = DocumentRunningNumber::where('company_id', $companyId)
                     ->whereNull('branch_id')
@@ -47,7 +51,7 @@ class DocumentObserver
             }
 
             // Auto-create running number config if not found
-            if (! $runningNumber) {
+            if (!$runningNumber) {
                 $runningNumber = $this->createDefaultConfig($type, $companyId, $branchId);
             }
 
@@ -59,6 +63,29 @@ class DocumentObserver
                 $runningNumber->increment('current_number');
             }
         });
+    }
+
+    /**
+     * Auto-fill company_id and branch_id from authenticated user if the model
+     * has those columns but they are not yet set.
+     */
+    private function autoFillCompanyContext(Model $model): void
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return;
+        }
+
+        // Auto-fill company_id if the model has the attribute and it's empty
+        if ($model->isFillable('company_id') && empty($model->company_id) && !empty($user->company_id)) {
+            $model->company_id = $user->company_id;
+        }
+
+        // Auto-fill branch_id if the model has the attribute and it's empty
+        if ($model->isFillable('branch_id') && empty($model->branch_id) && !empty($user->branch_id)) {
+            $model->branch_id = $user->branch_id;
+        }
     }
 
     /**
@@ -85,7 +112,7 @@ class DocumentObserver
             'payment_status' => 'PS',
         ];
 
-        if (! isset($prefixes[$type])) {
+        if (!isset($prefixes[$type])) {
             return null;
         }
 

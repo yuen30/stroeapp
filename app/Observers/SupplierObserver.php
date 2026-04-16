@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Models\Supplier;
-use Illuminate\Support\Facades\Auth;
 
 class SupplierObserver
 {
@@ -12,12 +11,7 @@ class SupplierObserver
      */
     public function creating(Supplier $supplier): void
     {
-        // รหัสผู้จำหน่ายจะถูกจัดการโดย DocumentObserver อัตโนมัติ
-
-        // กำหนด company_id ตาม user ที่ login ถ้ายังไม่มี
-        if (empty($supplier->company_id)) {
-            $supplier->company_id = Auth::user()?->company_id;
-        }
+        // company_id auto-fill is handled by DocumentObserver
 
         // กำหนดสถานะเริ่มต้น
         if (!isset($supplier->is_active)) {
