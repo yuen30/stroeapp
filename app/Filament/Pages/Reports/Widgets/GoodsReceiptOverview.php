@@ -3,13 +3,13 @@
 namespace App\Filament\Pages\Reports\Widgets;
 
 use App\Enums\OrderStatus;
-use Filament\Widgets\Concerns\InteractsWithPageTable;
+use App\Filament\Traits\InteractsWithPageTableWorkaround;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class GoodsReceiptOverview extends BaseWidget
 {
-    use InteractsWithPageTable;
+    use InteractsWithPageTableWorkaround;
 
     protected function getTablePage(): string
     {
