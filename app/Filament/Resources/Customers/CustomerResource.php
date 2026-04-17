@@ -37,7 +37,7 @@ class CustomerResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['code', 'name', 'tax_id', 'tel', 'email'];
+        return ['code', 'name', 'tax_id', 'tel'];
     }
 
     public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
